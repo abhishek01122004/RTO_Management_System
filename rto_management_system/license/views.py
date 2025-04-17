@@ -14,7 +14,7 @@ from django.utils import timezone
 from .models import LicenseType, LicenseApplication, DrivingLicense, TestSchedule
 from .forms import (LicenseApplicationForm, LicenseApplicationReviewForm, 
                    TestScheduleForm, TestResultForm)
-from notifications.utils import send_notification, send_email, send_sms
+from rto_management_system.notifications.utils import send_notification, send_email, send_sms
 
 
 # Helper functions
