@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+
+{% block title %}My Driving Licenses{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row mb-4">
+        <div class="col">
+            <h2>My Driving Licenses</h2>
+            <p class="text-muted">View all your issued driving licenses</p>
+        </div>
+        <div class="col-auto">
+            <a href="{% url 'apply_for_license' %}" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> Apply for New License
+            </a>
+        </div>
+    </div>
+    
+    <div class="row">
+        {% if licenses %}
+            {% for license in licenses %}
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card shadow h-100">
+                    <div class="card-header {% if license.is_active %}bg-success{% else %}bg-danger{% endif %} text-white">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">{{ license.license_type.name }}</h5>
+                            <span class="badge bg-light text-dark">{{ license.license_type.code }}</span>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-3">
+                            <div class="col-4">
+                                {% if license.holder.profile_picture %}
+                                <img src="{{ license.holder.profile_picture.url }}" alt="Profile Picture" class="img-thumbnail">
+                                {% else %}
+                                <div class="text-center p-3 bg-light rounded">
+                                    <i class="bi bi-person-circle" style="font-size: 4rem;"></i>
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-8">
+                                <h5>{{ license.holder.get_full_name }}</h5>
+                                <p class="text-muted mb-0">License #: {{ license.license_number }}</p>
+                                <p class="text-muted mb-0">
+                                    Status: 
+                                    {% if license.is_active %}
+                                    <span class="badge bg-success">Active</span>
+                                    {% else %}
+                                    <span class="badge bg-danger">Inactive</span>
+                                    {% endif %}
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <tr>
+                                    <th>Issued Date:</th>
+                                    <td>{{ license.issued_date|date:"d M Y" }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Valid Until:</th>
+                                    <td>{{ license.valid_until|date:"d M Y" }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Blood Group:</th>
+                                    <td>{{ license.holder.citizen_profile.blood_group }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                        
+                        <div class="d-grid">
+                            <a href="{% url 'license_detail' license_number=license.license_number %}" class="btn btn-primary">
+                                <i class="bi bi-eye"></i> View Details
+                            </a>
+                        </div>
+                    </div>
+                    <div class="card-footer text-muted">
+                        {% if license.qr_code %}
+                        <div class="text-center">
+                            <small>Scan QR code to verify</small><br>
+                            <img src="{{ license.qr_code.url }}" alt="QR Code" style="max-width: 100px;">
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-body text-center py-5">
+                    <img src="https://cdn-icons-png.flaticon.com/512/7613/7613177.png" alt="No licenses" class="img-fluid mb-3" style="max-width: 100px;">
+                    <h5>No Driving Licenses Found</h5>
+                    <p class="text-muted">You don't have any issued driving licenses yet.</p>
+                    <a href="{% url 'apply_for_license' %}" class="btn btn-primary mt-2">
+                        Apply for License
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+
+{% block title %}My License Applications{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row mb-4">
+        <div class="col">
+            <h2>My License Applications</h2>
+            <p class="text-muted">View and track all your license applications</p>
+        </div>
+        <div class="col-auto">
+            <a href="{% url 'apply_for_license' %}" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> New Application
+            </a>
+        </div>
+    </div>
+    
+    <div class="card shadow">
+        <div class="card-body">
+            {% if applications %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Application #</th>
+                            <th>License Type</th>
+                            <th>Date Applied</th>
+                            <th>Type</th>
+                            <th>Status</th>
+                            <th>Payment</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for application in applications %}
+                        <tr>
+                            <td>{{ application.application_number }}</td>
+                            <td>{{ application.license_type.name }}</td>
+                            <td>{{ application.application_date|date:"d M Y" }}</td>
+                            <td>{{ application.get_application_type_display }}</td>
+                            <td>
+                                {% if application.status == 'PENDING' %}
+                                <span class="badge bg-warning text-dark">{{ application.get_status_display }}</span>
+                                {% elif application.status == 'DOCUMENT_VERIFICATION' %}
+                                <span class="badge bg-info text-dark">{{ application.get_status_display }}</span>
+                                {% elif application.status == 'SCHEDULED_FOR_TEST' %}
+                                <span class="badge bg-primary">{{ application.get_status_display }}</span>
+                                {% elif application.status == 'TEST_PASSED' %}
+                                <span class="badge bg-success">{{ application.get_status_display }}</span>
+                                {% elif application.status == 'TEST_FAILED' %}
+                                <span class="badge bg-danger">{{ application.get_status_display }}</span>
+                                {% elif application.status == 'APPROVED' %}
+                                <span class="badge bg-success">{{ application.get_status_display }}</span>
+                                {% elif application.status == 'REJECTED' %}
+                                <span class="badge bg-danger">{{ application.get_status_display }}</span>
+                                {% elif application.status == 'ISSUED' %}
+                                <span class="badge bg-success">{{ application.get_status_display }}</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if application.payment_status %}
+                                <span class="badge bg-success">Paid</span>
+                                {% else %}
+                                <span class="badge bg-danger">Pending</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="{% url 'license_application_detail' application_number=application.application_number %}" class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-eye"></i> View
+                                </a>
+                                {% if not application.payment_status %}
+                                <a href="{% url 'license_payment' application_number=application.application_number %}" class="btn btn-sm btn-outline-success">
+                                    <i class="bi bi-credit-card"></i> Pay Now
+                                </a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-5">
+                <img src="https://cdn-icons-png.flaticon.com/512/1379/1379505.png" alt="No applications" class="img-fluid mb-3" style="max-width: 100px;">
+                <h5>No License Applications Found</h5>
+                <p class="text-muted">You haven't applied for any licenses yet.</p>
+                <a href="{% url 'apply_for_license' %}" class="btn btn-primary mt-2">
+                    Apply for License
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

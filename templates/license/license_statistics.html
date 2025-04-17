@@ -1,0 +1,366 @@
+{% extends 'base.html' %}
+
+{% block title %}License Statistics{% endblock %}
+
+{% block extra_css %}
+<style>
+    .stat-card {
+        border: none;
+        border-radius: 10px;
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease;
+    }
+    .stat-card:hover {
+        transform: translateY(-5px);
+    }
+    .stat-icon {
+        font-size: 2.5rem;
+        margin-bottom: 10px;
+    }
+    .stat-number {
+        font-size: 2rem;
+        font-weight: bold;
+    }
+    .chart-container {
+        position: relative;
+        height: 300px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2>License Statistics</h2>
+            <p class="text-muted">Comprehensive statistics and analytics for license management</p>
+        </div>
+        <div>
+            <div class="dropdown">
+                <button class="btn btn-outline-primary dropdown-toggle" type="button" id="timeRangeDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                    {{ time_range|default:"Last 30 Days" }}
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="timeRangeDropdown">
+                    <li><a class="dropdown-item" href="{% url 'license_statistics' %}?range=7">Last 7 Days</a></li>
+                    <li><a class="dropdown-item" href="{% url 'license_statistics' %}?range=30">Last 30 Days</a></li>
+                    <li><a class="dropdown-item" href="{% url 'license_statistics' %}?range=90">Last 90 Days</a></li>
+                    <li><a class="dropdown-item" href="{% url 'license_statistics' %}?range=365">Last 365 Days</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Summary Statistics -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-4">
+            <div class="card stat-card text-center p-4 bg-primary bg-opacity-10">
+                <div class="card-body">
+                    <i class="bi bi-file-text stat-icon text-primary"></i>
+                    <h3 class="stat-number">{{ total_applications }}</h3>
+                    <p class="card-text">Total Applications</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-4">
+            <div class="card stat-card text-center p-4 bg-success bg-opacity-10">
+                <div class="card-body">
+                    <i class="bi bi-card-checklist stat-icon text-success"></i>
+                    <h3 class="stat-number">{{ total_licenses_issued }}</h3>
+                    <p class="card-text">Licenses Issued</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-4">
+            <div class="card stat-card text-center p-4 bg-warning bg-opacity-10">
+                <div class="card-body">
+                    <i class="bi bi-hourglass-split stat-icon text-warning"></i>
+                    <h3 class="stat-number">{{ pending_applications }}</h3>
+                    <p class="card-text">Pending Applications</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-4">
+            <div class="card stat-card text-center p-4 bg-danger bg-opacity-10">
+                <div class="card-body">
+                    <i class="bi bi-x-circle stat-icon text-danger"></i>
+                    <h3 class="stat-number">{{ rejected_applications }}</h3>
+                    <p class="card-text">Rejected Applications</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Charts -->
+    <div class="row mb-4">
+        <div class="col-md-6 mb-4">
+            <div class="card shadow h-100">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Applications by Status</h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="statusChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mb-4">
+            <div class="card shadow h-100">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Applications by License Type</h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="typeChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mb-4">
+        <div class="col-md-8 mb-4">
+            <div class="card shadow h-100">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Applications Trend</h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="trendChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card shadow h-100">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Test Results</h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="testResultChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Detailed Statistics Table -->
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Detailed Statistics</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <h6>Application Breakdown</h6>
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-striped">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Status</th>
+                                    <th>Count</th>
+                                    <th>Percentage</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for status in status_breakdown %}
+                                <tr>
+                                    <td>{{ status.status_display }}</td>
+                                    <td>{{ status.count }}</td>
+                                    <td>{{ status.percentage|floatformat:1 }}%</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <h6>License Type Breakdown</h6>
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-striped">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>License Type</th>
+                                    <th>Applications</th>
+                                    <th>Issued</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for type in type_breakdown %}
+                                <tr>
+                                    <td>{{ type.name }} ({{ type.code }})</td>
+                                    <td>{{ type.applications }}</td>
+                                    <td>{{ type.issued }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <h6>Test Statistics</h6>
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-striped">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Test Type</th>
+                                    <th>Total</th>
+                                    <th>Passed</th>
+                                    <th>Failed</th>
+                                    <th>Pass Rate</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for test in test_statistics %}
+                                <tr>
+                                    <td>{{ test.test_type_display }}</td>
+                                    <td>{{ test.total }}</td>
+                                    <td>{{ test.passed }}</td>
+                                    <td>{{ test.failed }}</td>
+                                    <td>{{ test.pass_rate|floatformat:1 }}%</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <h6>Processing Time (Averages)</h6>
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-striped">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Metric</th>
+                                    <th>Days</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Application to Document Verification</td>
+                                    <td>{{ avg_verification_time|floatformat:1 }}</td>
+                                </tr>
+                                <tr>
+                                    <td>Document Verification to Test Scheduling</td>
+                                    <td>{{ avg_test_scheduling_time|floatformat:1 }}</td>
+                                </tr>
+                                <tr>
+                                    <td>Test Completion to License Issuance</td>
+                                    <td>{{ avg_issuance_time|floatformat:1 }}</td>
+                                </tr>
+                                <tr>
+                                    <td>Total Processing Time (End-to-End)</td>
+                                    <td>{{ avg_total_time|floatformat:1 }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Status Chart
+    const statusCtx = document.getElementById('statusChart').getContext('2d');
+    const statusChart = new Chart(statusCtx, {
+        type: 'pie',
+        data: {
+            labels: {{ status_labels|safe }},
+            datasets: [{
+                data: {{ status_data|safe }},
+                backgroundColor: ['#28a745', '#ffc107', '#17a2b8', '#dc3545', '#6c757d', '#fd7e14', '#20c997', '#6610f2']
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'right'
+                }
+            }
+        }
+    });
+    
+    // License Type Chart
+    const typeCtx = document.getElementById('typeChart').getContext('2d');
+    const typeChart = new Chart(typeCtx, {
+        type: 'bar',
+        data: {
+            labels: {{ type_labels|safe }},
+            datasets: [{
+                label: 'Applications',
+                data: {{ type_data|safe }},
+                backgroundColor: '#0d6efd'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+    
+    // Trend Chart
+    const trendCtx = document.getElementById('trendChart').getContext('2d');
+    const trendChart = new Chart(trendCtx, {
+        type: 'line',
+        data: {
+            labels: {{ trend_labels|safe }},
+            datasets: [{
+                label: 'Applications',
+                data: {{ trend_data|safe }},
+                borderColor: '#0d6efd',
+                backgroundColor: 'rgba(13, 110, 253, 0.1)',
+                fill: true,
+                tension: 0.3
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+    
+    // Test Results Chart
+    const testResultCtx = document.getElementById('testResultChart').getContext('2d');
+    const testResultChart = new Chart(testResultCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Passed', 'Failed', 'Pending'],
+            datasets: [{
+                data: {{ test_results_data|safe }},
+                backgroundColor: ['#28a745', '#dc3545', '#ffc107']
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

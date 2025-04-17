@@ -1,0 +1,125 @@
+{% extends 'base.html' %}
+
+{% block title %}License Application Payment{% endblock %}
+
+{% block extra_css %}
+<style>
+    .payment-card {
+        max-width: 600px;
+        margin: 0 auto;
+    }
+    .application-details {
+        background-color: #f8f9fa;
+        border-radius: 5px;
+        padding: 15px;
+    }
+    .razorpay-payment-button {
+        display: block;
+        width: 100%;
+        padding: 0.5rem 1rem;
+        background-color: #0d6efd;
+        color: white;
+        border: none;
+        border-radius: 0.25rem;
+        font-size: 1rem;
+        cursor: pointer;
+    }
+    .razorpay-payment-button:hover {
+        background-color: #0b5ed7;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row mb-4">
+        <div class="col">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'my_license_applications' %}">My Applications</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'license_application_detail' application_number=application.application_number %}">Application #{{ application.application_number }}</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Payment</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+    
+    <div class="card shadow payment-card">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0">License Application Payment</h4>
+        </div>
+        <div class="card-body">
+            <div class="application-details mb-4">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p class="mb-1"><strong>Application Number:</strong></p>
+                        <p>{{ application.application_number }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p class="mb-1"><strong>Application Date:</strong></p>
+                        <p>{{ application.application_date|date:"d M Y" }}</p>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <p class="mb-1"><strong>License Type:</strong></p>
+                        <p>{{ application.license_type.name }} ({{ application.license_type.code }})</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p class="mb-1"><strong>Amount:</strong></p>
+                        <p class="h4 text-success">₹{{ amount }}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="alert alert-info">
+                <h5 class="alert-heading">Payment Information</h5>
+                <p>You are about to make a payment for your license application. Please review the details carefully before proceeding.</p>
+                <p class="mb-0">Upon successful payment, your application will be forwarded for further processing by an RTO officer.</p>
+            </div>
+            
+            <form action="{% url 'license_payment_success' application_number=application.application_number %}" method="POST">
+                {% csrf_token %}
+                <script
+                    src="https://checkout.razorpay.com/v1/checkout.js"
+                    data-key="{{ key_id }}"
+                    data-amount="{{ amount|floatformat:2|stringformat:'g' }}00"
+                    data-currency="INR"
+                    data-order_id="{{ order_id }}"
+                    data-buttontext="Pay Now ₹{{ amount }}"
+                    data-name="RTO Management System"
+                    data-description="License Application Fee"
+                    data-image="https://upload.wikimedia.org/wikipedia/commons/5/55/Emblem_of_India.svg"
+                    data-prefill.name="{{ user_name }}"
+                    data-prefill.email="{{ user_email }}"
+                    data-prefill.contact="{{ user_phone }}"
+                    data-theme.color="#0d6efd"
+                ></script>
+            </form>
+            
+            <div class="text-center mt-3">
+                <a href="{% url 'license_application_detail' application_number=application.application_number %}" class="btn btn-outline-secondary">
+                    Cancel and Go Back
+                </a>
+            </div>
+        </div>
+        <div class="card-footer">
+            <div class="d-flex justify-content-between align-items-center">
+                <small class="text-muted">Powered by Razorpay</small>
+                <div>
+                    <img src="https://razorpay.com/assets/razorpay-logo.svg" alt="Razorpay" height="20">
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="text-center mt-4">
+        <div class="card shadow payment-card p-3">
+            <h5>Other Payment Methods</h5>
+            <p class="text-muted">You can also pay the application fee offline at any RTO office.</p>
+            <p>For offline payment, please visit the nearest RTO office with your application number and valid ID proof.</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
