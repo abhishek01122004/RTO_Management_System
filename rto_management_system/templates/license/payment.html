@@ -79,24 +79,40 @@
                 <p class="mb-0">Upon successful payment, your application will be forwarded for further processing by an RTO officer.</p>
             </div>
             
-            <form action="{% url 'license_payment_success' application_number=application.application_number %}" method="POST">
-                {% csrf_token %}
-                <script
-                    src="https://checkout.razorpay.com/v1/checkout.js"
-                    data-key="{{ key_id }}"
-                    data-amount="{{ amount|floatformat:2|stringformat:'g' }}00"
-                    data-currency="INR"
-                    data-order_id="{{ order_id }}"
-                    data-buttontext="Pay Now ₹{{ amount }}"
-                    data-name="RTO Management System"
-                    data-description="License Application Fee"
-                    data-image="https://upload.wikimedia.org/wikipedia/commons/5/55/Emblem_of_India.svg"
-                    data-prefill.name="{{ user_name }}"
-                    data-prefill.email="{{ user_email }}"
-                    data-prefill.contact="{{ user_phone }}"
-                    data-theme.color="#0d6efd"
-                ></script>
-            </form>
+            {% if dev_mode %}
+                <!-- Development mode simplified payment form -->
+                <div class="alert alert-warning">
+                    <h5 class="alert-heading">Development Mode</h5>
+                    <p>This is a development environment without Razorpay keys. You can simulate payment by clicking the button below.</p>
+                </div>
+                
+                <form action="{% url 'license_payment' application_number=application.application_number %}" method="POST" class="mt-3">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-primary btn-lg w-100">
+                        Simulate Payment of ₹{{ amount }}
+                    </button>
+                </form>
+            {% else %}
+                <!-- Real Razorpay payment form -->
+                <form action="{% url 'license_payment_success' application_number=application.application_number %}" method="POST">
+                    {% csrf_token %}
+                    <script
+                        src="https://checkout.razorpay.com/v1/checkout.js"
+                        data-key="{{ key_id }}"
+                        data-amount="{{ amount|floatformat:2|stringformat:'g' }}00"
+                        data-currency="INR"
+                        data-order_id="{{ order_id }}"
+                        data-buttontext="Pay Now ₹{{ amount }}"
+                        data-name="RTO Management System"
+                        data-description="License Application Fee"
+                        data-image="https://upload.wikimedia.org/wikipedia/commons/5/55/Emblem_of_India.svg"
+                        data-prefill.name="{{ user_name }}"
+                        data-prefill.email="{{ user_email }}"
+                        data-prefill.contact="{{ user_phone }}"
+                        data-theme.color="#0d6efd"
+                    ></script>
+                </form>
+            {% endif %}
             
             <div class="text-center mt-3">
                 <a href="{% url 'license_application_detail' application_number=application.application_number %}" class="btn btn-outline-secondary">
