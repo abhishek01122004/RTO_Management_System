@@ -202,7 +202,7 @@
                                 {% for test in test_schedules %}
                                 <tr>
                                     <td>{{ test.get_test_type_display }}</td>
-                                    <td>{{ test.scheduled_date|date:"d M Y, h:i A" }}</td>
+                                    <td>{{ test.scheduled_date|date:"d M Y, H:i" }}</td>
                                     <td>{{ test.venue }}</td>
                                     <td>
                                         {% if test.is_completed %}
@@ -249,7 +249,7 @@
                                                     </div>
                                                     <div class="modal-body">
                                                         <p><strong>Test:</strong> {{ test.get_test_type_display }}</p>
-                                                        <p><strong>Date:</strong> {{ test.scheduled_date|date:"d M Y, h:i A" }}</p>
+                                                        <p><strong>Date:</strong> {{ test.scheduled_date|date:"d M Y, H:i" }}</p>
                                                         <p><strong>Result:</strong> 
                                                             {% if test.passed %}
                                                             <span class="badge bg-success">Pass</span>
@@ -341,7 +341,7 @@
                                 </div>
                                 <div>
                                     <h6 class="mb-1">Application Submitted</h6>
-                                    <p class="small text-muted mb-0">{{ application.application_date|date:"d M Y, h:i A" }}</p>
+                                    <p class="small text-muted mb-0">{{ application.application_date|date:"d M Y, H:i" }}</p>
                                 </div>
                             </div>
                         </li>
@@ -356,7 +356,7 @@
                                 </div>
                                 <div>
                                     <h6 class="mb-1">Payment Completed</h6>
-                                    <p class="small text-muted mb-0">{{ application.payment_date|date:"d M Y, h:i A" }}</p>
+                                    <p class="small text-muted mb-0">{{ application.payment_date|date:"d M Y, H:i" }}</p>
                                     <p class="small text-muted mb-0">Transaction ID: {{ application.payment_transaction_id }}</p>
                                 </div>
                             </div>
@@ -392,7 +392,7 @@
                                 </div>
                                 <div>
                                     <h6 class="mb-1">{{ test.get_test_type_display }} Scheduled</h6>
-                                    <p class="small text-muted mb-0">{{ test.scheduled_date|date:"d M Y, h:i A" }} at {{ test.venue }}</p>
+                                    <p class="small text-muted mb-0">{{ test.scheduled_date|date:"d M Y, H:i" }} at {{ test.venue }}</p>
                                     {% if test.is_completed %}
                                     <p class="small {% if test.passed %}text-success{% else %}text-danger{% endif %} mb-0">
                                         Result: {% if test.passed %}Passed{% else %}Failed{% endif %}
