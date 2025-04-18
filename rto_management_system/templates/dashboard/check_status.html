@@ -1,0 +1,157 @@
+{% extends 'base.html' %}
+
+{% block title %}Check Application Status - RTO Management System{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row mb-4">
+        <div class="col">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Check Application Status</li>
+                </ol>
+            </nav>
+            <h2>Application Status</h2>
+            <p class="text-muted">View the current status of your application</p>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Status Details</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <tbody>
+                                <tr>
+                                    <th style="width: 200px;">Application Type</th>
+                                    <td>{{ application_type|title }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Application Number</th>
+                                    <td>{{ application_number }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Current Status</th>
+                                    <td>
+                                        <span class="badge bg-info">{{ status }}</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Last Updated</th>
+                                    <td>{% now "F d, Y H:i" %}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <h6>Status Timeline</h6>
+                        <div class="timeline">
+                            <div class="timeline-item">
+                                <div class="timeline-marker bg-success"></div>
+                                <div class="timeline-content">
+                                    <h6 class="mb-0">Application Submitted</h6>
+                                    <p class="small text-muted">{% now "F d, Y" %}</p>
+                                </div>
+                            </div>
+                            <div class="timeline-item">
+                                <div class="timeline-marker bg-primary"></div>
+                                <div class="timeline-content">
+                                    <h6 class="mb-0">Under Review</h6>
+                                    <p class="small text-muted">{% now "F d, Y" %}</p>
+                                </div>
+                            </div>
+                            <div class="timeline-item">
+                                <div class="timeline-marker bg-secondary"></div>
+                                <div class="timeline-content">
+                                    <h6 class="mb-0">Pending Approval</h6>
+                                    <p class="small text-muted">Estimated: {% now "F d, Y" %}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <a href="{% url 'dashboard' %}" class="btn btn-primary">
+                            <i class="bi bi-arrow-left"></i> Back to Dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card shadow mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Next Steps</h5>
+                </div>
+                <div class="card-body">
+                    <p>Based on your application status, here are the next steps:</p>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item">
+                            <i class="bi bi-check-circle-fill text-success me-2"></i>
+                            Wait for document verification
+                        </li>
+                        <li class="list-group-item">
+                            <i class="bi bi-clock text-warning me-2"></i>
+                            Schedule a test when notified
+                        </li>
+                        <li class="list-group-item">
+                            <i class="bi bi-clock text-warning me-2"></i>
+                            Pay applicable fees
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="card shadow">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Need Assistance?</h5>
+                </div>
+                <div class="card-body">
+                    <p>If you have questions about your application status, please contact:</p>
+                    <p class="small mb-2"><i class="bi bi-telephone"></i> Helpline: 1800-XXX-XXXX</p>
+                    <p class="small mb-2"><i class="bi bi-envelope"></i> Email: support@rto.gov.in</p>
+                    <p class="small mb-0">Please reference your application number when contacting support.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .timeline {
+        position: relative;
+        padding-left: 30px;
+    }
+    .timeline-item {
+        position: relative;
+        padding-bottom: 1.5rem;
+    }
+    .timeline-item:last-child {
+        padding-bottom: 0;
+    }
+    .timeline-marker {
+        position: absolute;
+        left: -30px;
+        top: 0;
+        width: 15px;
+        height: 15px;
+        border-radius: 50%;
+    }
+    .timeline-item:not(:last-child)::after {
+        content: '';
+        position: absolute;
+        left: -23px;
+        top: 15px;
+        width: 2px;
+        height: calc(100% - 15px);
+        background-color: #dee2e6;
+    }
+</style>
+{% endblock %}
