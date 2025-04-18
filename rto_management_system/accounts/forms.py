@@ -28,14 +28,14 @@ class CitizenRegistrationForm(UserCreationForm):
     )
     
     aadhaar_number = forms.CharField(
-        max_length=12,
+        max_length=14,  # Increased to allow for spaces
         validators=[
             RegexValidator(
-                regex=r'^\d{12}$',
-                message="Aadhaar number must be 12 digits"
+                regex=r'^\d{4}[\s-]?\d{4}[\s-]?\d{4}$|^\d{12}$',
+                message="Aadhaar number must be 12 digits with or without spaces/hyphens (e.g., 1234 5678 9012 or 123456789012)"
             )
         ],
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Aadhaar Number (12 digits)'})
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Aadhaar Number (e.g., 1234 5678 9012)'})
     )
     
     address = forms.CharField(
