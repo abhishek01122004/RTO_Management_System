@@ -82,12 +82,12 @@
                                     <tr>
                                         <td>{{ application.application_number }}</td>
                                         <td>
-                                            <div>{{ application.applicant.get_full_name }}</div>
-                                            <small class="text-muted">{{ application.applicant.email }}</small>
+                                            <div>{{ application.owner.get_full_name }}</div>
+                                            <small class="text-muted">{{ application.owner.email }}</small>
                                         </td>
                                         <td>
-                                            <div>{{ application.vehicle_model.maker.name }} {{ application.vehicle_model.name }}</div>
-                                            <small class="text-muted">{{ application.vehicle_class.name }}</small>
+                                            <div>{{ application.make }} {{ application.model }}</div>
+                                            <small class="text-muted">{{ application.get_registration_type_display }}</small>
                                         </td>
                                         <td>{{ application.application_date|date:"d M Y" }}</td>
                                         <td>
@@ -113,24 +113,24 @@
                                         </td>
                                         <td>
                                             <div class="btn-group btn-group-sm">
-                                                <a href="{% url 'review_registration_application' application_number=application.application_number %}" class="btn btn-outline-primary">
+                                                <a href="{% url 'review_registration_application' application_number=application.registration_number %}" class="btn btn-outline-primary">
                                                     <i class="bi bi-eye"></i> Review
                                                 </a>
                                                 
                                                 {% if application.status == 'DOCUMENT_VERIFICATION' %}
-                                                <a href="{% url 'schedule_inspection' application_number=application.application_number %}" class="btn btn-outline-info">
+                                                <a href="{% url 'schedule_inspection' application_number=application.registration_number %}" class="btn btn-outline-info">
                                                     <i class="bi bi-calendar"></i> Schedule
                                                 </a>
                                                 {% endif %}
                                                 
                                                 {% if application.status == 'INSPECTION_SCHEDULED' %}
-                                                <a href="{% url 'record_inspection_result' application_number=application.application_number %}" class="btn btn-outline-success">
+                                                <a href="{% url 'record_inspection_result' application_number=application.registration_number %}" class="btn btn-outline-success">
                                                     <i class="bi bi-clipboard-check"></i> Record
                                                 </a>
                                                 {% endif %}
                                                 
                                                 {% if application.status == 'INSPECTION_PASSED' %}
-                                                <a href="{% url 'issue_registration' application_number=application.application_number %}" class="btn btn-outline-success">
+                                                <a href="{% url 'issue_registration' application_number=application.registration_number %}" class="btn btn-outline-success">
                                                     <i class="bi bi-check-circle"></i> Issue
                                                 </a>
                                                 {% endif %}

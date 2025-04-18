@@ -201,12 +201,12 @@ def review_registration_applications(request):
     status_filter = request.GET.get('status', '')
     
     if status_filter:
-        applications = RegistrationApplication.objects.filter(
+        applications = VehicleRegistration.objects.filter(
             status=status_filter,
             payment_status=True
         ).order_by('-application_date')
     else:
-        applications = RegistrationApplication.objects.filter(
+        applications = VehicleRegistration.objects.filter(
             payment_status=True
         ).order_by('-application_date')
     
@@ -220,16 +220,34 @@ def review_registration_applications(request):
 @user_passes_test(lambda u: u.user_type in ['OFFICER', 'ADMIN'])
 def review_registration_application(request, application_number):
     """View for officers to review a specific registration application"""
-    application = get_object_or_404(RegistrationApplication, application_number=application_number)
+    application = get_object_or_404(VehicleRegistration, registration_number=application_number)
     
     if request.method == 'POST':
         # Handle form submission
-        # This will be implemented in a separate step with the form
-        pass
+        status = request.POST.get('status')
+        remarks = request.POST.get('remarks')
+        rejection_reason = request.POST.get('rejection_reason')
+        
+        if status:
+            application.status = status
+            application.updated_at = timezone.now()
+            
+            if remarks:
+                application.inspection_notes = remarks
+                
+            if rejection_reason:
+                application.rejection_reason = rejection_reason
+                
+            application.reviewed_by = request.user
+            application.save()
+            
+            messages.success(request, f"Application {application_number} has been updated to {status}")
+            return redirect('review_registration_applications')
     else:
         # Prepare context for GET request
         context = {
             'application': application,
+            'original_status': application.status,
         }
     
     return render(request, 'vehicle/review.html', context)
@@ -239,17 +257,67 @@ def review_registration_application(request, application_number):
 @user_passes_test(lambda u: u.user_type in ['OFFICER', 'ADMIN'])
 def schedule_inspection(request, application_number):
     """View for scheduling a vehicle inspection"""
-    application = get_object_or_404(RegistrationApplication, application_number=application_number)
+    application = get_object_or_404(VehicleRegistration, registration_number=application_number)
     
     if request.method == 'POST':
         # Handle form submission
-        # This will be implemented in a separate step with the form
-        pass
-    else:
-        # Prepare context for GET request
-        context = {
-            'application': application,
-        }
+        inspection_date_str = request.POST.get('inspection_date')
+        inspection_time_str = request.POST.get('inspection_time')
+        remarks = request.POST.get('remarks')
+        
+        if inspection_date_str and inspection_time_str:
+            try:
+                # Parse date and time
+                inspection_date = datetime.datetime.strptime(inspection_date_str, '%Y-%m-%d').date()
+                inspection_time = datetime.datetime.strptime(inspection_time_str, '%H:%M').time()
+                
+                # Combine date and time
+                inspection_datetime = datetime.datetime.combine(inspection_date, inspection_time)
+                inspection_datetime = timezone.make_aware(inspection_datetime)
+                
+                # Update application
+                application.status = 'INSPECTION_SCHEDULED'
+                application.inspection_date = inspection_datetime
+                if remarks:
+                    application.inspection_notes = remarks
+                application.updated_at = timezone.now()
+                application.save()
+                
+                # Send notification to the applicant
+                if application.owner:
+                    try:
+                        send_notification(
+                            application.owner,
+                            "Vehicle Inspection Scheduled",
+                            f"Your vehicle inspection for {application.make} {application.model} has been scheduled for {inspection_date_str} at {inspection_time_str}.",
+                            "INSPECTION"
+                        )
+                        
+                        send_email(
+                            application.owner.email,
+                            "Vehicle Inspection Scheduled",
+                            f"Dear {application.owner.get_full_name()},\n\nYour vehicle inspection for {application.make} {application.model} has been scheduled for {inspection_date_str} at {inspection_time_str}.\n\nPlease bring your vehicle to the RTO office on the scheduled date and time.\n\nThank you,\nRTO Office"
+                        )
+                        
+                        if application.owner.phone_number:
+                            send_sms(
+                                application.owner.phone_number,
+                                f"Your vehicle inspection for {application.registration_number} has been scheduled for {inspection_date_str} at {inspection_time_str}. Please bring your vehicle to the RTO office on time. Thank you, RTO Office"
+                            )
+                    except Exception as e:
+                        messages.warning(request, f"Could not send notification: {str(e)}")
+                
+                messages.success(request, f"Inspection for {application_number} has been scheduled for {inspection_date_str} at {inspection_time_str}")
+                return redirect('review_registration_applications')
+            except Exception as e:
+                messages.error(request, f"Error scheduling inspection: {str(e)}")
+    
+    # Prepare context for GET request
+    context = {
+        'application': application,
+        'min_date': timezone.now().date().strftime('%Y-%m-%d'),
+        'min_time': timezone.now().time().strftime('%H:%M'),
+    }
     
     return render(request, 'vehicle/schedule_inspection.html', context)
 
@@ -258,17 +326,57 @@ def schedule_inspection(request, application_number):
 @user_passes_test(lambda u: u.user_type in ['OFFICER', 'ADMIN'])
 def record_inspection_result(request, application_number):
     """View for recording vehicle inspection results"""
-    application = get_object_or_404(RegistrationApplication, application_number=application_number)
+    application = get_object_or_404(VehicleRegistration, registration_number=application_number)
     
     if request.method == 'POST':
         # Handle form submission
-        # This will be implemented in a separate step with the form
-        pass
-    else:
-        # Prepare context for GET request
-        context = {
-            'application': application,
-        }
+        inspection_result = request.POST.get('inspection_result')
+        inspection_notes = request.POST.get('inspection_notes')
+        
+        if inspection_result:
+            # Update application status based on inspection result
+            if inspection_result == 'PASSED':
+                application.status = 'INSPECTION_PASSED'
+                application.inspection_result = True
+            else:
+                application.status = 'INSPECTION_FAILED'
+                application.inspection_result = False
+            
+            # Update inspection data
+            if inspection_notes:
+                application.inspection_notes = inspection_notes
+            
+            application.updated_at = timezone.now()
+            application.save()
+            
+            # Send notification to the applicant
+            if application.owner:
+                try:
+                    result_text = "passed" if inspection_result == 'PASSED' else "failed"
+                    send_notification(
+                        application.owner,
+                        f"Vehicle Inspection {result_text.capitalize()}",
+                        f"Your vehicle inspection for {application.make} {application.model} has {result_text}.",
+                        "INSPECTION"
+                    )
+                    
+                    send_email(
+                        application.owner.email,
+                        f"Vehicle Inspection {result_text.capitalize()}",
+                        f"Dear {application.owner.get_full_name()},\n\nYour vehicle inspection for {application.make} {application.model} has {result_text}.\n\n" +
+                        (f"Please proceed with the registration process.\n\n" if inspection_result == 'PASSED' else f"Please address the following issues and schedule another inspection:\n\n{inspection_notes}\n\n") +
+                        "Thank you,\nRTO Office"
+                    )
+                except Exception as e:
+                    messages.warning(request, f"Could not send notification: {str(e)}")
+            
+            messages.success(request, f"Inspection result for {application_number} has been recorded as {inspection_result}")
+            return redirect('review_registration_applications')
+    
+    # Prepare context for GET request
+    context = {
+        'application': application,
+    }
     
     return render(request, 'vehicle/record_inspection.html', context)
 
@@ -277,17 +385,74 @@ def record_inspection_result(request, application_number):
 @user_passes_test(lambda u: u.user_type in ['OFFICER', 'ADMIN'])
 def issue_registration(request, application_number):
     """View for issuing a vehicle registration"""
-    application = get_object_or_404(RegistrationApplication, application_number=application_number)
+    application = get_object_or_404(VehicleRegistration, registration_number=application_number)
     
     if request.method == 'POST':
         # Handle form submission
-        # This will be implemented in a separate step with the form
-        pass
-    else:
-        # Prepare context for GET request
-        context = {
-            'application': application,
-        }
+        registration_number = request.POST.get('registration_number')
+        valid_until = request.POST.get('valid_until')
+        remarks = request.POST.get('remarks')
+        
+        if registration_number and valid_until:
+            try:
+                # Parse valid until date
+                valid_until_date = datetime.datetime.strptime(valid_until, '%Y-%m-%d').date()
+                
+                # Update application
+                application.status = 'REGISTERED'
+                if registration_number != application.registration_number:
+                    application.registration_number = registration_number
+                application.valid_until = valid_until_date
+                application.registration_date = timezone.now().date()
+                
+                if remarks:
+                    application.inspection_notes = remarks
+                
+                application.updated_at = timezone.now()
+                application.save()
+                
+                # Send notification to the applicant
+                if application.owner:
+                    try:
+                        send_notification(
+                            application.owner,
+                            "Vehicle Registration Completed",
+                            f"Your vehicle registration {registration_number} has been issued and is valid until {valid_until}.",
+                            "REGISTRATION"
+                        )
+                        
+                        send_email(
+                            application.owner.email,
+                            "Vehicle Registration Completed",
+                            f"Dear {application.owner.get_full_name()},\n\nYour vehicle registration for {application.make} {application.model} has been completed.\n\nRegistration Number: {registration_number}\nValid Until: {valid_until}\n\nPlease collect your registration certificate from the RTO office.\n\nThank you,\nRTO Office"
+                        )
+                    except Exception as e:
+                        messages.warning(request, f"Could not send notification: {str(e)}")
+                
+                messages.success(request, f"Registration {registration_number} has been issued successfully")
+                return redirect('review_registration_applications')
+            except Exception as e:
+                messages.error(request, f"Error issuing registration: {str(e)}")
+    
+    # Prepare context for GET request
+    # Generate a suggested registration number if none exists
+    suggested_reg_number = application.registration_number
+    if not suggested_reg_number or suggested_reg_number.startswith('TEMP-'):
+        # Generate a new registration number
+        state_code = "MH"
+        region_code = ''.join(random.choices(string.digits, k=2))
+        alpha_part = ''.join(random.choices(string.ascii_uppercase, k=2))
+        digit_part = ''.join(random.choices(string.digits, k=4))
+        suggested_reg_number = f"{state_code}-{region_code}-{alpha_part}-{digit_part}"
+    
+    # Calculate suggested valid until date (15 years from now)
+    suggested_valid_until = (timezone.now().date() + datetime.timedelta(days=15*365)).strftime('%Y-%m-%d')
+    
+    context = {
+        'application': application,
+        'suggested_reg_number': suggested_reg_number,
+        'suggested_valid_until': suggested_valid_until,
+    }
     
     return render(request, 'vehicle/issue_registration.html', context)
 
