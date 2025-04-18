@@ -39,7 +39,7 @@ from django.contrib import messages
 from django.conf import settings
 from django.http import JsonResponse, HttpResponseRedirect
 from django.urls import reverse
-from django.db.models import Count, Q
+from django.db.models import Count, Q, Sum
 from django.utils import timezone
 
 from .models import LicenseType, LicenseApplication, DrivingLicense, TestSchedule
@@ -626,7 +626,7 @@ def license_statistics(request):
     
     # Revenue from license fees
     total_revenue = licenses_qs.aggregate(
-        total=models.Sum('application__license_type__fee')
+        total=Sum('application__license_type__fee')
     )['total'] or 0
     
     context = {
