@@ -83,9 +83,27 @@ class CitizenRegistrationForm(UserCreationForm):
             'last_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Last Name'}),
         }
     
+    def clean_aadhaar_number(self):
+        """Clean Aadhaar number by removing spaces and hyphens"""
+        aadhaar = self.cleaned_data.get('aadhaar_number')
+        if aadhaar:
+            # Remove spaces and hyphens
+            aadhaar = aadhaar.replace(' ', '').replace('-', '')
+            
+            # Validate it's 12 digits
+            if len(aadhaar) != 12 or not aadhaar.isdigit():
+                raise forms.ValidationError("Aadhaar number must contain exactly 12 digits.")
+                
+        return aadhaar
+    
     def save(self, commit=True):
         user = super().save(commit=False)
         user.user_type = 'CITIZEN'
+        
+        # Clean aadhaar number again to ensure it's properly formatted
+        if self.cleaned_data.get('aadhaar_number'):
+            user.aadhaar_number = self.cleaned_data.get('aadhaar_number').replace(' ', '').replace('-', '')
+        
         if commit:
             user.save()
             CitizenProfile.objects.create(
