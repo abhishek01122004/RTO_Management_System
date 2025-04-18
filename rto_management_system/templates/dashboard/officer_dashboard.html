@@ -23,14 +23,14 @@
                         <a href="{% url 'review_license_applications' %}" class="btn btn-outline-primary">
                             <i class="bi bi-list-check"></i> Review License Applications
                         </a>
-                        <a href="#" class="btn btn-outline-primary">
-                            <i class="bi bi-calendar-check"></i> Schedule Tests
-                        </a>
-                        <a href="#" class="btn btn-outline-primary">
+                        <a href="{% url 'review_registration_applications' %}" class="btn btn-outline-primary">
                             <i class="bi bi-car-front"></i> Vehicle Registrations
                         </a>
-                        <a href="#" class="btn btn-outline-primary">
+                        <a href="{% url 'generate_challan' %}" class="btn btn-outline-primary">
                             <i class="bi bi-receipt"></i> Generate Challan
+                        </a>
+                        <a href="{% url 'manage_challans' %}" class="btn btn-outline-primary">
+                            <i class="bi bi-list-ul"></i> Manage Challans
                         </a>
                     </div>
                 </div>

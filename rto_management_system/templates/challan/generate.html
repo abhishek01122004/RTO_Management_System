@@ -1,0 +1,246 @@
+{% extends 'base.html' %}
+
+{% block title %}Generate Challan{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row mb-4">
+        <div class="col">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Generate Challan</li>
+                </ol>
+            </nav>
+            <h2 class="mt-3">Generate New Challan</h2>
+            <p class="text-muted">Issue a new traffic violation challan</p>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Challan Details</h4>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data" id="challan-form">
+                        {% csrf_token %}
+                        
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger">
+                                {% for error in form.non_field_errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        
+                        <div class="mb-4">
+                            <h5>Vehicle Information</h5>
+                            <hr>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="{{ form.vehicle_number.id_for_label }}" class="form-label">Vehicle Registration Number *</label>
+                                    {{ form.vehicle_number }}
+                                    {% if form.vehicle_number.errors %}
+                                        <div class="text-danger">{{ form.vehicle_number.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <h5>Violator Information</h5>
+                            <hr>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="{{ form.violator_email.id_for_label }}" class="form-label">Violator Email (if known)</label>
+                                    {{ form.violator_email }}
+                                    {% if form.violator_email.errors %}
+                                        <div class="text-danger">{{ form.violator_email.errors }}</div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="{{ form.violator_phone.id_for_label }}" class="form-label">Violator Phone (if known)</label>
+                                    {{ form.violator_phone }}
+                                    {% if form.violator_phone.errors %}
+                                        <div class="text-danger">{{ form.violator_phone.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="{{ form.license_number.id_for_label }}" class="form-label">License Number (if known)</label>
+                                    {{ form.license_number }}
+                                    {% if form.license_number.errors %}
+                                        <div class="text-danger">{{ form.license_number.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <h5>Violation Information</h5>
+                            <hr>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="{{ form.violation_place.id_for_label }}" class="form-label">Place of Violation *</label>
+                                    {{ form.violation_place }}
+                                    {% if form.violation_place.errors %}
+                                        <div class="text-danger">{{ form.violation_place.errors }}</div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="{{ form.evidence_image.id_for_label }}" class="form-label">Evidence Image (if any)</label>
+                                    {{ form.evidence_image }}
+                                    {% if form.evidence_image.errors %}
+                                        <div class="text-danger">{{ form.evidence_image.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-12">
+                                    <label for="{{ form.violation_description.id_for_label }}" class="form-label">Description of Violation *</label>
+                                    {{ form.violation_description }}
+                                    {% if form.violation_description.errors %}
+                                        <div class="text-danger">{{ form.violation_description.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <h5>Select Violated Rules</h5>
+                            <hr>
+                            
+                            <div class="alert alert-info">
+                                <small>Select all the traffic rules that were violated. The total penalty amount will be calculated automatically.</small>
+                            </div>
+                            
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-hover">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th style="width: 50px;"></th>
+                                            <th>Rule Code</th>
+                                            <th>Rule Description</th>
+                                            <th>Penalty (₹)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for rule in traffic_rules %}
+                                        <tr>
+                                            <td class="text-center">
+                                                <div class="form-check">
+                                                    <input class="form-check-input rule-checkbox" type="checkbox" name="selected_rules" value="{{ rule.id }}" id="rule_{{ rule.id }}">
+                                                </div>
+                                            </td>
+                                            <td><label for="rule_{{ rule.id }}">{{ rule.rule_code }}</label></td>
+                                            <td>{{ rule.description }}</td>
+                                            <td>₹{{ rule.penalty_amount }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            
+                            {% if form.selected_rules.errors %}
+                                <div class="text-danger">{{ form.selected_rules.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">Generate Challan</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <div class="card shadow mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Total Penalty</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <span>Selected Rules:</span>
+                        <span id="rule-count" class="badge bg-primary rounded-pill">0</span>
+                    </div>
+                    <hr>
+                    <div class="d-flex align-items-center justify-content-between">
+                        <span class="h5">Total Amount:</span>
+                        <span class="h5 text-primary" id="total-amount">₹0.00</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card shadow">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Instructions</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="small text-muted">
+                        <li>Enter the vehicle registration number exactly as it appears on the vehicle</li>
+                        <li>If the violator's details are known, enter them to automatically notify them</li>
+                        <li>Select all traffic rules that were violated</li>
+                        <li>Upload evidence image if available (supports JPG, PNG formats)</li>
+                        <li>Provide specific details about the violation in the description</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Calculate total amount when rules are selected
+        const ruleCheckboxes = document.querySelectorAll('.rule-checkbox');
+        const ruleCount = document.getElementById('rule-count');
+        const totalAmount = document.getElementById('total-amount');
+        
+        // Get penalty amounts
+        const penalties = {};
+        {% for rule in traffic_rules %}
+        penalties[{{ rule.id }}] = {{ rule.penalty_amount }};
+        {% endfor %}
+        
+        function updateTotals() {
+            let total = 0;
+            let count = 0;
+            
+            ruleCheckboxes.forEach(function(checkbox) {
+                if (checkbox.checked) {
+                    count++;
+                    total += penalties[checkbox.value] || 0;
+                }
+            });
+            
+            ruleCount.textContent = count;
+            totalAmount.textContent = '₹' + total.toFixed(2);
+        }
+        
+        ruleCheckboxes.forEach(function(checkbox) {
+            checkbox.addEventListener('change', updateTotals);
+        });
+        
+        // Form validation
+        const form = document.getElementById('challan-form');
+        form.addEventListener('submit', function(event) {
+            const selectedRules = form.querySelectorAll('input[name="selected_rules"]:checked');
+            if (selectedRules.length === 0) {
+                event.preventDefault();
+                alert('Please select at least one traffic rule violation.');
+            }
+        });
+    });
+</script>
+{% endblock %}

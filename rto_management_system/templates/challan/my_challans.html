@@ -1,0 +1,175 @@
+{% extends 'base.html' %}
+
+{% block title %}My Challans{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row mb-4">
+        <div class="col">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">My Challans</li>
+                </ol>
+            </nav>
+            <h2 class="mt-3">My Challans</h2>
+            <p class="text-muted">View and manage your traffic violation challans</p>
+        </div>
+    </div>
+    
+    <div class="row mb-4">
+        <div class="col">
+            <div class="card shadow">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Filter Challans</h5>
+                    <a href="{% url 'search_challan' %}" class="btn btn-outline-primary btn-sm">
+                        <i class="bi bi-search me-1"></i> Search Challans
+                    </a>
+                </div>
+                <div class="card-body">
+                    <form method="get" class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Status</label>
+                            <select name="status" class="form-select">
+                                <option value="">All Status</option>
+                                <option value="PENDING" {% if status_filter == 'PENDING' %}selected{% endif %}>Pending</option>
+                                <option value="PAID" {% if status_filter == 'PAID' %}selected{% endif %}>Paid</option>
+                                <option value="DISPUTED" {% if status_filter == 'DISPUTED' %}selected{% endif %}>Disputed</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Payment Status</label>
+                            <select name="payment_status" class="form-select">
+                                <option value="">All</option>
+                                <option value="paid" {% if payment_filter == 'paid' %}selected{% endif %}>Paid</option>
+                                <option value="unpaid" {% if payment_filter == 'unpaid' %}selected{% endif %}>Unpaid</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4 d-flex align-items-end">
+                            <button type="submit" class="btn btn-primary w-100">Apply Filters</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col">
+            <div class="card shadow">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Your Challans</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Challan No.</th>
+                                    <th>Vehicle No.</th>
+                                    <th>Issue Date</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                    <th>Payment</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if challans %}
+                                    {% for challan in challans %}
+                                    <tr>
+                                        <td>{{ challan.challan_number }}</td>
+                                        <td>{{ challan.vehicle_number }}</td>
+                                        <td>{{ challan.issue_date|date:"d M Y" }}</td>
+                                        <td>₹{{ challan.total_amount }}</td>
+                                        <td>
+                                            {% if challan.status == 'PENDING' %}
+                                            <span class="badge bg-warning text-dark">Pending</span>
+                                            {% elif challan.status == 'PAID' %}
+                                            <span class="badge bg-success">Paid</span>
+                                            {% elif challan.status == 'DISPUTED' %}
+                                            <span class="badge bg-danger">Disputed</span>
+                                            {% elif challan.status == 'CANCELED' %}
+                                            <span class="badge bg-secondary">Canceled</span>
+                                            {% else %}
+                                            <span class="badge bg-secondary">{{ challan.status }}</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if challan.payment_status %}
+                                            <span class="badge bg-success">Paid</span>
+                                            {% else %}
+                                            <span class="badge bg-danger">Unpaid</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <div class="btn-group btn-group-sm">
+                                                <a href="{% url 'view_challan' challan_number=challan.challan_number %}" class="btn btn-outline-primary">
+                                                    <i class="bi bi-eye"></i> View
+                                                </a>
+                                                {% if not challan.payment_status and challan.status == 'PENDING' %}
+                                                <a href="{% url 'pay_challan' challan_number=challan.challan_number %}" class="btn btn-outline-success">
+                                                    <i class="bi bi-cash"></i> Pay
+                                                </a>
+                                                {% endif %}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr>
+                                        <td colspan="7" class="text-center py-4">
+                                            <div class="text-muted">
+                                                <i class="bi bi-inbox fs-3 d-block mb-2"></i>
+                                                <p>No challans found matching your criteria.</p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Payment Options</h5>
+                </div>
+                <div class="card-body">
+                    <p>You can pay your challans using the following methods:</p>
+                    <ul>
+                        <li>Online payment through the RTO Portal</li>
+                        <li>Visit nearest RTO office for offline payment</li>
+                        <li>Payment through authorized banks</li>
+                    </ul>
+                    <div class="alert alert-info mb-0">
+                        <small>Note: Unpaid challans may affect your license renewal process. Make sure to clear all dues.</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Important Information</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="text-muted small">
+                        <li>Challans must be paid within 30 days of issue date to avoid additional penalties</li>
+                        <li>You can dispute a challan if you believe it was issued incorrectly</li>
+                        <li>Once payment is processed, you'll receive a receipt via email</li>
+                        <li>Keep a copy of payment receipts for future reference</li>
+                        <li>For any assistance, contact the RTO helpline at <strong>1800-XXX-XXXX</strong></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

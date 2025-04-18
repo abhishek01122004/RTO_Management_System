@@ -1,0 +1,307 @@
+{% extends 'base.html' %}
+
+{% block title %}Challan Details{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row mb-4">
+        <div class="col">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+                    {% if request.user.user_type == 'CITIZEN' %}
+                    <li class="breadcrumb-item"><a href="{% url 'my_challans' %}">My Challans</a></li>
+                    {% else %}
+                    <li class="breadcrumb-item"><a href="{% url 'manage_challans' %}">Manage Challans</a></li>
+                    {% endif %}
+                    <li class="breadcrumb-item active" aria-current="page">Challan #{{ challan.challan_number }}</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Challan #{{ challan.challan_number }}</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h5 class="mb-3">Challan Details</h5>
+                            <table class="table table-borderless table-sm">
+                                <tr>
+                                    <td class="text-muted">Issue Date:</td>
+                                    <td class="fw-medium">{{ challan.issue_date|date:"d M Y" }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="text-muted">Due Date:</td>
+                                    <td class="fw-medium">{{ challan.due_date|date:"d M Y" }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="text-muted">Status:</td>
+                                    <td>
+                                        {% if challan.status == 'PENDING' %}
+                                        <span class="badge bg-warning text-dark">Pending</span>
+                                        {% elif challan.status == 'PAID' %}
+                                        <span class="badge bg-success">Paid</span>
+                                        {% elif challan.status == 'DISPUTED' %}
+                                        <span class="badge bg-danger">Disputed</span>
+                                        {% elif challan.status == 'CANCELED' %}
+                                        <span class="badge bg-secondary">Canceled</span>
+                                        {% else %}
+                                        <span class="badge bg-secondary">{{ challan.status }}</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="text-muted">Payment Status:</td>
+                                    <td>
+                                        {% if challan.payment_status %}
+                                        <span class="badge bg-success">Paid</span>
+                                        {% else %}
+                                        <span class="badge bg-danger">Unpaid</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="text-muted">Place of Violation:</td>
+                                    <td class="fw-medium">{{ challan.violation_place }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <h5 class="mb-3">Vehicle Details</h5>
+                            <table class="table table-borderless table-sm">
+                                <tr>
+                                    <td class="text-muted">Vehicle Number:</td>
+                                    <td class="fw-medium">{{ challan.vehicle_number }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="text-muted">License Number:</td>
+                                    <td class="fw-medium">{{ challan.license_number|default:"Not Available" }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="text-muted">Issued By:</td>
+                                    <td class="fw-medium">{{ challan.issued_by.get_full_name }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="text-muted">Violator:</td>
+                                    <td class="fw-medium">
+                                        {% if challan.violator %}
+                                            {{ challan.violator.get_full_name }}
+                                        {% else %}
+                                            Not Identified
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h5 class="mb-3">Violation Description</h5>
+                            <p>{{ challan.violation_description }}</p>
+                            {% if challan.remarks %}
+                                <h6 class="mt-3 text-muted">Remarks</h6>
+                                <p>{{ challan.remarks }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    {% if challan.evidence_image %}
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h5 class="mb-3">Evidence</h5>
+                            <img src="{{ challan.evidence_image.url }}" alt="Evidence" class="img-fluid rounded border">
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="row">
+                        <div class="col-12">
+                            <h5 class="mb-3">Traffic Rule Violations</h5>
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-hover">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Rule Code</th>
+                                            <th>Description</th>
+                                            <th>Penalty (₹)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for rule in violated_rules %}
+                                        <tr>
+                                            <td>{{ rule.rule_code }}</td>
+                                            <td>{{ rule.description }}</td>
+                                            <td>₹{{ rule.penalty_amount }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                        <tr class="table-primary">
+                                            <td colspan="2" class="fw-bold text-end">Total Amount</td>
+                                            <td class="fw-bold">₹{{ challan.total_amount }}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            {% if payment %}
+            <div class="card shadow mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">Payment Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <table class="table table-borderless table-sm">
+                                <tr>
+                                    <td class="text-muted">Payment Date:</td>
+                                    <td class="fw-medium">{{ payment.payment_date|date:"d M Y, h:i A" }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="text-muted">Payment Method:</td>
+                                    <td class="fw-medium">{{ payment.get_payment_method_display }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <table class="table table-borderless table-sm">
+                                <tr>
+                                    <td class="text-muted">Amount Paid:</td>
+                                    <td class="fw-medium">₹{{ payment.amount }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="text-muted">Transaction ID:</td>
+                                    <td class="fw-medium">{{ payment.transaction_id }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                    {% if payment.remarks %}
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <h6 class="text-muted">Payment Remarks</h6>
+                            <p>{{ payment.remarks }}</p>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        
+        <div class="col-lg-4">
+            <div class="card shadow mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        {% if request.user.user_type == 'CITIZEN' %}
+                            {% if not challan.payment_status and challan.status == 'PENDING' %}
+                                <a href="{% url 'pay_challan' challan_number=challan.challan_number %}" class="btn btn-success">
+                                    <i class="bi bi-cash me-2"></i> Pay Challan
+                                </a>
+                                <a href="{% url 'dispute_challan' challan_number=challan.challan_number %}" class="btn btn-danger">
+                                    <i class="bi bi-exclamation-circle me-2"></i> Dispute Challan
+                                </a>
+                            {% endif %}
+                        {% else %}
+                            {% if not challan.payment_status %}
+                                <a href="{% url 'record_offline_payment' challan_number=challan.challan_number %}" class="btn btn-success">
+                                    <i class="bi bi-cash me-2"></i> Record Payment
+                                </a>
+                            {% endif %}
+                            
+                            <a href="{% url 'update_challan' challan_number=challan.challan_number %}" class="btn btn-primary">
+                                <i class="bi bi-pencil me-2"></i> Update Challan
+                            </a>
+                        {% endif %}
+                        
+                        <a href="#" onclick="window.print()" class="btn btn-outline-secondary">
+                            <i class="bi bi-printer me-2"></i> Print Challan
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card shadow">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Timeline</h5>
+                </div>
+                <div class="card-body p-0">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item py-3">
+                            <div class="d-flex">
+                                <div class="timeline-icon bg-primary rounded-circle d-flex justify-content-center align-items-center text-white" style="width: 40px; height: 40px;">
+                                    <i class="bi bi-receipt"></i>
+                                </div>
+                                <div class="ms-3">
+                                    <div class="fw-bold">Challan Generated</div>
+                                    <div class="text-muted small">{{ challan.issue_date|date:"d M Y, h:i A" }}</div>
+                                    <div class="small">By {{ challan.issued_by.get_full_name }}</div>
+                                </div>
+                            </div>
+                        </li>
+                        
+                        {% if challan.status == 'DISPUTED' %}
+                        <li class="list-group-item py-3">
+                            <div class="d-flex">
+                                <div class="timeline-icon bg-danger rounded-circle d-flex justify-content-center align-items-center text-white" style="width: 40px; height: 40px;">
+                                    <i class="bi bi-exclamation-circle"></i>
+                                </div>
+                                <div class="ms-3">
+                                    <div class="fw-bold">Challan Disputed</div>
+                                    <div class="text-muted small">{{ challan.updated_at|date:"d M Y, h:i A" }}</div>
+                                </div>
+                            </div>
+                        </li>
+                        {% endif %}
+                        
+                        {% if challan.status == 'CANCELED' %}
+                        <li class="list-group-item py-3">
+                            <div class="d-flex">
+                                <div class="timeline-icon bg-secondary rounded-circle d-flex justify-content-center align-items-center text-white" style="width: 40px; height: 40px;">
+                                    <i class="bi bi-x-circle"></i>
+                                </div>
+                                <div class="ms-3">
+                                    <div class="fw-bold">Challan Canceled</div>
+                                    <div class="text-muted small">{{ challan.updated_at|date:"d M Y, h:i A" }}</div>
+                                </div>
+                            </div>
+                        </li>
+                        {% endif %}
+                        
+                        {% if payment %}
+                        <li class="list-group-item py-3">
+                            <div class="d-flex">
+                                <div class="timeline-icon bg-success rounded-circle d-flex justify-content-center align-items-center text-white" style="width: 40px; height: 40px;">
+                                    <i class="bi bi-check-circle"></i>
+                                </div>
+                                <div class="ms-3">
+                                    <div class="fw-bold">Payment Received</div>
+                                    <div class="text-muted small">{{ payment.payment_date|date:"d M Y, h:i A" }}</div>
+                                    <div class="small">
+                                        {{ payment.get_payment_method_display }}
+                                        {% if payment.transaction_id %}
+                                         - {{ payment.transaction_id }}
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
