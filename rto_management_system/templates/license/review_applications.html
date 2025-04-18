@@ -1,0 +1,116 @@
+{% extends 'base.html' %}
+
+{% block title %}Review License Applications{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2>License Applications</h2>
+            <p class="text-muted">Review and process pending license applications</p>
+        </div>
+        <div>
+            <div class="dropdown">
+                <button class="btn btn-outline-primary dropdown-toggle" type="button" id="statusFilterDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                    {% if status_filter %}{{ status_filter|title }}{% else %}All Applications{% endif %}
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="statusFilterDropdown">
+                    <li><a class="dropdown-item" href="{% url 'review_license_applications' %}">All Applications</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="{% url 'review_license_applications' %}?status=PENDING">Pending</a></li>
+                    <li><a class="dropdown-item" href="{% url 'review_license_applications' %}?status=DOCUMENT_VERIFICATION">Document Verification</a></li>
+                    <li><a class="dropdown-item" href="{% url 'review_license_applications' %}?status=SCHEDULED_FOR_TEST">Scheduled for Test</a></li>
+                    <li><a class="dropdown-item" href="{% url 'review_license_applications' %}?status=TEST_PASSED">Test Passed</a></li>
+                    <li><a class="dropdown-item" href="{% url 'review_license_applications' %}?status=TEST_FAILED">Test Failed</a></li>
+                    <li><a class="dropdown-item" href="{% url 'review_license_applications' %}?status=APPROVED">Approved</a></li>
+                    <li><a class="dropdown-item" href="{% url 'review_license_applications' %}?status=REJECTED">Rejected</a></li>
+                    <li><a class="dropdown-item" href="{% url 'review_license_applications' %}?status=ISSUED">Issued</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <div class="card shadow">
+        <div class="card-body">
+            {% if applications %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Application #</th>
+                            <th>Applicant</th>
+                            <th>License Type</th>
+                            <th>Applied On</th>
+                            <th>Application Type</th>
+                            <th>Status</th>
+                            <th>Last Updated</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for application in applications %}
+                        <tr>
+                            <td>{{ application.application_number }}</td>
+                            <td>{{ application.applicant.get_full_name }}</td>
+                            <td>{{ application.license_type.name }} ({{ application.license_type.code }})</td>
+                            <td>{{ application.application_date|date:"d M Y" }}</td>
+                            <td>{{ application.get_application_type_display }}</td>
+                            <td>
+                                {% if application.status == 'PENDING' %}
+                                <span class="badge bg-warning text-dark">{{ application.get_status_display }}</span>
+                                {% elif application.status == 'DOCUMENT_VERIFICATION' %}
+                                <span class="badge bg-info text-dark">{{ application.get_status_display }}</span>
+                                {% elif application.status == 'SCHEDULED_FOR_TEST' %}
+                                <span class="badge bg-primary">{{ application.get_status_display }}</span>
+                                {% elif application.status == 'TEST_PASSED' %}
+                                <span class="badge bg-success">{{ application.get_status_display }}</span>
+                                {% elif application.status == 'TEST_FAILED' %}
+                                <span class="badge bg-danger">{{ application.get_status_display }}</span>
+                                {% elif application.status == 'APPROVED' %}
+                                <span class="badge bg-success">{{ application.get_status_display }}</span>
+                                {% elif application.status == 'REJECTED' %}
+                                <span class="badge bg-danger">{{ application.get_status_display }}</span>
+                                {% elif application.status == 'ISSUED' %}
+                                <span class="badge bg-success">{{ application.get_status_display }}</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ application.updated_at|date:"d M Y" }}</td>
+                            <td>
+                                <div class="btn-group">
+                                    <a href="{% url 'review_license_application' application_number=application.application_number %}" class="btn btn-sm btn-primary">
+                                        <i class="bi bi-eye"></i> Review
+                                    </a>
+                                    <button type="button" class="btn btn-sm btn-primary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <span class="visually-hidden">Toggle Dropdown</span>
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        {% if application.status == 'DOCUMENT_VERIFICATION' or application.status == 'TEST_PASSED' %}
+                                        <li><a class="dropdown-item" href="{% url 'schedule_test' application_number=application.application_number %}">
+                                            <i class="bi bi-calendar"></i> Schedule Test
+                                        </a></li>
+                                        {% endif %}
+                                        
+                                        {% if application.status == 'TEST_PASSED' %}
+                                        <li><a class="dropdown-item" href="{% url 'issue_license' application_number=application.application_number %}">
+                                            <i class="bi bi-card-heading"></i> Issue License
+                                        </a></li>
+                                        {% endif %}
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-5">
+                <img src="https://cdn-icons-png.flaticon.com/512/7486/7486754.png" alt="No applications" class="img-fluid mb-3" style="max-width: 100px;">
+                <h5>No License Applications Found</h5>
+                <p class="text-muted">There are no license applications matching your filter criteria.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

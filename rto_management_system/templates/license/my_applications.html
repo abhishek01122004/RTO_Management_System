@@ -1,0 +1,149 @@
+{% extends 'base.html' %}
+
+{% block title %}My License Applications - RTO Management System{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row mb-4">
+        <div class="col">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">My License Applications</li>
+                </ol>
+            </nav>
+            <h2>My License Applications</h2>
+            <p class="text-muted">View and track all your license applications</p>
+        </div>
+        <div class="col-auto">
+            <a href="{% url 'apply_for_license' %}" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> New Application
+            </a>
+        </div>
+    </div>
+    
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <div class="row align-items-center">
+                <div class="col">
+                    <h5 class="mb-0">License Applications</h5>
+                </div>
+                <div class="col-auto">
+                    <div class="form-check form-check-inline text-white">
+                        <input class="form-check-input" type="checkbox" id="showActiveOnly" checked>
+                        <label class="form-check-label" for="showActiveOnly">Show active applications only</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            {% if applications %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Application Number</th>
+                            <th>License Type</th>
+                            <th>Application Type</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                            <th>Payment</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for application in applications %}
+                        <tr class="{% if application.status == 'ISSUED' or application.status == 'REJECTED' %}inactive-row{% endif %}">
+                            <td>{{ application.application_number }}</td>
+                            <td>{{ application.license_type.name }}</td>
+                            <td>{{ application.get_application_type_display }}</td>
+                            <td>{{ application.application_date|date:"d M Y" }}</td>
+                            <td>
+                                {% if application.status == 'PENDING' %}
+                                <span class="badge bg-warning text-dark">{{ application.get_status_display }}</span>
+                                {% elif application.status == 'DOCUMENT_VERIFICATION' %}
+                                <span class="badge bg-info">{{ application.get_status_display }}</span>
+                                {% elif application.status == 'SCHEDULED_FOR_TEST' %}
+                                <span class="badge bg-primary">{{ application.get_status_display }}</span>
+                                {% elif application.status == 'TEST_PASSED' %}
+                                <span class="badge bg-success">{{ application.get_status_display }}</span>
+                                {% elif application.status == 'TEST_FAILED' %}
+                                <span class="badge bg-danger">{{ application.get_status_display }}</span>
+                                {% elif application.status == 'APPROVED' %}
+                                <span class="badge bg-success">{{ application.get_status_display }}</span>
+                                {% elif application.status == 'REJECTED' %}
+                                <span class="badge bg-danger">{{ application.get_status_display }}</span>
+                                {% elif application.status == 'ISSUED' %}
+                                <span class="badge bg-success">{{ application.get_status_display }}</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if application.payment_status %}
+                                <span class="badge bg-success">Paid</span>
+                                {% else %}
+                                <span class="badge bg-danger">Pending</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="{% url 'license_application_detail' application_number=application.application_number %}" class="btn btn-sm btn-primary">
+                                    <i class="bi bi-eye"></i> View
+                                </a>
+                                
+                                {% if not application.payment_status %}
+                                <a href="{% url 'license_payment' application_number=application.application_number %}" class="btn btn-sm btn-success ms-1">
+                                    <i class="bi bi-credit-card"></i> Pay
+                                </a>
+                                {% endif %}
+                                
+                                {% if application.status == 'ISSUED' %}
+                                <a href="{% url 'license_detail' license_number=application.issued_license.license_number %}" class="btn btn-sm btn-info ms-1">
+                                    <i class="bi bi-card-heading"></i> License
+                                </a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-5">
+                <div class="display-1 text-muted mb-3"><i class="bi bi-file-earmark-x"></i></div>
+                <h4>No Applications Found</h4>
+                <p class="text-muted">You haven't applied for any licenses yet.</p>
+                <a href="{% url 'apply_for_license' %}" class="btn btn-primary mt-3">
+                    <i class="bi bi-plus-circle"></i> Apply for License
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const showActiveOnly = document.getElementById('showActiveOnly');
+        const inactiveRows = document.querySelectorAll('.inactive-row');
+        
+        // Handle the checkbox change
+        showActiveOnly.addEventListener('change', function() {
+            inactiveRows.forEach(row => {
+                if (this.checked) {
+                    row.style.display = 'none';
+                } else {
+                    row.style.display = '';
+                }
+            });
+        });
+        
+        // Initialize view
+        if (showActiveOnly.checked) {
+            inactiveRows.forEach(row => {
+                row.style.display = 'none';
+            });
+        }
+    });
+</script>
+{% endblock %}
+{% endblock %}

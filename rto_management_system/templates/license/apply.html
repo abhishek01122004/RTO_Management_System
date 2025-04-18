@@ -1,0 +1,173 @@
+{% extends 'base.html' %}
+
+{% block title %}Apply for License - RTO Management System{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row mb-4">
+        <div class="col">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Apply for License</li>
+                </ol>
+            </nav>
+            <h2>Apply for Driving License</h2>
+            <p class="text-muted">Fill out the form below to apply for a new driving license or renew an existing one.</p>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">License Application Form</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {% for error in form.non_field_errors %}
+                            {{ error }}
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.license_type.id_for_label }}" class="form-label">License Type *</label>
+                            {{ form.license_type }}
+                            {% if form.license_type.errors %}
+                            <div class="text-danger">
+                                {{ form.license_type.errors }}
+                            </div>
+                            {% endif %}
+                            <div class="form-text">Select the type of license you want to apply for</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.application_type.id_for_label }}" class="form-label">Application Type *</label>
+                            {{ form.application_type }}
+                            {% if form.application_type.errors %}
+                            <div class="text-danger">
+                                {{ form.application_type.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <hr class="my-4">
+                        <h5>Required Documents</h5>
+                        <p class="text-muted mb-4">Please upload clear and valid copies of the following documents</p>
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.photo.id_for_label }}" class="form-label">Recent Passport Photo *</label>
+                            {{ form.photo }}
+                            {% if form.photo.errors %}
+                            <div class="text-danger">
+                                {{ form.photo.errors }}
+                            </div>
+                            {% endif %}
+                            <div class="form-text">Upload a recent passport-sized photograph (JPEG/PNG, max 2MB)</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.signature.id_for_label }}" class="form-label">Signature *</label>
+                            {{ form.signature }}
+                            {% if form.signature.errors %}
+                            <div class="text-danger">
+                                {{ form.signature.errors }}
+                            </div>
+                            {% endif %}
+                            <div class="form-text">Upload a scanned copy of your signature (JPEG/PNG, max 1MB)</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.id_proof.id_for_label }}" class="form-label">ID Proof *</label>
+                            {{ form.id_proof }}
+                            {% if form.id_proof.errors %}
+                            <div class="text-danger">
+                                {{ form.id_proof.errors }}
+                            </div>
+                            {% endif %}
+                            <div class="form-text">Upload a valid government-issued ID proof (Aadhaar/PAN/Passport) (PDF/JPEG, max 5MB)</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.address_proof.id_for_label }}" class="form-label">Address Proof *</label>
+                            {{ form.address_proof }}
+                            {% if form.address_proof.errors %}
+                            <div class="text-danger">
+                                {{ form.address_proof.errors }}
+                            </div>
+                            {% endif %}
+                            <div class="form-text">Upload a valid address proof (Utility Bill/Bank Statement/Aadhaar) (PDF/JPEG, max 5MB)</div>
+                        </div>
+                        
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-send"></i> Submit Application
+                            </button>
+                            <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary">
+                                Cancel and Return to Dashboard
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card shadow mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Application Guidelines</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <h6><i class="bi bi-info-circle text-primary"></i> Important Information</h6>
+                        <ul class="small">
+                            <li>All fields marked with * are mandatory</li>
+                            <li>Documents must be clear and readable</li>
+                            <li>The application fee will be collected after submission</li>
+                            <li>Processing time is typically 7-10 working days</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <h6><i class="bi bi-card-checklist text-primary"></i> Required Documents</h6>
+                        <ul class="small">
+                            <li>Passport-sized photo (recent)</li>
+                            <li>Signature (scanned)</li>
+                            <li>Identity proof (Aadhaar/PAN/Passport)</li>
+                            <li>Address proof (not older than 3 months)</li>
+                        </ul>
+                    </div>
+                    
+                    <div>
+                        <h6><i class="bi bi-clock text-primary"></i> Process Timeline</h6>
+                        <ol class="small">
+                            <li>Submit application and documents</li>
+                            <li>Pay the application fee</li>
+                            <li>Document verification by RTO</li>
+                            <li>Schedule driving test (if applicable)</li>
+                            <li>License issuance (if approved)</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card shadow">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Need Help?</h5>
+                </div>
+                <div class="card-body">
+                    <p class="small">If you have any questions about the application process, please contact our support team:</p>
+                    <p class="small mb-2"><i class="bi bi-telephone"></i> Helpline: 1800-XXX-XXXX</p>
+                    <p class="small mb-2"><i class="bi bi-envelope"></i> Email: support@rto.gov.in</p>
+                    <p class="small"><i class="bi bi-clock"></i> Hours: Mon-Fri, 9AM - 5PM</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
