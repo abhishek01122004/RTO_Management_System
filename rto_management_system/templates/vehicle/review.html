@@ -483,7 +483,7 @@
                         {% endif %}
                         
                         {% if application.status == 'DOCUMENT_VERIFICATION' %}
-                        <a href="{% url 'schedule_inspection' application_number=application.application_number %}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                        <a href="{% url 'schedule_inspection' application_number=application.registration_number %}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
                             <div>
                                 <div class="fw-medium">Schedule Inspection</div>
                                 <small class="text-muted">Set date and time for vehicle inspection</small>
@@ -493,7 +493,7 @@
                         {% endif %}
                         
                         {% if application.status == 'INSPECTION_SCHEDULED' %}
-                        <a href="{% url 'record_inspection_result' application_number=application.application_number %}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                        <a href="{% url 'record_inspection_result' application_number=application.registration_number %}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
                             <div>
                                 <div class="fw-medium">Record Inspection Result</div>
                                 <small class="text-muted">Enter inspection findings</small>
@@ -503,7 +503,7 @@
                         {% endif %}
                         
                         {% if application.status == 'INSPECTION_PASSED' %}
-                        <a href="{% url 'issue_registration' application_number=application.application_number %}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                        <a href="{% url 'issue_registration' application_number=application.registration_number %}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
                             <div>
                                 <div class="fw-medium">Issue Registration</div>
                                 <small class="text-muted">Generate RC and number plate details</small>

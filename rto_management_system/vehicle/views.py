@@ -199,20 +199,23 @@ def transfer_vehicle(request, registration_number):
 def review_registration_applications(request):
     """View for officers to review vehicle registration applications"""
     status_filter = request.GET.get('status', '')
+    registration_type_filter = request.GET.get('registration_type', '')
+    
+    # Build query with filters
+    query_filters = {'payment_status': True}
     
     if status_filter:
-        applications = VehicleRegistration.objects.filter(
-            status=status_filter,
-            payment_status=True
-        ).order_by('-application_date')
-    else:
-        applications = VehicleRegistration.objects.filter(
-            payment_status=True
-        ).order_by('-application_date')
+        query_filters['status'] = status_filter
+        
+    if registration_type_filter:
+        query_filters['registration_type'] = registration_type_filter
+    
+    applications = VehicleRegistration.objects.filter(**query_filters).order_by('-application_date')
     
     return render(request, 'vehicle/review_applications.html', {
         'applications': applications,
-        'status_filter': status_filter
+        'status_filter': status_filter,
+        'registration_type_filter': registration_type_filter
     })
 
 

@@ -39,13 +39,13 @@
                             </select>
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label">Application Type</label>
-                            <select name="application_type" class="form-select">
+                            <label class="form-label">Registration Type</label>
+                            <select name="registration_type" class="form-select">
                                 <option value="">All Types</option>
-                                <option value="NEW" {% if application_type_filter == 'NEW' %}selected{% endif %}>New Registration</option>
-                                <option value="RENEWAL" {% if application_type_filter == 'RENEWAL' %}selected{% endif %}>Registration Renewal</option>
-                                <option value="TRANSFER" {% if application_type_filter == 'TRANSFER' %}selected{% endif %}>Ownership Transfer</option>
-                                <option value="DUPLICATE" {% if application_type_filter == 'DUPLICATE' %}selected{% endif %}>Duplicate Registration</option>
+                                <option value="PERSONAL" {% if registration_type_filter == 'PERSONAL' %}selected{% endif %}>Personal Vehicle</option>
+                                <option value="COMMERCIAL" {% if registration_type_filter == 'COMMERCIAL' %}selected{% endif %}>Commercial Vehicle</option>
+                                <option value="TRANSPORT" {% if registration_type_filter == 'TRANSPORT' %}selected{% endif %}>Transport Vehicle</option>
+                                <option value="GOVERNMENT" {% if registration_type_filter == 'GOVERNMENT' %}selected{% endif %}>Government Vehicle</option>
                             </select>
                         </div>
                         <div class="col-md-4 d-flex align-items-end">
@@ -80,7 +80,7 @@
                                 {% if applications %}
                                     {% for application in applications %}
                                     <tr>
-                                        <td>{{ application.application_number }}</td>
+                                        <td>{{ application.registration_number }}</td>
                                         <td>
                                             <div>{{ application.owner.get_full_name }}</div>
                                             <small class="text-muted">{{ application.owner.email }}</small>
