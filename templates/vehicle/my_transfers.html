@@ -1,0 +1,235 @@
+{% extends 'base.html' %}
+
+{% block title %}My Vehicle Transfers - RTO Management System{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row mb-4">
+        <div class="col">
+            <h2>My Vehicle Transfers</h2>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">My Transfers</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Transfers as Current Owner -->
+    <div class="row mb-4">
+        <div class="col">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Transfers as Current Owner (Selling)</h5>
+                </div>
+                <div class="card-body">
+                    {% if transfers_as_owner %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Vehicle</th>
+                                        <th>Registration Number</th>
+                                        <th>New Owner</th>
+                                        <th>Request Date</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for transfer in transfers_as_owner %}
+                                        <tr>
+                                            <td>
+                                                {{ transfer.vehicle.make }} {{ transfer.vehicle.model }}
+                                                <small class="d-block text-muted">{{ transfer.vehicle.year }}</small>
+                                            </td>
+                                            <td>{{ transfer.vehicle.registration_number }}</td>
+                                            <td>
+                                                {{ transfer.new_owner.get_full_name }}
+                                                <small class="d-block text-muted">{{ transfer.new_owner.email }}</small>
+                                            </td>
+                                            <td>{{ transfer.request_date|date:"d M Y" }}</td>
+                                            <td>
+                                                {% if transfer.status == 'PENDING' %}
+                                                    <span class="badge bg-warning text-dark">Pending</span>
+                                                {% elif transfer.status == 'APPROVED' %}
+                                                    <span class="badge bg-success">Approved</span>
+                                                {% elif transfer.status == 'REJECTED' %}
+                                                    <span class="badge bg-danger">Rejected</span>
+                                                {% elif transfer.status == 'COMPLETED' %}
+                                                    <span class="badge bg-success">Completed</span>
+                                                {% elif transfer.status == 'CANCELLED' %}
+                                                    <span class="badge bg-secondary">Cancelled</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <div class="btn-group btn-group-sm">
+                                                    <a href="#" class="btn btn-outline-primary">
+                                                        <i class="fas fa-eye"></i> View
+                                                    </a>
+                                                    {% if transfer.status == 'PENDING' %}
+                                                        <a href="#" class="btn btn-outline-danger">
+                                                            <i class="fas fa-times"></i> Cancel
+                                                        </a>
+                                                    {% endif %}
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i> You haven't initiated any vehicle transfers yet.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Transfers as New Owner -->
+    <div class="row">
+        <div class="col">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Transfers as New Owner (Buying)</h5>
+                </div>
+                <div class="card-body">
+                    {% if transfers_as_buyer %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Vehicle</th>
+                                        <th>Registration Number</th>
+                                        <th>Current Owner</th>
+                                        <th>Request Date</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for transfer in transfers_as_buyer %}
+                                        <tr>
+                                            <td>
+                                                {{ transfer.vehicle.make }} {{ transfer.vehicle.model }}
+                                                <small class="d-block text-muted">{{ transfer.vehicle.year }}</small>
+                                            </td>
+                                            <td>{{ transfer.vehicle.registration_number }}</td>
+                                            <td>
+                                                {{ transfer.current_owner.get_full_name }}
+                                                <small class="d-block text-muted">{{ transfer.current_owner.email }}</small>
+                                            </td>
+                                            <td>{{ transfer.request_date|date:"d M Y" }}</td>
+                                            <td>
+                                                {% if transfer.status == 'PENDING' %}
+                                                    <span class="badge bg-warning text-dark">Pending</span>
+                                                {% elif transfer.status == 'APPROVED' %}
+                                                    <span class="badge bg-success">Approved</span>
+                                                {% elif transfer.status == 'REJECTED' %}
+                                                    <span class="badge bg-danger">Rejected</span>
+                                                {% elif transfer.status == 'COMPLETED' %}
+                                                    <span class="badge bg-success">Completed</span>
+                                                {% elif transfer.status == 'CANCELLED' %}
+                                                    <span class="badge bg-secondary">Cancelled</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <div class="btn-group btn-group-sm">
+                                                    <a href="#" class="btn btn-outline-primary">
+                                                        <i class="fas fa-eye"></i> View
+                                                    </a>
+                                                    {% if transfer.status == 'PENDING' %}
+                                                        <a href="#" class="btn btn-outline-success">
+                                                            <i class="fas fa-check"></i> Accept
+                                                        </a>
+                                                        <a href="#" class="btn btn-outline-danger">
+                                                            <i class="fas fa-times"></i> Reject
+                                                        </a>
+                                                    {% endif %}
+                                                    {% if transfer.status == 'APPROVED' and not transfer.payment_status %}
+                                                        <a href="#" class="btn btn-outline-success">
+                                                            <i class="fas fa-credit-card"></i> Pay Fee
+                                                        </a>
+                                                    {% endif %}
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i> You don't have any incoming transfer requests.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Information Card -->
+    <div class="row mt-4">
+        <div class="col">
+            <div class="card shadow">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Transfer Process</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <div class="card h-100 border-primary">
+                                <div class="card-body text-center">
+                                    <div class="display-4 mb-2 text-primary">1</div>
+                                    <h5>Initiate Transfer</h5>
+                                    <p class="small">Current owner starts the transfer process</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="card h-100 border-primary">
+                                <div class="card-body text-center">
+                                    <div class="display-4 mb-2 text-primary">2</div>
+                                    <h5>Buyer Acceptance</h5>
+                                    <p class="small">New owner accepts the transfer request</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="card h-100 border-primary">
+                                <div class="card-body text-center">
+                                    <div class="display-4 mb-2 text-primary">3</div>
+                                    <h5>RTO Verification</h5>
+                                    <p class="small">Officials review and approve transfer</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="card h-100 border-primary">
+                                <div class="card-body text-center">
+                                    <div class="display-4 mb-2 text-primary">4</div>
+                                    <h5>Ownership Updated</h5>
+                                    <p class="small">Ownership records are updated</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add any JavaScript functionality here if needed
+    });
+</script>
+{% endblock %}
