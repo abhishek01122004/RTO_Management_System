@@ -19,6 +19,22 @@
     
     <!-- Additional CSS includes -->
     {% block extra_css %}{% endblock %}
+    
+    <style>
+        /* Logout form button styling */
+        .logout-form button.dropdown-item {
+            background: none;
+            border: none;
+            width: 100%;
+            text-align: left;
+            padding: 0.25rem 1rem;
+            cursor: pointer;
+        }
+        
+        .logout-form button.dropdown-item:hover {
+            background-color: #f8f9fa;
+        }
+    </style>
 </head>
 <body>
     <!-- Navbar -->
@@ -166,7 +182,12 @@
                                 <li><a class="dropdown-item" href="{% url 'dashboard' %}"><i class="fas fa-tachometer-alt me-2"></i> Dashboard</a></li>
                                 <li><a class="dropdown-item" href="{% url 'profile' %}"><i class="fas fa-user me-2"></i> My Profile</a></li>
                                 <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item" href="{% url 'logout' %}"><i class="fas fa-sign-out-alt me-2"></i> Logout</a></li>
+                                <li>
+                                    <form action="{% url 'logout' %}" method="post" class="logout-form m-0">
+                                        {% csrf_token %}
+                                        <button type="submit" class="dropdown-item"><i class="fas fa-sign-out-alt me-2"></i> Logout</button>
+                                    </form>
+                                </li>
                             </ul>
                         </li>
                     {% else %}
