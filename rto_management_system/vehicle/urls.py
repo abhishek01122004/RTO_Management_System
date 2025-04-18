@@ -3,29 +3,34 @@ from . import views
 
 urlpatterns = [
     # Citizen URLs
-    path('register/', views.register_vehicle, name='register_vehicle'),
-    path('registrations/', views.my_vehicle_registrations, name='my_vehicle_registrations'),
-    path('registration/<str:reg_number>/', views.vehicle_registration_detail, name='vehicle_registration_detail'),
-    path('vehicles/', views.my_vehicles, name='my_vehicles'),
-    path('vehicle/<str:reg_number>/', views.vehicle_detail, name='vehicle_detail'),
-    path('registration/<str:reg_number>/payment/', views.vehicle_registration_payment, name='vehicle_registration_payment'),
-    path('registration/<str:reg_number>/payment/success/', views.vehicle_registration_payment_success, name='vehicle_registration_payment_success'),
-    path('transfer/initiate/<str:reg_number>/', views.initiate_vehicle_transfer, name='initiate_vehicle_transfer'),
-    path('transfers/', views.my_vehicle_transfers, name='my_vehicle_transfers'),
+    path('dashboard/', views.vehicle_dashboard, name='vehicle_dashboard'),
+    path('register/', views.apply_for_registration, name='apply_for_registration'),
+    path('application/<str:application_number>/', views.registration_application_detail, name='registration_application_detail'),
+    path('applications/', views.my_registration_applications, name='my_registration_applications'),
+    path('my-vehicles/', views.my_vehicles, name='my_vehicles'),
+    path('vehicle/<str:registration_number>/', views.vehicle_detail, name='vehicle_detail'),
+    path('vehicle/<str:registration_number>/transfer/', views.transfer_vehicle, name='transfer_vehicle'),
+    path('transfers/', views.vehicle_transfers, name='vehicle_transfers'),
     
     # Officer URLs
-    path('registrations/review/', views.review_vehicle_registrations, name='review_vehicle_registrations'),
-    path('registration/<str:reg_number>/review/', views.review_vehicle_registration, name='review_vehicle_registration'),
-    path('registration/<str:reg_number>/schedule-inspection/', views.schedule_inspection, name='schedule_inspection'),
-    path('inspection/<int:inspection_id>/result/', views.record_inspection_result, name='record_inspection_result'),
-    path('registration/<str:reg_number>/assign-number/', views.assign_registration_number, name='assign_registration_number'),
-    path('transfers/review/', views.review_vehicle_transfers, name='review_vehicle_transfers'),
-    path('transfer/<int:transfer_id>/review/', views.review_vehicle_transfer, name='review_vehicle_transfer'),
+    path('applications/review/', views.review_registration_applications, name='review_registration_applications'),
+    path('application/<str:application_number>/review/', views.review_registration_application, name='review_registration_application'),
+    path('application/<str:application_number>/inspection/', views.schedule_inspection, name='schedule_inspection'),
+    path('application/<str:application_number>/inspection/result/', views.record_inspection_result, name='record_inspection_result'),
+    path('application/<str:application_number>/issue/', views.issue_registration, name='issue_registration'),
+    path('transfers/review/', views.review_transfer_applications, name='review_transfer_applications'),
+    path('transfer/<int:transfer_id>/review/', views.review_transfer, name='review_transfer'),
     
     # Admin URLs
-    path('categories/', views.vehicle_categories, name='vehicle_categories'),
-    path('category/add/', views.add_vehicle_category, name='add_vehicle_category'),
-    path('category/<int:category_id>/edit/', views.edit_vehicle_category, name='edit_vehicle_category'),
+    path('classes/', views.vehicle_classes, name='vehicle_classes'),
+    path('class/add/', views.add_vehicle_class, name='add_vehicle_class'),
+    path('class/<int:class_id>/edit/', views.edit_vehicle_class, name='edit_vehicle_class'),
+    path('makers/', views.vehicle_makers, name='vehicle_makers'),
+    path('maker/add/', views.add_vehicle_maker, name='add_vehicle_maker'),
+    path('maker/<int:maker_id>/edit/', views.edit_vehicle_maker, name='edit_vehicle_maker'),
+    path('models/', views.vehicle_models, name='vehicle_models'),
+    path('model/add/', views.add_vehicle_model, name='add_vehicle_model'),
+    path('model/<int:model_id>/edit/', views.edit_vehicle_model, name='edit_vehicle_model'),
     
     # Statistics
     path('statistics/', views.vehicle_statistics, name='vehicle_statistics'),

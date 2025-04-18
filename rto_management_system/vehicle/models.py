@@ -1,19 +1,104 @@
+import random
+import string
 from django.db import models
-from accounts.models import User
+from django.utils import timezone
+from django.conf import settings
+
+# Vehicle class constants
+VEHICLE_CLASSES = (
+    ('MCWOG', 'Motorcycle Without Gear'),
+    ('MCWG', 'Motorcycle With Gear'),
+    ('LMV', 'Light Motor Vehicle'),
+    ('HMV', 'Heavy Motor Vehicle'),
+    ('TRANS', 'Transport Vehicle'),
+    ('MCWG+LMV', 'Motorcycle With Gear & Light Motor Vehicle'),
+    ('OTHER', 'Other'),
+)
+
+# Fuel types
+FUEL_TYPES = (
+    ('PETROL', 'Petrol'),
+    ('DIESEL', 'Diesel'),
+    ('CNG', 'CNG'),
+    ('LPG', 'LPG'),
+    ('ELECTRIC', 'Electric'),
+    ('HYBRID', 'Hybrid'),
+    ('OTHER', 'Other'),
+)
+
+# Vehicle types
+VEHICLE_TYPES = (
+    ('2W', 'Two Wheeler'),
+    ('3W', 'Three Wheeler'),
+    ('4W', 'Four Wheeler'),
+    ('CV', 'Commercial Vehicle'),
+    ('OTHER', 'Other'),
+)
 
 
-class VehicleCategory(models.Model):
-    """Model for vehicle categories (car, motorcycle, etc.)"""
+def generate_registration_number():
+    """Generate a unique vehicle registration number"""
+    prefix = "MH"
+    region_code = ''.join(random.choices(string.digits, k=2))
+    alpha_part = ''.join(random.choices(string.ascii_uppercase, k=2))
+    digit_part = ''.join(random.choices(string.digits, k=4))
+    return f"{prefix}-{region_code}-{alpha_part}-{digit_part}"
+
+
+def generate_application_number():
+    """Generate a unique application number for vehicle registration"""
+    prefix = "VR"
+    date_str = timezone.now().strftime("%Y%m%d")
+    random_str = ''.join(random.choices(string.digits, k=4))
+    return f"{prefix}{date_str}{random_str}"
+
+
+class VehicleClass(models.Model):
+    """Vehicle class model (e.g., LMV, HMV, etc.)"""
+    name = models.CharField(max_length=50)
+    code = models.CharField(max_length=10, unique=True)
+    description = models.TextField(blank=True)
+    fee = models.DecimalField(max_digits=10, decimal_places=2)
+    validity_years = models.IntegerField(default=15)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    is_active = models.BooleanField(default=True)
+
+    def __str__(self):
+        return f"{self.name} ({self.code})"
+
+
+class VehicleMaker(models.Model):
+    """Vehicle maker/manufacturer model"""
     name = models.CharField(max_length=100)
-    description = models.TextField()
-    registration_fee = models.DecimalField(max_digits=10, decimal_places=2)
-    
+    country = models.CharField(max_length=50, blank=True)
+    website = models.URLField(blank=True)
+    logo = models.ImageField(upload_to='vehicle_makers/', blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_active = models.BooleanField(default=True)
+
     def __str__(self):
         return self.name
 
 
-class VehicleRegistration(models.Model):
-    """Model for vehicle registration applications"""
+class VehicleModel(models.Model):
+    """Vehicle model (e.g., Swift, City, etc.)"""
+    maker = models.ForeignKey(VehicleMaker, on_delete=models.CASCADE, related_name='models')
+    name = models.CharField(max_length=100)
+    vehicle_type = models.CharField(max_length=10, choices=VEHICLE_TYPES)
+    fuel_type = models.CharField(max_length=10, choices=FUEL_TYPES)
+    engine_capacity = models.IntegerField(help_text="Engine capacity in CC")
+    seating_capacity = models.IntegerField()
+    year_of_manufacture = models.IntegerField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_active = models.BooleanField(default=True)
+
+    def __str__(self):
+        return f"{self.maker.name} {self.name} ({self.year_of_manufacture})"
+
+
+class RegistrationApplication(models.Model):
+    """Vehicle registration application model"""
     STATUS_CHOICES = (
         ('PENDING', 'Pending'),
         ('DOCUMENT_VERIFICATION', 'Document Verification'),
@@ -24,92 +109,127 @@ class VehicleRegistration(models.Model):
         ('REJECTED', 'Rejected'),
         ('REGISTERED', 'Registered'),
     )
-    
-    REGISTRATION_TYPE_CHOICES = (
+
+    APPLICATION_TYPES = (
         ('NEW', 'New Registration'),
         ('RENEWAL', 'Registration Renewal'),
         ('TRANSFER', 'Ownership Transfer'),
+        ('DUPLICATE', 'Duplicate Registration'),
     )
-    
-    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='vehicle_registrations')
-    registration_number = models.CharField(max_length=20, unique=True, blank=True, null=True)
-    temporary_number = models.CharField(max_length=20, unique=True)
-    registration_type = models.CharField(max_length=20, choices=REGISTRATION_TYPE_CHOICES, default='NEW')
-    vehicle_category = models.ForeignKey(VehicleCategory, on_delete=models.CASCADE)
-    make = models.CharField(max_length=100)
-    model = models.CharField(max_length=100)
-    year = models.PositiveIntegerField()
-    chassis_number = models.CharField(max_length=100, unique=True)
-    engine_number = models.CharField(max_length=100, unique=True)
-    fuel_type = models.CharField(max_length=50)
-    seating_capacity = models.PositiveIntegerField()
+
+    application_number = models.CharField(max_length=20, unique=True, blank=True)
+    applicant = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    application_type = models.CharField(max_length=10, choices=APPLICATION_TYPES)
+    vehicle_class = models.ForeignKey(VehicleClass, on_delete=models.PROTECT)
+    vehicle_maker = models.ForeignKey(VehicleMaker, on_delete=models.PROTECT)
+    vehicle_model = models.ForeignKey(VehicleModel, on_delete=models.PROTECT)
+    engine_number = models.CharField(max_length=50)
+    chassis_number = models.CharField(max_length=50, unique=True)
     color = models.CharField(max_length=50)
     purchase_date = models.DateField()
-    purchase_invoice = models.FileField(upload_to='vehicle_invoices/')
+    dealer_name = models.CharField(max_length=100)
+    temporary_registration = models.CharField(max_length=50, blank=True, null=True)
     insurance_provider = models.CharField(max_length=100)
-    insurance_number = models.CharField(max_length=100)
+    insurance_number = models.CharField(max_length=50)
     insurance_validity = models.DateField()
-    insurance_document = models.FileField(upload_to='vehicle_insurance/')
-    pollution_certificate = models.FileField(upload_to='vehicle_pollution/', blank=True, null=True)
-    road_tax_receipt = models.FileField(upload_to='vehicle_tax/', blank=True, null=True)
-    vehicle_photo_front = models.FileField(upload_to='vehicle_photos/')
-    vehicle_photo_side = models.FileField(upload_to='vehicle_photos/')
-    address_proof = models.FileField(upload_to='vehicle_address_proof/')
-    status = models.CharField(max_length=30, choices=STATUS_CHOICES, default='PENDING')
-    application_date = models.DateField(auto_now_add=True)
+    emission_test_number = models.CharField(max_length=50, blank=True, null=True)
+    emission_test_validity = models.DateField(blank=True, null=True)
+    
+    # Document uploads
+    invoice_copy = models.FileField(upload_to='vehicle_documents/invoices/')
+    insurance_copy = models.FileField(upload_to='vehicle_documents/insurance/')
+    emission_certificate = models.FileField(upload_to='vehicle_documents/emission/', blank=True, null=True)
+    owner_id_proof = models.FileField(upload_to='vehicle_documents/id_proofs/')
+    owner_address_proof = models.FileField(upload_to='vehicle_documents/address_proofs/')
+    
+    # Application processing fields
+    application_date = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(max_length=25, choices=STATUS_CHOICES, default='PENDING')
+    remarks = models.TextField(blank=True, null=True)
     rejection_reason = models.TextField(blank=True, null=True)
+    inspection_date = models.DateTimeField(blank=True, null=True)
+    inspection_officer = models.ForeignKey(
+        settings.AUTH_USER_MODEL, 
+        on_delete=models.SET_NULL, 
+        blank=True, 
+        null=True, 
+        related_name='vehicle_inspections'
+    )
+    inspection_remarks = models.TextField(blank=True, null=True)
+    reviewed_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, 
+        on_delete=models.SET_NULL, 
+        blank=True, 
+        null=True, 
+        related_name='vehicle_applications_reviewed'
+    )
+    
+    # Payment fields
+    fee = models.DecimalField(max_digits=10, decimal_places=2)
     payment_status = models.BooleanField(default=False)
-    payment_date = models.DateTimeField(null=True, blank=True)
+    payment_date = models.DateTimeField(blank=True, null=True)
     payment_transaction_id = models.CharField(max_length=100, blank=True, null=True)
-    inspection_date = models.DateTimeField(null=True, blank=True)
-    inspection_result = models.BooleanField(null=True, blank=True)
-    inspection_notes = models.TextField(blank=True, null=True)
-    reviewed_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, 
-                                   related_name='reviewed_vehicle_registrations')
-    registration_date = models.DateField(null=True, blank=True)
-    valid_until = models.DateField(null=True, blank=True)
+    
+    # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    
+
     def __str__(self):
-        reg_no = self.registration_number or self.temporary_number
-        return f"{reg_no} - {self.make} {self.model} ({self.owner.email})"
-
-
-class VehicleInspection(models.Model):
-    """Model for vehicle inspection scheduling and results"""
-    registration = models.ForeignKey(VehicleRegistration, on_delete=models.CASCADE, related_name='inspections')
-    scheduled_date = models.DateTimeField()
-    venue = models.CharField(max_length=255)
-    instructions = models.TextField()
-    inspector = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, 
-                                related_name='conducted_inspections')
-    is_completed = models.BooleanField(default=False)
-    passed = models.BooleanField(null=True, blank=True)
-    notes = models.TextField(blank=True, null=True)
-    inspection_report = models.FileField(upload_to='inspection_reports/', blank=True, null=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+        return f"{self.application_number} - {self.get_application_type_display()}"
     
-    def __str__(self):
-        return f"Inspection for {self.registration.temporary_number} on {self.scheduled_date}"
+    def save(self, *args, **kwargs):
+        # Generate application number if it doesn't exist
+        if not self.application_number:
+            self.application_number = generate_application_number()
+        
+        # Set fee based on vehicle class if not already set
+        if not self.fee and self.vehicle_class:
+            self.fee = self.vehicle_class.fee
+            
+        super().save(*args, **kwargs)
 
 
-class RegisteredVehicle(models.Model):
-    """Model for registered vehicles with complete information"""
-    registration = models.OneToOneField(VehicleRegistration, on_delete=models.CASCADE, related_name='registered_vehicle')
-    registration_certificate = models.FileField(upload_to='registration_certificates/', blank=True, null=True)
-    qr_code = models.ImageField(upload_to='vehicle_qr_codes/', blank=True, null=True)
+class VehicleRegistration(models.Model):
+    """Vehicle registration model"""
+    registration_number = models.CharField(max_length=20, unique=True, blank=True)
+    application = models.OneToOneField(RegistrationApplication, on_delete=models.CASCADE, related_name='registration')
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='owned_vehicles')
+    registered_date = models.DateField(auto_now_add=True)
+    expiry_date = models.DateField()
+    fitness_certificate_expiry = models.DateField(blank=True, null=True)
+    tax_paid_upto = models.DateField(blank=True, null=True)
+    emission_test_validity = models.DateField(blank=True, null=True)
+    insurance_validity = models.DateField()
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
+    # RC smart card data
+    rc_card_number = models.CharField(max_length=50, blank=True, null=True)
+    rc_card_issued_date = models.DateField(blank=True, null=True)
+    
+    # Inspection and verification data
+    last_inspection_date = models.DateField(blank=True, null=True)
+    next_inspection_due = models.DateField(blank=True, null=True)
+    
     def __str__(self):
-        return f"Registered Vehicle: {self.registration.registration_number}"
+        return self.registration_number
+    
+    def save(self, *args, **kwargs):
+        # Generate registration number if it doesn't exist
+        if not self.registration_number:
+            self.registration_number = generate_registration_number()
+            
+        # Set expiry date based on vehicle class if not already set
+        if not self.expiry_date and self.application and self.application.vehicle_class:
+            validity_years = self.application.vehicle_class.validity_years
+            self.expiry_date = timezone.now().date() + timezone.timedelta(days=validity_years * 365)
+            
+        super().save(*args, **kwargs)
 
 
 class VehicleTransfer(models.Model):
-    """Model for vehicle ownership transfers"""
+    """Vehicle ownership transfer model"""
     STATUS_CHOICES = (
         ('PENDING', 'Pending'),
         ('APPROVED', 'Approved'),
@@ -117,21 +237,43 @@ class VehicleTransfer(models.Model):
         ('COMPLETED', 'Completed'),
     )
     
-    vehicle = models.ForeignKey(RegisteredVehicle, on_delete=models.CASCADE, related_name='transfers')
-    current_owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='vehicle_transfers_as_owner')
-    new_owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='vehicle_transfers_as_buyer')
-    application_date = models.DateField(auto_now_add=True)
-    transfer_document = models.FileField(upload_to='transfer_documents/')
-    sale_amount = models.DecimalField(max_digits=12, decimal_places=2)
+    vehicle = models.ForeignKey(VehicleRegistration, on_delete=models.CASCADE, related_name='transfers')
+    current_owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL, 
+        on_delete=models.CASCADE, 
+        related_name='vehicle_transfers_as_seller'
+    )
+    new_owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL, 
+        on_delete=models.CASCADE, 
+        related_name='vehicle_transfers_as_buyer'
+    )
     sale_date = models.DateField()
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='PENDING')
+    sale_amount = models.DecimalField(max_digits=12, decimal_places=2)
+    application_date = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='PENDING')
+    remarks = models.TextField(blank=True)
+    
+    # Document uploads
+    sale_agreement = models.FileField(upload_to='vehicle_transfers/agreements/')
+    seller_id_proof = models.FileField(upload_to='vehicle_transfers/id_proofs/')
+    buyer_id_proof = models.FileField(upload_to='vehicle_transfers/id_proofs/')
+    seller_address_proof = models.FileField(upload_to='vehicle_transfers/address_proofs/')
+    buyer_address_proof = models.FileField(upload_to='vehicle_transfers/address_proofs/')
+    
+    # Processing fields
+    transfer_fee = models.DecimalField(max_digits=10, decimal_places=2)
     payment_status = models.BooleanField(default=False)
-    payment_date = models.DateTimeField(null=True, blank=True)
+    payment_date = models.DateTimeField(blank=True, null=True)
     payment_transaction_id = models.CharField(max_length=100, blank=True, null=True)
-    reviewed_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, 
-                                   related_name='reviewed_vehicle_transfers')
-    completion_date = models.DateField(null=True, blank=True)
-    rejection_reason = models.TextField(blank=True, null=True)
+    processed_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, 
+        on_delete=models.SET_NULL, 
+        blank=True, 
+        null=True, 
+        related_name='vehicle_transfers_processed'
+    )
+    processed_date = models.DateTimeField(blank=True, null=True)
     
     def __str__(self):
-        return f"Transfer of {self.vehicle.registration.registration_number} from {self.current_owner.email} to {self.new_owner.email}"
+        return f"Transfer of {self.vehicle.registration_number} from {self.current_owner} to {self.new_owner}"
