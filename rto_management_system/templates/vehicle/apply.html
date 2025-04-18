@@ -1,0 +1,260 @@
+{% extends 'base.html' %}
+
+{% block title %}Apply for Vehicle Registration{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row mb-4">
+        <div class="col">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Apply for Vehicle Registration</li>
+                </ol>
+            </nav>
+            <h2 class="mt-3">Apply for Vehicle Registration</h2>
+            <p class="text-muted">Complete the form below to register your vehicle with the RTO</p>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Vehicle Registration Application</h4>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data" id="vehicle-registration-form">
+                        {% csrf_token %}
+                        
+                        <div class="mb-4">
+                            <h5>Vehicle Information</h5>
+                            <hr>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Vehicle Class</label>
+                                    <select name="vehicle_class" class="form-select" required>
+                                        <option value="">-- Select Vehicle Class --</option>
+                                        {% for vehicle_class in vehicle_classes %}
+                                        <option value="{{ vehicle_class.id }}">{{ vehicle_class.name }} ({{ vehicle_class.code }})</option>
+                                        {% endfor %}
+                                    </select>
+                                    <div class="form-text">Select the appropriate class for your vehicle</div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Vehicle Maker</label>
+                                    <select name="vehicle_maker" class="form-select" required id="vehicle-maker-select">
+                                        <option value="">-- Select Vehicle Maker --</option>
+                                        {% for maker in vehicle_makers %}
+                                        <option value="{{ maker.id }}">{{ maker.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Vehicle Model</label>
+                                    <select name="vehicle_model" class="form-select" required id="vehicle-model-select" disabled>
+                                        <option value="">-- Select Vehicle Model --</option>
+                                        <!-- Models will be populated via JavaScript based on maker selection -->
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Color</label>
+                                    <input type="text" name="color" class="form-control" required placeholder="Vehicle Color">
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Engine Number</label>
+                                    <input type="text" name="engine_number" class="form-control" required placeholder="Engine Number">
+                                    <div class="form-text">Enter the engine number exactly as shown on documents</div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Chassis Number</label>
+                                    <input type="text" name="chassis_number" class="form-control" required placeholder="Chassis Number">
+                                    <div class="form-text">Enter the chassis number exactly as shown on documents</div>
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Purchase Date</label>
+                                    <input type="date" name="purchase_date" class="form-control" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Dealer Name</label>
+                                    <input type="text" name="dealer_name" class="form-control" required placeholder="Dealer/Showroom Name">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <h5>Insurance Information</h5>
+                            <hr>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Insurance Provider</label>
+                                    <input type="text" name="insurance_provider" class="form-control" required placeholder="Insurance Company Name">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Insurance Number</label>
+                                    <input type="text" name="insurance_number" class="form-control" required placeholder="Insurance Policy Number">
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Insurance Validity</label>
+                                    <input type="date" name="insurance_validity" class="form-control" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Emission Test Number (if applicable)</label>
+                                    <input type="text" name="emission_test_number" class="form-control" placeholder="PUC Certificate Number">
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Emission Test Validity (if applicable)</label>
+                                    <input type="date" name="emission_test_validity" class="form-control">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Temporary Registration (if any)</label>
+                                    <input type="text" name="temporary_registration" class="form-control" placeholder="Temporary Registration Number">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <h5>Document Uploads</h5>
+                            <hr>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Invoice Copy</label>
+                                    <input type="file" name="invoice_copy" class="form-control" required accept=".pdf,.jpg,.jpeg,.png">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Insurance Copy</label>
+                                    <input type="file" name="insurance_copy" class="form-control" required accept=".pdf,.jpg,.jpeg,.png">
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Emission Certificate (if applicable)</label>
+                                    <input type="file" name="emission_certificate" class="form-control" accept=".pdf,.jpg,.jpeg,.png">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">ID Proof</label>
+                                    <input type="file" name="owner_id_proof" class="form-control" required accept=".pdf,.jpg,.jpeg,.png">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-check mb-4">
+                            <input class="form-check-input" type="checkbox" value="" id="declaration" required>
+                            <label class="form-check-label" for="declaration">
+                                I declare that the information provided is true and correct to the best of my knowledge.
+                            </label>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">Submit Application</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <div class="card shadow mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Application Fee</h5>
+                </div>
+                <div class="card-body">
+                    <p>Registration fee varies based on the vehicle class selected. The applicable fee will be shown after submission and must be paid to process your application.</p>
+                    <div class="alert alert-info mb-0">
+                        <small>Note: Fee payment is required for application processing. You'll be redirected to the payment gateway after submission.</small>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card shadow">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Important Information</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="small text-muted">
+                        <li>Original documents must be presented during verification</li>
+                        <li>Vehicle inspection may be required before final registration</li>
+                        <li>Incomplete applications will not be processed</li>
+                        <li>Typical processing time is 7-10 working days</li>
+                        <li>Ensure all uploaded documents are clearly readable</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Vehicle model population based on maker selection
+        const makerSelect = document.getElementById('vehicle-maker-select');
+        const modelSelect = document.getElementById('vehicle-model-select');
+        
+        if (makerSelect && modelSelect) {
+            makerSelect.addEventListener('change', function() {
+                const makerId = this.value;
+                
+                // Reset model dropdown
+                modelSelect.innerHTML = '<option value="">-- Select Vehicle Model --</option>';
+                
+                if (makerId) {
+                    // Enable the model dropdown
+                    modelSelect.disabled = false;
+                    
+                    // Here you'd typically fetch models via AJAX
+                    // For now, we'll add a placeholder message
+                    const option = document.createElement('option');
+                    option.text = 'Loading models...';
+                    option.disabled = true;
+                    modelSelect.add(option);
+                    
+                    // Fetch models via AJAX (to be implemented)
+                    // fetchVehicleModels(makerId);
+                } else {
+                    // If no maker is selected, disable the model dropdown
+                    modelSelect.disabled = true;
+                }
+            });
+        }
+        
+        // Form validation (can be expanded)
+        const form = document.getElementById('vehicle-registration-form');
+        if (form) {
+            form.addEventListener('submit', function(event) {
+                const declaration = document.getElementById('declaration');
+                if (!declaration.checked) {
+                    event.preventDefault();
+                    alert('Please accept the declaration to proceed.');
+                }
+            });
+        }
+    });
+    
+    // Function to fetch vehicle models via AJAX (to be implemented)
+    function fetchVehicleModels(makerId) {
+        // AJAX request to get models for the selected maker
+        // This would be implemented later with proper backend endpoint
+    }
+</script>
+{% endblock %}
