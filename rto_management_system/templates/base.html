@@ -68,9 +68,9 @@
                                 <a class="nav-link dropdown-toggle" href="#" id="vehicleDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">Vehicle</a>
                                 <ul class="dropdown-menu" aria-labelledby="vehicleDropdown">
                                     <li><a class="dropdown-item" href="{% url 'apply_for_registration' %}">Register Vehicle</a></li>
-                                    <li><a class="dropdown-item" href="{% url 'my_vehicle_registrations' %}">My Registrations</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'my_registration_applications' %}">My Registrations</a></li>
                                     <li><a class="dropdown-item" href="{% url 'my_vehicles' %}">My Vehicles</a></li>
-                                    <li><a class="dropdown-item" href="{% url 'my_vehicle_transfers' %}">My Transfers</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'vehicle_transfers' %}">My Transfers</a></li>
                                 </ul>
                             </li>
                             
@@ -92,8 +92,8 @@
                             <li class="nav-item dropdown">
                                 <a class="nav-link dropdown-toggle" href="#" id="officerVehicleDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">Vehicle</a>
                                 <ul class="dropdown-menu" aria-labelledby="officerVehicleDropdown">
-                                    <li><a class="dropdown-item" href="{% url 'review_vehicle_registrations' %}">Review Registrations</a></li>
-                                    <li><a class="dropdown-item" href="{% url 'review_vehicle_transfers' %}">Review Transfers</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'review_registration_applications' %}">Review Registrations</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'review_transfer_applications' %}">Review Transfers</a></li>
                                 </ul>
                             </li>
                             
@@ -238,7 +238,7 @@
                     <h5>Quick Links</h5>
                     <ul class="list-unstyled">
                         <li><a href="/" class="text-light"><i class="fas fa-angle-right me-2"></i>Home</a></li>
-                        <li><a href="/dashboard/" class="text-light"><i class="fas fa-angle-right me-2"></i>Dashboard</a></li>
+                        <li><a href="{% url 'dashboard' %}" class="text-light"><i class="fas fa-angle-right me-2"></i>Dashboard</a></li>
                         <li><a href="/dashboard/status/license/" class="text-light"><i class="fas fa-angle-right me-2"></i>Track Status</a></li>
                         <li><a href="#" class="text-light"><i class="fas fa-angle-right me-2"></i>Traffic Rules</a></li>
                         <li><a href="#" class="text-light"><i class="fas fa-angle-right me-2"></i>Contact Us</a></li>
