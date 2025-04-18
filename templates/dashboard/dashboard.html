@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - RTO Management System{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white text-center">
+                    <h4 class="mb-0">RTO Management System Dashboard</h4>
+                </div>
+                <div class="card-body text-center">
+                    <div class="py-5">
+                        <div class="display-1 text-muted mb-4"><i class="bi bi-shield-check"></i></div>
+                        <h3>Welcome to the RTO Management System</h3>
+                        <p class="lead">You will be redirected to your role-specific dashboard momentarily.</p>
+                        <div class="spinner-border text-primary mt-3" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+    // Redirect to the appropriate dashboard based on user role
+    document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(function() {
+            window.location.href = "{% url 'dashboard_redirect' %}";
+        }, 1000);
+    });
+</script>
+{% endblock %}
+{% endblock %}

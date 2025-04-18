@@ -93,12 +93,27 @@
                     </li>
                     {% endif %}
                     
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">Vehicle Services</a>
+                    {% if user.user_type == 'CITIZEN' %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="vehicleDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Vehicle Services
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="vehicleDropdown">
+                            <li><a class="dropdown-item" href="#">Register Vehicle</a></li>
+                            <li><a class="dropdown-item" href="#">My Vehicles</a></li>
+                            <li><a class="dropdown-item" href="#">Transfer Ownership</a></li>
+                        </ul>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">Challan Services</a>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="challanDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Challan Services
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="challanDropdown">
+                            <li><a class="dropdown-item" href="#">Pay Challan</a></li>
+                            <li><a class="dropdown-item" href="#">Challan History</a></li>
+                        </ul>
                     </li>
+                    {% endif %}
                     {% endif %}
                     
                     <li class="nav-item">

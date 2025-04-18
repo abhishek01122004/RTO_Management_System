@@ -1,0 +1,155 @@
+{% extends 'base.html' %}
+
+{% block title %}Citizen Dashboard - RTO Management System{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row mb-4">
+        <div class="col">
+            <h2>Welcome, {{ user.get_full_name|default:user.email }}</h2>
+            <p class="text-muted">{{ current_date|date:"l, F j, Y" }}</p>
+        </div>
+    </div>
+    
+    <div class="row">
+        <!-- Quick Actions Card -->
+        <div class="col-md-4">
+            <div class="card shadow mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-3">
+                        <a href="{% url 'apply_for_license' %}" class="btn btn-outline-primary">
+                            <i class="bi bi-card-heading"></i> Apply for License
+                        </a>
+                        <a href="{% url 'my_license_applications' %}" class="btn btn-outline-primary">
+                            <i class="bi bi-list-check"></i> My License Applications
+                        </a>
+                        <a href="{% url 'my_licenses' %}" class="btn btn-outline-primary">
+                            <i class="bi bi-card-list"></i> My Licenses
+                        </a>
+                        <a href="#" class="btn btn-outline-primary">
+                            <i class="bi bi-car-front"></i> Register New Vehicle
+                        </a>
+                        <a href="#" class="btn btn-outline-primary">
+                            <i class="bi bi-truck"></i> My Vehicles
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Recent Applications Card -->
+        <div class="col-md-8">
+            <div class="card shadow mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Recent License Applications</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Application Number</th>
+                                    <th>License Type</th>
+                                    <th>Date</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if recent_applications %}
+                                    {% for application in recent_applications %}
+                                    <tr>
+                                        <td>{{ application.application_number }}</td>
+                                        <td>{{ application.license_type.name }}</td>
+                                        <td>{{ application.application_date|date:"M d, Y" }}</td>
+                                        <td>
+                                            {% if application.status == 'PENDING' %}
+                                            <span class="badge bg-warning text-dark">{{ application.get_status_display }}</span>
+                                            {% elif application.status == 'APPROVED' or application.status == 'ISSUED' %}
+                                            <span class="badge bg-success">{{ application.get_status_display }}</span>
+                                            {% elif application.status == 'REJECTED' %}
+                                            <span class="badge bg-danger">{{ application.get_status_display }}</span>
+                                            {% else %}
+                                            <span class="badge bg-info">{{ application.get_status_display }}</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <a href="{% url 'license_application_detail' application_number=application.application_number %}" class="btn btn-sm btn-primary">
+                                                <i class="bi bi-eye"></i> View
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr>
+                                        <td colspan="5" class="text-center">No recent applications found.</td>
+                                    </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="text-end mt-3">
+                        <a href="{% url 'my_license_applications' %}" class="btn btn-sm btn-outline-primary">View All Applications</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">My Licenses</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>License Number</th>
+                                    <th>License Type</th>
+                                    <th>Issued Date</th>
+                                    <th>Valid Until</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if licenses %}
+                                    {% for license in licenses %}
+                                    <tr>
+                                        <td>{{ license.license_number }}</td>
+                                        <td>{{ license.license_type.name }}</td>
+                                        <td>{{ license.issued_date|date:"M d, Y" }}</td>
+                                        <td>{{ license.valid_until|date:"M d, Y" }}</td>
+                                        <td>
+                                            {% if license.is_active %}
+                                            <span class="badge bg-success">Active</span>
+                                            {% else %}
+                                            <span class="badge bg-danger">Expired</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <a href="{% url 'license_detail' license_number=license.license_number %}" class="btn btn-sm btn-primary">
+                                                <i class="bi bi-eye"></i> View
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr>
+                                        <td colspan="6" class="text-center">No licenses found.</td>
+                                    </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="text-end mt-3">
+                        <a href="{% url 'my_licenses' %}" class="btn btn-sm btn-outline-primary">View All Licenses</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
