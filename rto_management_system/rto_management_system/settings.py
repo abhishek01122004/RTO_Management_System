@@ -22,7 +22,16 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-default-key-fo
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0', '67808e7d-570d-4dca-983a-e5ce23b113b9-00-n4pzlmhlh8pm.worf.replit.dev', '.replit.dev']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0', '*.replit.dev', '*.repl.co', '*']
+
+# CSRF Settings
+CSRF_TRUSTED_ORIGINS = [
+    'https://*.replit.dev',
+    'https://*.repl.co',
+    'https://*.replit.app',
+    'http://localhost:5000',
+    'http://127.0.0.1:5000',
+]
 
 
 # Application definition
