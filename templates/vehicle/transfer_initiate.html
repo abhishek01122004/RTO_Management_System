@@ -1,0 +1,277 @@
+{% extends 'base.html' %}
+
+{% block title %}Initiate Vehicle Transfer - RTO Management System{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row mb-4">
+        <div class="col">
+            <h2>Initiate Vehicle Transfer</h2>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'my_vehicles' %}">My Vehicles</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'vehicle_detail' reg_number=vehicle.registration_number %}">Vehicle Details</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Initiate Transfer</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card shadow mb-4">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Ownership Transfer</h5>
+                    <div>
+                        <span class="badge bg-light text-dark">{{ vehicle.registration_number }}</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info mb-4">
+                        <i class="fas fa-info-circle me-2"></i> You are initiating a transfer of ownership for your vehicle. Please provide details of the new owner.
+                    </div>
+                    
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h6>Current Owner</h6>
+                            <table class="table">
+                                <tr>
+                                    <th>Name</th>
+                                    <td>{{ vehicle.owner.get_full_name }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Email</th>
+                                    <td>{{ vehicle.owner.email }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Phone</th>
+                                    <td>{{ vehicle.owner.phone_number }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Vehicle Details</h6>
+                            <table class="table">
+                                <tr>
+                                    <th>Make & Model</th>
+                                    <td>{{ vehicle.make }} {{ vehicle.model }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Year</th>
+                                    <td>{{ vehicle.year }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Color</th>
+                                    <td>{{ vehicle.color }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger">
+                                {% for error in form.non_field_errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        
+                        <div class="mb-4">
+                            <h6 class="border-bottom pb-2">New Owner Details</h6>
+                            
+                            <div class="mb-3">
+                                <label for="{{ form.new_owner_email.id_for_label }}" class="form-label">New Owner's Email *</label>
+                                {{ form.new_owner_email }}
+                                {% if form.new_owner_email.errors %}
+                                    <div class="text-danger">{{ form.new_owner_email.errors }}</div>
+                                {% endif %}
+                                <div class="form-text">Enter the email address of the registered RTO user who will be the new owner.</div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="{{ form.transfer_reason.id_for_label }}" class="form-label">Reason for Transfer *</label>
+                                {{ form.transfer_reason }}
+                                {% if form.transfer_reason.errors %}
+                                    <div class="text-danger">{{ form.transfer_reason.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <h6 class="border-bottom pb-2">Required Documents</h6>
+                            
+                            <div class="mb-3">
+                                <label for="{{ form.sale_deed.id_for_label }}" class="form-label">Sale Deed / Agreement *</label>
+                                {{ form.sale_deed }}
+                                {% if form.sale_deed.errors %}
+                                    <div class="text-danger">{{ form.sale_deed.errors }}</div>
+                                {% endif %}
+                                <div class="form-text">Upload a scanned copy of the sale deed or transfer agreement.</div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="{{ form.delivery_note.id_for_label }}" class="form-label">Delivery Note *</label>
+                                {{ form.delivery_note }}
+                                {% if form.delivery_note.errors %}
+                                    <div class="text-danger">{{ form.delivery_note.errors }}</div>
+                                {% endif %}
+                                <div class="form-text">Upload a scanned copy of the delivery note.</div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="{{ form.no_objection.id_for_label }}" class="form-label">No Objection Certificate (if applicable)</label>
+                                {{ form.no_objection }}
+                                {% if form.no_objection.errors %}
+                                    <div class="text-danger">{{ form.no_objection.errors }}</div>
+                                {% endif %}
+                                <div class="form-text">Upload a scanned copy of the NOC if required.</div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="declaration" required>
+                                <label class="form-check-label" for="declaration">
+                                    I hereby declare that all the information provided is accurate and I authorize the transfer of the above vehicle to the new owner.
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{% url 'vehicle_detail' reg_number=vehicle.registration_number %}" class="btn btn-outline-secondary me-md-2">
+                                <i class="fas fa-arrow-left me-2"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-exchange-alt me-2"></i> Initiate Transfer
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <!-- Transfer Process Card -->
+            <div class="card shadow mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Transfer Process</h5>
+                </div>
+                <div class="card-body">
+                    <ol class="list-group list-group-numbered mb-0">
+                        <li class="list-group-item d-flex justify-content-between align-items-start">
+                            <div class="ms-2 me-auto">
+                                <div class="fw-bold">Initiate Transfer</div>
+                                Submit required documents and new owner details
+                            </div>
+                            <span class="badge bg-primary rounded-pill">Now</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-start">
+                            <div class="ms-2 me-auto">
+                                <div class="fw-bold">New Owner Confirmation</div>
+                                New owner receives notification and confirms acceptance
+                            </div>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-start">
+                            <div class="ms-2 me-auto">
+                                <div class="fw-bold">RTO Verification</div>
+                                RTO officials verify documents and approve transfer
+                            </div>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-start">
+                            <div class="ms-2 me-auto">
+                                <div class="fw-bold">Payment of Transfer Fee</div>
+                                Transfer fees to be paid by the new owner
+                            </div>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-start">
+                            <div class="ms-2 me-auto">
+                                <div class="fw-bold">Ownership Updated</div>
+                                Ownership records updated in the RTO database
+                            </div>
+                        </li>
+                    </ol>
+                </div>
+            </div>
+
+            <!-- Required Documents Card -->
+            <div class="card shadow mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Required Documents</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item">
+                            <i class="fas fa-check-circle text-success me-2"></i> Sale Deed / Transfer Agreement
+                            <small class="d-block text-muted">Signed by both parties</small>
+                        </li>
+                        <li class="list-group-item">
+                            <i class="fas fa-check-circle text-success me-2"></i> Delivery Note
+                            <small class="d-block text-muted">Confirming vehicle handover</small>
+                        </li>
+                        <li class="list-group-item">
+                            <i class="fas fa-check-circle text-success me-2"></i> Form 29 (Application for Transfer)
+                            <small class="d-block text-muted">Generated automatically in the system</small>
+                        </li>
+                        <li class="list-group-item">
+                            <i class="fas fa-check-circle text-success me-2"></i> Form 30 (Report of Transfer)
+                            <small class="d-block text-muted">Generated automatically in the system</small>
+                        </li>
+                        <li class="list-group-item">
+                            <i class="fas fa-info-circle text-info me-2"></i> No Objection Certificate (if applicable)
+                            <small class="d-block text-muted">If vehicle is registered in another state</small>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Help Card -->
+            <div class="card shadow">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Need Help?</h5>
+                </div>
+                <div class="card-body">
+                    <p>For assistance with vehicle transfer:</p>
+                    <p><i class="fas fa-phone me-2"></i> +91 1234567890</p>
+                    <p><i class="fas fa-envelope me-2"></i> transfer@rtosystem.com</p>
+                    <p><i class="fas fa-question-circle me-2"></i> <a href="#">Transfer FAQs</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const emailInput = document.getElementById('id_new_owner_email');
+        const declarationCheckbox = document.getElementById('declaration');
+        const submitButton = document.querySelector('button[type="submit"]');
+        
+        // Validate email is different from current user
+        emailInput.addEventListener('blur', function() {
+            const currentUserEmail = '{{ vehicle.owner.email }}';
+            if (this.value === currentUserEmail) {
+                alert('The new owner cannot be the same as the current owner.');
+                this.value = '';
+                this.focus();
+            }
+        });
+        
+        // Ensure declaration is checked before submit
+        const form = document.querySelector('form');
+        form.addEventListener('submit', function(e) {
+            if (!declarationCheckbox.checked) {
+                e.preventDefault();
+                alert('Please accept the declaration to proceed.');
+                declarationCheckbox.focus();
+            }
+        });
+    });
+</script>
+{% endblock %}

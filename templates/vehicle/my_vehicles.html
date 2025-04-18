@@ -1,0 +1,178 @@
+{% extends 'base.html' %}
+
+{% block title %}My Vehicles - RTO Management System{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row mb-4">
+        <div class="col">
+            <h2>My Vehicles</h2>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">My Vehicles</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <a href="{% url 'register_vehicle' %}" class="btn btn-primary">
+                        <i class="fas fa-plus-circle me-2"></i> Register New Vehicle
+                    </a>
+                </div>
+                <div class="input-group" style="max-width: 300px;">
+                    <input type="text" id="searchInput" class="form-control" placeholder="Search vehicles...">
+                    <button class="btn btn-outline-secondary" type="button">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Registered Vehicles</h5>
+                </div>
+                <div class="card-body">
+                    {% if vehicles %}
+                        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                            {% for vehicle in vehicles %}
+                                <div class="col">
+                                    <div class="card h-100 vehicle-card">
+                                        <div class="card-header bg-light">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <h6 class="mb-0">{{ vehicle.make }} {{ vehicle.model }}</h6>
+                                                <span class="badge {% if vehicle.is_active %}bg-success{% else %}bg-danger{% endif %}">
+                                                    {% if vehicle.is_active %}Active{% else %}Inactive{% endif %}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="text-center mb-3">
+                                                <div class="border border-dark d-inline-block px-3 py-2 bg-light rounded">
+                                                    <h5 class="mb-0">{{ vehicle.registration_number }}</h5>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="mb-3">
+                                                <small class="text-muted d-block">Year: {{ vehicle.year }}</small>
+                                                <small class="text-muted d-block">Type: {{ vehicle.vehicle_category.name }}</small>
+                                                <small class="text-muted d-block">Fuel: {{ vehicle.fuel_type }}</small>
+                                            </div>
+                                            
+                                            <div class="mb-3">
+                                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                                    <small class="text-muted">Registration</small>
+                                                    <small class="{% if vehicle.is_active %}text-success{% else %}text-danger{% endif %}">
+                                                        {% if vehicle.is_active %}Valid till {{ vehicle.valid_until|date:"d M Y" }}{% else %}Expired{% endif %}
+                                                    </small>
+                                                </div>
+                                                
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <small class="text-muted">Insurance</small>
+                                                    <small class="{% if vehicle.insurance_valid_upto and vehicle.insurance_valid_upto > today %}text-success{% else %}text-danger{% endif %}">
+                                                        {% if vehicle.insurance_valid_upto and vehicle.insurance_valid_upto > today %}Valid{% else %}Expired{% endif %}
+                                                    </small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="card-footer">
+                                            <a href="{% url 'vehicle_detail' reg_number=vehicle.registration_number %}" class="btn btn-outline-primary w-100">
+                                                <i class="fas fa-info-circle me-2"></i> View Details
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i> You don't have any registered vehicles yet.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pagination Section -->
+    {% if vehicles.has_other_pages %}
+        <div class="row mt-4">
+            <div class="col">
+                <nav aria-label="Page navigation">
+                    <ul class="pagination justify-content-center">
+                        {% if vehicles.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ vehicles.previous_page_number }}" aria-label="Previous">
+                                    <span aria-hidden="true">&laquo;</span>
+                                </a>
+                            </li>
+                        {% else %}
+                            <li class="page-item disabled">
+                                <span class="page-link" aria-hidden="true">&laquo;</span>
+                            </li>
+                        {% endif %}
+                        
+                        {% for i in vehicles.paginator.page_range %}
+                            {% if vehicles.number == i %}
+                                <li class="page-item active">
+                                    <span class="page-link">{{ i }}</span>
+                                </li>
+                            {% else %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ i }}">{{ i }}</a>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+                        
+                        {% if vehicles.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ vehicles.next_page_number }}" aria-label="Next">
+                                    <span aria-hidden="true">&raquo;</span>
+                                </a>
+                            </li>
+                        {% else %}
+                            <li class="page-item disabled">
+                                <span class="page-link" aria-hidden="true">&raquo;</span>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Simple search functionality
+        const searchInput = document.getElementById('searchInput');
+        const vehicleCards = document.querySelectorAll('.vehicle-card');
+        
+        searchInput.addEventListener('keyup', function(e) {
+            const searchText = e.target.value.toLowerCase();
+            
+            vehicleCards.forEach(card => {
+                const cardText = card.textContent.toLowerCase();
+                const parentCol = card.closest('.col');
+                
+                if(cardText.includes(searchText)) {
+                    parentCol.style.display = '';
+                } else {
+                    parentCol.style.display = 'none';
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

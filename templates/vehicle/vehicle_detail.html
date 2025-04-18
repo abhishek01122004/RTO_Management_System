@@ -1,0 +1,446 @@
+{% extends 'base.html' %}
+
+{% block title %}Vehicle Details - RTO Management System{% endblock %}
+
+{% block extra_css %}
+<style>
+    .rc-card {
+        background-color: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 10px;
+        padding: 20px;
+        position: relative;
+    }
+    
+    .rc-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiB2aWV3Qm94PSIwIDAgMTAwIDEwMCI+CiAgPHBhdGggZD0iTTUwLDAgTDEwMCw1MCBMNTAsMTAwIEwwLDUwIFoiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI2UwZTBlMCIgc3Ryb2tlLXdpZHRoPSIxIi8+Cjwvc3ZnPg==');
+        background-size: 100px 100px;
+        background-repeat: repeat;
+        opacity: 0.2;
+        z-index: 0;
+        border-radius: 9px;
+    }
+    
+    .rc-card-content {
+        position: relative;
+        z-index: 1;
+    }
+    
+    .rc-title {
+        text-align: center;
+        border-bottom: 2px solid #0d6efd;
+        padding-bottom: 10px;
+        margin-bottom: 20px;
+    }
+    
+    .rc-number {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #0d6efd;
+        border: 2px solid #0d6efd;
+        border-radius: 5px;
+        padding: 5px 10px;
+        display: inline-block;
+    }
+    
+    .rc-watermark {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) rotate(-30deg);
+        font-size: 5rem;
+        opacity: 0.05;
+        font-weight: bold;
+        white-space: nowrap;
+        z-index: 0;
+    }
+    
+    .rc-seal {
+        position: absolute;
+        bottom: 30px;
+        right: 40px;
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        border: 1px solid #dee2e6;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: rgba(255, 255, 255, 0.7);
+        z-index: 1;
+    }
+    
+    .timeline-item {
+        position: relative;
+        padding-bottom: 1.5rem;
+        padding-left: 1.5rem;
+        border-left: 1px solid #dee2e6;
+    }
+    
+    .timeline-item::before {
+        content: '';
+        position: absolute;
+        left: -6px;
+        top: 0;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background-color: #0d6efd;
+    }
+    
+    .timeline-item:last-child {
+        border-left: none;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row mb-4">
+        <div class="col">
+            <h2>Vehicle Details</h2>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'my_vehicles' %}">My Vehicles</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Vehicle Details</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <!-- Registration Certificate Card -->
+            <div class="card shadow mb-4">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Registration Certificate</h5>
+                    <div>
+                        <button class="btn btn-sm btn-light" onclick="printRC()">
+                            <i class="fas fa-print me-2"></i> Print RC
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="rc-card" id="rc-card">
+                        <div class="rc-watermark">RTO</div>
+                        <div class="rc-card-content">
+                            <div class="rc-title">
+                                <h4 class="mb-2">CERTIFICATE OF REGISTRATION</h4>
+                                <p class="mb-0 text-muted">Motor Vehicles Act, 1988</p>
+                            </div>
+                            
+                            <div class="row mb-4">
+                                <div class="col-md-6 text-center mb-3">
+                                    <div class="rc-number">{{ vehicle.registration_number }}</div>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6>Registration Date: {{ vehicle.registration_date|date:"d M Y" }}</h6>
+                                    <h6>Valid Until: {{ vehicle.valid_until|date:"d M Y" }}</h6>
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-4">
+                                <div class="col-md-6">
+                                    <h6 class="border-bottom pb-1">Vehicle Details</h6>
+                                    <p><strong>Make:</strong> {{ vehicle.make }}</p>
+                                    <p><strong>Model:</strong> {{ vehicle.model }}</p>
+                                    <p><strong>Year:</strong> {{ vehicle.year }}</p>
+                                    <p><strong>Fuel Type:</strong> {{ vehicle.fuel_type }}</p>
+                                    <p><strong>Chassis No:</strong> {{ vehicle.chassis_number }}</p>
+                                    <p><strong>Engine No:</strong> {{ vehicle.engine_number }}</p>
+                                    <p><strong>Color:</strong> {{ vehicle.color }}</p>
+                                    <p><strong>Seating Capacity:</strong> {{ vehicle.seating_capacity }}</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6 class="border-bottom pb-1">Owner Details</h6>
+                                    <p><strong>Name:</strong> {{ vehicle.owner.get_full_name }}</p>
+                                    <p><strong>Address:</strong> {{ vehicle.owner.address }}</p>
+                                    <p><strong>Phone:</strong> {{ vehicle.owner.phone_number }}</p>
+                                    <p><strong>Email:</strong> {{ vehicle.owner.email }}</p>
+                                    
+                                    <div class="mt-4">
+                                        <h6 class="border-bottom pb-1">Taxation Details</h6>
+                                        <p><strong>Tax Paid Up To:</strong> {{ vehicle.tax_paid_upto|date:"d M Y" }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6 class="border-bottom pb-1">RTO Details</h6>
+                                    <p><strong>Registering Authority:</strong> Regional Transport Office</p>
+                                    <p><strong>RTO Code:</strong> {{ vehicle.registration_number|slice:"3:5" }}</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6 class="border-bottom pb-1">Insurance Details</h6>
+                                    <p><strong>Insurance Company:</strong> {{ vehicle.insurance_company|default:"Not available" }}</p>
+                                    <p><strong>Policy Number:</strong> {{ vehicle.insurance_policy_number|default:"Not available" }}</p>
+                                    <p><strong>Valid Until:</strong> {{ vehicle.insurance_valid_upto|date:"d M Y"|default:"Not available" }}</p>
+                                </div>
+                            </div>
+                            
+                            <div class="rc-seal">
+                                <div class="text-center">
+                                    <div><i class="fas fa-stamp fa-2x text-primary opacity-50"></i></div>
+                                    <small>RTO SEAL</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Owner History Card -->
+            {% if ownership_history %}
+                <div class="card shadow mb-4">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">Ownership History</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="timeline">
+                            {% for history in ownership_history %}
+                                <div class="timeline-item">
+                                    <h6>{{ history.transfer_date|date:"d M Y" }}</h6>
+                                    <p>
+                                        <strong>From:</strong> {{ history.previous_owner.get_full_name }}<br>
+                                        <strong>To:</strong> {{ history.new_owner.get_full_name }}
+                                    </p>
+                                    {% if history.remarks %}
+                                        <p class="text-muted">{{ history.remarks }}</p>
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+                            <div class="timeline-item">
+                                <h6>{{ vehicle.registration_date|date:"d M Y" }}</h6>
+                                <p><strong>First Registration</strong></p>
+                                <p class="text-muted">Vehicle registered to {{ vehicle.owner.get_full_name }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="col-md-4">
+            <!-- Vehicle Status Card -->
+            <div class="card shadow mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Vehicle Status</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-center mb-3">
+                        {% if vehicle.is_active %}
+                            <span class="badge bg-success fs-6 px-4 py-2">Active</span>
+                        {% else %}
+                            <span class="badge bg-danger fs-6 px-4 py-2">Inactive</span>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="list-group mb-3">
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            <span>Registration</span>
+                            {% if vehicle.is_active %}
+                                <span class="badge bg-success rounded-pill">Valid</span>
+                            {% else %}
+                                <span class="badge bg-danger rounded-pill">Expired</span>
+                            {% endif %}
+                        </div>
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            <span>Insurance</span>
+                            {% if vehicle.insurance_valid_upto and vehicle.insurance_valid_upto > today %}
+                                <span class="badge bg-success rounded-pill">Valid</span>
+                            {% else %}
+                                <span class="badge bg-danger rounded-pill">Expired</span>
+                            {% endif %}
+                        </div>
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            <span>Pollution Certificate</span>
+                            {% if vehicle.pollution_valid_upto and vehicle.pollution_valid_upto > today %}
+                                <span class="badge bg-success rounded-pill">Valid</span>
+                            {% else %}
+                                <span class="badge bg-danger rounded-pill">Expired</span>
+                            {% endif %}
+                        </div>
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            <span>Tax Payment</span>
+                            {% if vehicle.tax_paid_upto and vehicle.tax_paid_upto > today %}
+                                <span class="badge bg-success rounded-pill">Paid</span>
+                            {% else %}
+                                <span class="badge bg-danger rounded-pill">Due</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    {% if pending_challans_count > 0 %}
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle me-2"></i> You have {{ pending_challans_count }} pending traffic challans. <a href="{% url 'my_challans' %}" class="alert-link">View details</a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Quick Actions Card -->
+            <div class="card shadow mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="#" class="btn btn-outline-primary">
+                            <i class="fas fa-sync-alt me-2"></i> Renew Registration
+                        </a>
+                        <a href="{% url 'initiate_vehicle_transfer' reg_number=vehicle.registration_number %}" class="btn btn-outline-primary">
+                            <i class="fas fa-exchange-alt me-2"></i> Transfer Ownership
+                        </a>
+                        <a href="#" class="btn btn-outline-primary">
+                            <i class="fas fa-file-alt me-2"></i> Apply for NOC
+                        </a>
+                        <a href="#" class="btn btn-outline-primary">
+                            <i class="fas fa-cloud-download-alt me-2"></i> Download RC
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Important Documents Card -->
+            <div class="card shadow">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Important Documents</h5>
+                </div>
+                <div class="card-body">
+                    <div class="list-group">
+                        <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="fas fa-shield-alt me-2 text-success"></i> Insurance Certificate
+                            </div>
+                            <i class="fas fa-download text-primary"></i>
+                        </a>
+                        <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="fas fa-leaf me-2 text-success"></i> Pollution Certificate
+                            </div>
+                            <i class="fas fa-download text-primary"></i>
+                        </a>
+                        <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="fas fa-receipt me-2 text-primary"></i> Tax Receipt
+                            </div>
+                            <i class="fas fa-download text-primary"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Function to print RC
+    function printRC() {
+        const printContents = document.getElementById('rc-card').innerHTML;
+        const originalContents = document.body.innerHTML;
+        
+        // Create a new window with the RC card styled for printing
+        const printWindow = window.open('', '_blank');
+        printWindow.document.write(`
+            <html>
+                <head>
+                    <title>Registration Certificate</title>
+                    <style>
+                        body {
+                            font-family: Arial, sans-serif;
+                            padding: 20px;
+                        }
+                        .rc-card {
+                            border: 1px solid #000;
+                            padding: 20px;
+                            position: relative;
+                            background-color: #fff;
+                        }
+                        .rc-title {
+                            text-align: center;
+                            border-bottom: 2px solid #000;
+                            padding-bottom: 10px;
+                            margin-bottom: 20px;
+                        }
+                        .rc-number {
+                            font-size: 1.5rem;
+                            font-weight: bold;
+                            border: 2px solid #000;
+                            padding: 5px 10px;
+                            display: inline-block;
+                        }
+                        .row {
+                            display: flex;
+                            flex-wrap: wrap;
+                            margin-bottom: 15px;
+                        }
+                        .col-md-6 {
+                            width: 50%;
+                            padding: 0 15px;
+                            box-sizing: border-box;
+                        }
+                        .border-bottom {
+                            border-bottom: 1px solid #000;
+                            padding-bottom: 5px;
+                            margin-bottom: 10px;
+                        }
+                        p {
+                            margin: 5px 0;
+                        }
+                        .rc-watermark {
+                            position: absolute;
+                            top: 50%;
+                            left: 50%;
+                            transform: translate(-50%, -50%) rotate(-30deg);
+                            font-size: 5rem;
+                            opacity: 0.05;
+                            font-weight: bold;
+                            white-space: nowrap;
+                        }
+                        .rc-seal {
+                            position: absolute;
+                            bottom: 30px;
+                            right: 40px;
+                            width: 100px;
+                            height: 100px;
+                            border-radius: 50%;
+                            border: 1px solid #000;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            text-align: center;
+                        }
+                        @media print {
+                            body {
+                                margin: 0;
+                                padding: 0;
+                            }
+                            .rc-card {
+                                border: none;
+                            }
+                        }
+                    </style>
+                </head>
+                <body onload="window.print();window.close()">
+                    <div class="rc-card">
+                        ${printContents}
+                    </div>
+                </body>
+            </html>
+        `);
+        
+        printWindow.document.close();
+    }
+</script>
+{% endblock %}

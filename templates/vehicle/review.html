@@ -1,0 +1,392 @@
+{% extends 'base.html' %}
+
+{% block title %}Review Vehicle Registration - RTO Management System{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row mb-4">
+        <div class="col">
+            <h2>Review Vehicle Registration</h2>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'review_vehicle_registrations' %}">Review Registrations</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Review Registration</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <!-- Review Form Card -->
+            <div class="card shadow mb-4">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Registration Review</h5>
+                    <div>
+                        {% if registration.registration_number %}
+                            <span class="badge bg-success">{{ registration.registration_number }}</span>
+                        {% else %}
+                            <span class="badge bg-warning text-dark">{{ registration.temporary_number }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <!-- Application Information -->
+                        <div class="mb-4">
+                            <h6 class="border-bottom pb-2">Application Information</h6>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p><strong>Application Date:</strong> {{ registration.application_date|date:"d M Y" }}</p>
+                                    <p><strong>Registration Type:</strong> {{ registration.get_registration_type_display }}</p>
+                                    <p><strong>Payment Status:</strong> 
+                                        {% if registration.payment_status %}
+                                            <span class="badge bg-success">Paid</span>
+                                        {% else %}
+                                            <span class="badge bg-danger">Unpaid</span>
+                                        {% endif %}
+                                    </p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p><strong>Applicant:</strong> {{ registration.owner.get_full_name }}</p>
+                                    <p><strong>Email:</strong> {{ registration.owner.email }}</p>
+                                    <p><strong>Phone:</strong> {{ registration.owner.phone_number }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Vehicle Information -->
+                        <div class="mb-4">
+                            <h6 class="border-bottom pb-2">Vehicle Information</h6>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p><strong>Make & Model:</strong> {{ registration.make }} {{ registration.model }}</p>
+                                    <p><strong>Year:</strong> {{ registration.year }}</p>
+                                    <p><strong>Vehicle Category:</strong> {{ registration.vehicle_category.name }}</p>
+                                    <p><strong>Fuel Type:</strong> {{ registration.fuel_type }}</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p><strong>Chassis Number:</strong> {{ registration.chassis_number }}</p>
+                                    <p><strong>Engine Number:</strong> {{ registration.engine_number }}</p>
+                                    <p><strong>Seating Capacity:</strong> {{ registration.seating_capacity }}</p>
+                                    <p><strong>Color:</strong> {{ registration.color }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Document Review Section -->
+                        <div class="mb-4">
+                            <h6 class="border-bottom pb-2">Document Review</h6>
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <div class="card">
+                                        <div class="card-header bg-light">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <h6 class="mb-0">Invoice</h6>
+                                                <a href="{{ registration.invoice.url }}" class="btn btn-sm btn-outline-primary" target="_blank">
+                                                    <i class="fas fa-external-link-alt"></i> View
+                                                </a>
+                                            </div>
+                                        </div>
+                                        <div class="card-body p-2">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="invoice_verified" name="invoice_verified">
+                                                <label class="form-check-label" for="invoice_verified">
+                                                    Document is valid and readable
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card">
+                                        <div class="card-header bg-light">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <h6 class="mb-0">Insurance</h6>
+                                                <a href="{{ registration.insurance.url }}" class="btn btn-sm btn-outline-primary" target="_blank">
+                                                    <i class="fas fa-external-link-alt"></i> View
+                                                </a>
+                                            </div>
+                                        </div>
+                                        <div class="card-body p-2">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="insurance_verified" name="insurance_verified">
+                                                <label class="form-check-label" for="insurance_verified">
+                                                    Document is valid and readable
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <div class="card">
+                                        <div class="card-header bg-light">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <h6 class="mb-0">Pollution Certificate</h6>
+                                                <a href="{{ registration.pollution_certificate.url }}" class="btn btn-sm btn-outline-primary" target="_blank">
+                                                    <i class="fas fa-external-link-alt"></i> View
+                                                </a>
+                                            </div>
+                                        </div>
+                                        <div class="card-body p-2">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="pollution_verified" name="pollution_verified">
+                                                <label class="form-check-label" for="pollution_verified">
+                                                    Document is valid and readable
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card">
+                                        <div class="card-header bg-light">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <h6 class="mb-0">Vehicle Photo</h6>
+                                                <a href="{{ registration.vehicle_photo.url }}" class="btn btn-sm btn-outline-primary" target="_blank">
+                                                    <i class="fas fa-external-link-alt"></i> View
+                                                </a>
+                                            </div>
+                                        </div>
+                                        <div class="card-body p-2">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="photo_verified" name="photo_verified">
+                                                <label class="form-check-label" for="photo_verified">
+                                                    Photo is clear and shows vehicle properly
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Decision Section -->
+                        <div class="mb-4">
+                            <h6 class="border-bottom pb-2">Application Decision</h6>
+                            <div class="mb-3">
+                                <label for="{{ form.status.id_for_label }}" class="form-label">Status *</label>
+                                {{ form.status }}
+                                {% if form.status.errors %}
+                                    <div class="text-danger">{{ form.status.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="{{ form.remarks.id_for_label }}" class="form-label">Remarks</label>
+                                {{ form.remarks }}
+                                {% if form.remarks.errors %}
+                                    <div class="text-danger">{{ form.remarks.errors }}</div>
+                                {% endif %}
+                                <div class="form-text">Provide reason for rejection or any other important notes</div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="{{ form.rejection_reason.id_for_label }}" class="form-label">Rejection Reason (if rejecting)</label>
+                                {{ form.rejection_reason }}
+                                {% if form.rejection_reason.errors %}
+                                    <div class="text-danger">{{ form.rejection_reason.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <!-- Submit Buttons -->
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{% url 'review_vehicle_registrations' %}" class="btn btn-outline-secondary me-md-2">
+                                <i class="fas fa-arrow-left me-2"></i> Back to List
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i> Submit Review
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <!-- Current Status Card -->
+            <div class="card shadow mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Current Status</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-center mb-3">
+                        {% if registration.status == 'PENDING' %}
+                            <span class="badge bg-warning text-dark fs-6 px-4 py-2">Pending</span>
+                        {% elif registration.status == 'DOCUMENT_VERIFICATION' %}
+                            <span class="badge bg-info fs-6 px-4 py-2">Document Verification</span>
+                        {% elif registration.status == 'INSPECTION_SCHEDULED' %}
+                            <span class="badge bg-primary fs-6 px-4 py-2">Inspection Scheduled</span>
+                        {% elif registration.status == 'INSPECTION_PASSED' %}
+                            <span class="badge bg-success fs-6 px-4 py-2">Inspection Passed</span>
+                        {% elif registration.status == 'INSPECTION_FAILED' %}
+                            <span class="badge bg-danger fs-6 px-4 py-2">Inspection Failed</span>
+                        {% elif registration.status == 'APPROVED' %}
+                            <span class="badge bg-success fs-6 px-4 py-2">Approved</span>
+                        {% elif registration.status == 'REJECTED' %}
+                            <span class="badge bg-danger fs-6 px-4 py-2">Rejected</span>
+                        {% elif registration.status == 'REGISTERED' %}
+                            <span class="badge bg-success fs-6 px-4 py-2">Registered</span>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <p><strong>Last Updated:</strong> {{ registration.updated_at|date:"d M Y, h:i A" }}</p>
+                        {% if registration.reviewed_by %}
+                            <p><strong>Reviewed By:</strong> {{ registration.reviewed_by.get_full_name }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    {% if registration.remarks %}
+                        <div class="alert alert-info">
+                            <h6 class="mb-2">Current Remarks:</h6>
+                            <p class="mb-0">{{ registration.remarks }}</p>
+                        </div>
+                    {% endif %}
+                    
+                    <!-- Quick Actions -->
+                    <div class="d-grid gap-2 mt-3">
+                        {% if registration.status == 'DOCUMENT_VERIFICATION' %}
+                            <a href="{% url 'schedule_inspection' reg_number=registration.temporary_number %}" class="btn btn-outline-primary">
+                                <i class="fas fa-calendar-check me-2"></i> Schedule Inspection
+                            </a>
+                        {% endif %}
+                        
+                        {% if registration.status == 'INSPECTION_PASSED' or registration.status == 'APPROVED' %}
+                            <a href="{% url 'assign_registration_number' reg_number=registration.temporary_number %}" class="btn btn-outline-success">
+                                <i class="fas fa-check-circle me-2"></i> Assign Registration Number
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Inspection History Card -->
+            {% if inspections %}
+                <div class="card shadow mb-4">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0">Inspection History</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Status</th>
+                                        <th>Result</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for inspection in inspections %}
+                                        <tr>
+                                            <td>{{ inspection.scheduled_date|date:"d M Y" }}</td>
+                                            <td>
+                                                {% if inspection.is_completed %}
+                                                    <span class="badge bg-success">Completed</span>
+                                                {% else %}
+                                                    <span class="badge bg-warning text-dark">Scheduled</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if inspection.is_completed %}
+                                                    {% if inspection.passed %}
+                                                        <span class="badge bg-success">Passed</span>
+                                                    {% else %}
+                                                        <span class="badge bg-danger">Failed</span>
+                                                    {% endif %}
+                                                {% else %}
+                                                    <a href="{% url 'record_inspection_result' inspection_id=inspection.id %}" class="btn btn-sm btn-outline-primary">
+                                                        Record Result
+                                                    </a>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+
+            <!-- Help & Guidelines Card -->
+            <div class="card shadow">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Review Guidelines</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item">
+                            <i class="fas fa-check-circle text-success me-2"></i> Verify all documents thoroughly
+                        </li>
+                        <li class="list-group-item">
+                            <i class="fas fa-check-circle text-success me-2"></i> Confirm chassis & engine numbers match documents
+                        </li>
+                        <li class="list-group-item">
+                            <i class="fas fa-check-circle text-success me-2"></i> Check insurance validity period
+                        </li>
+                        <li class="list-group-item">
+                            <i class="fas fa-check-circle text-success me-2"></i> Ensure vehicle details match specification
+                        </li>
+                        <li class="list-group-item">
+                            <i class="fas fa-exclamation-triangle text-warning me-2"></i> Provide clear rejection reasons if rejecting
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Handle status change to show/hide rejection reason field
+        const statusSelect = document.getElementById('id_status');
+        const rejectionDiv = document.getElementById('id_rejection_reason').closest('.mb-3');
+        
+        function toggleRejectionReason() {
+            if (statusSelect.value === 'REJECTED') {
+                rejectionDiv.style.display = 'block';
+            } else {
+                rejectionDiv.style.display = 'none';
+            }
+        }
+        
+        // Initial toggle
+        toggleRejectionReason();
+        
+        // On change toggle
+        statusSelect.addEventListener('change', toggleRejectionReason);
+        
+        // Add validation for document checkboxes
+        const form = document.querySelector('form');
+        form.addEventListener('submit', function(e) {
+            if (statusSelect.value === 'DOCUMENT_VERIFICATION' || 
+                statusSelect.value === 'INSPECTION_SCHEDULED' || 
+                statusSelect.value === 'APPROVED') {
+                
+                const invoiceVerified = document.getElementById('invoice_verified').checked;
+                const insuranceVerified = document.getElementById('insurance_verified').checked;
+                const pollutionVerified = document.getElementById('pollution_verified').checked;
+                const photoVerified = document.getElementById('photo_verified').checked;
+                
+                if (!invoiceVerified || !insuranceVerified || !pollutionVerified || !photoVerified) {
+                    e.preventDefault();
+                    alert('Please verify all documents before proceeding with approval or scheduling inspection.');
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}
