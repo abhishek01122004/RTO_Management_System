@@ -1,0 +1,333 @@
+{% extends 'base.html' %}
+{% load license_extras %}
+
+{% block title %}License Statistics - RTO Management System{% endblock %}
+
+{% block extra_css %}
+<style>
+    .stats-card {
+        transition: transform 0.3s ease;
+        border-radius: 10px;
+    }
+    .stats-card:hover {
+        transform: translateY(-5px);
+    }
+    
+    .chart-container {
+        height: 300px;
+        margin-bottom: 20px;
+    }
+    
+    .filter-form {
+        background-color: #f8f9fa;
+        padding: 20px;
+        border-radius: 10px;
+        margin-bottom: 30px;
+    }
+</style>
+<!-- Include Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row mb-4">
+        <div class="col">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">License Statistics</li>
+                </ol>
+            </nav>
+            <h1 class="h2 mb-0">License System Statistics</h1>
+            <p class="text-muted">Comprehensive data analytics for license applications and issuances</p>
+        </div>
+    </div>
+    
+    <!-- Date range filter -->
+    <div class="row">
+        <div class="col-12">
+            <div class="filter-form">
+                <form method="get" action="{% url 'license_statistics' %}" class="row g-3">
+                    <div class="col-md-5">
+                        <label for="start_date" class="form-label">Start Date</label>
+                        <input type="date" class="form-control" id="start_date" name="start_date" value="{{ start_date|date:'Y-m-d' }}">
+                    </div>
+                    <div class="col-md-5">
+                        <label for="end_date" class="form-label">End Date</label>
+                        <input type="date" class="form-control" id="end_date" name="end_date" value="{{ end_date|date:'Y-m-d' }}">
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary w-100">Apply Filter</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Summary Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card stats-card shadow-sm h-100 bg-primary text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Total Applications</h5>
+                    <p class="display-4 mb-0">{{ total_applications }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stats-card shadow-sm h-100 bg-success text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Licenses Issued</h5>
+                    <p class="display-4 mb-0">{{ total_licenses_issued }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stats-card shadow-sm h-100 bg-info text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Pending Applications</h5>
+                    {% for status in status_counts %}
+                        {% if status.status == 'PENDING' %}
+                            <p class="display-4 mb-0">{{ status.count }}</p>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stats-card shadow-sm h-100 bg-warning text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Total Revenue</h5>
+                    <p class="display-4 mb-0">₹{{ total_revenue }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Charts Row -->
+    <div class="row mb-4">
+        <!-- Application Status Chart -->
+        <div class="col-md-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-header">
+                    <h5 class="mb-0">Applications by Status</h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="statusChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Application Type Chart -->
+        <div class="col-md-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-header">
+                    <h5 class="mb-0">Applications by Type</h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="typeChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Tables Row -->
+    <div class="row mb-4">
+        <!-- Status Counts Table -->
+        <div class="col-md-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-header">
+                    <h5 class="mb-0">Application Status Breakdown</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Status</th>
+                                    <th>Count</th>
+                                    <th>Percentage</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for status in status_counts %}
+                                <tr>
+                                    <td>
+                                        {% if status.status == 'PENDING' %}
+                                            <span class="badge bg-warning">PENDING</span>
+                                        {% elif status.status == 'DOCUMENT_VERIFICATION' %}
+                                            <span class="badge bg-info">DOCUMENT VERIFICATION</span>
+                                        {% elif status.status == 'SCHEDULED_FOR_TEST' %}
+                                            <span class="badge bg-primary">SCHEDULED FOR TEST</span>
+                                        {% elif status.status == 'TEST_PASSED' %}
+                                            <span class="badge bg-success">TEST PASSED</span>
+                                        {% elif status.status == 'TEST_FAILED' %}
+                                            <span class="badge bg-danger">TEST FAILED</span>
+                                        {% elif status.status == 'APPROVED' %}
+                                            <span class="badge bg-success">APPROVED</span>
+                                        {% elif status.status == 'REJECTED' %}
+                                            <span class="badge bg-danger">REJECTED</span>
+                                        {% elif status.status == 'LICENSE_ISSUED' %}
+                                            <span class="badge bg-success">LICENSE ISSUED</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">{{ status.status }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ status.count }}</td>
+                                    <td>{{ status.count|divisor:total_applications|floatformat:1 }}%</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- License Types Table -->
+        <div class="col-md-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-header">
+                    <h5 class="mb-0">Licenses by Type</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>License Type</th>
+                                    <th>Count</th>
+                                    <th>Percentage</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for license_type in license_type_counts %}
+                                <tr>
+                                    <td>{{ license_type.license_type__name }}</td>
+                                    <td>{{ license_type.count }}</td>
+                                    <td>{{ license_type.count|divisor:total_licenses_issued|floatformat:1 }}%</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Application Status Chart
+    const statusCtx = document.getElementById('statusChart').getContext('2d');
+    const statusLabels = [];
+    const statusData = [];
+    const statusBackgroundColors = [
+        'rgba(255, 193, 7, 0.8)',
+        'rgba(13, 202, 240, 0.8)',
+        'rgba(13, 110, 253, 0.8)',
+        'rgba(25, 135, 84, 0.8)',
+        'rgba(220, 53, 69, 0.8)',
+        'rgba(108, 117, 125, 0.8)'
+    ];
+    
+    {% for status in status_counts %}
+        {% if status.status == 'PENDING' %}
+            statusLabels.push('Pending');
+        {% elif status.status == 'DOCUMENT_VERIFICATION' %}
+            statusLabels.push('Document Verification');
+        {% elif status.status == 'SCHEDULED_FOR_TEST' %}
+            statusLabels.push('Scheduled for Test');
+        {% elif status.status == 'TEST_PASSED' %}
+            statusLabels.push('Test Passed');
+        {% elif status.status == 'TEST_FAILED' %}
+            statusLabels.push('Test Failed');
+        {% elif status.status == 'APPROVED' %}
+            statusLabels.push('Approved');
+        {% elif status.status == 'REJECTED' %}
+            statusLabels.push('Rejected');
+        {% elif status.status == 'LICENSE_ISSUED' %}
+            statusLabels.push('License Issued');
+        {% else %}
+            statusLabels.push('{{ status.status }}');
+        {% endif %}
+        statusData.push({{ status.count }});
+    {% endfor %}
+    
+    new Chart(statusCtx, {
+        type: 'pie',
+        data: {
+            labels: statusLabels,
+            datasets: [{
+                data: statusData,
+                backgroundColor: statusBackgroundColors,
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'right'
+                }
+            }
+        }
+    });
+    
+    // Application Type Chart
+    const typeCtx = document.getElementById('typeChart').getContext('2d');
+    const typeLabels = [];
+    const typeData = [];
+    const typeBackgroundColors = [
+        'rgba(13, 110, 253, 0.8)',
+        'rgba(25, 135, 84, 0.8)',
+        'rgba(13, 202, 240, 0.8)',
+        'rgba(255, 193, 7, 0.8)',
+        'rgba(220, 53, 69, 0.8)'
+    ];
+    
+    {% for type in type_counts %}
+        {% if type.application_type == 'NEW' %}
+            typeLabels.push('New License');
+        {% elif type.application_type == 'RENEWAL' %}
+            typeLabels.push('License Renewal');
+        {% elif type.application_type == 'DUPLICATE' %}
+            typeLabels.push('Duplicate License');
+        {% else %}
+            typeLabels.push('{{ type.application_type }}');
+        {% endif %}
+        typeData.push({{ type.count }});
+    {% endfor %}
+    
+    new Chart(typeCtx, {
+        type: 'doughnut',
+        data: {
+            labels: typeLabels,
+            datasets: [{
+                data: typeData,
+                backgroundColor: typeBackgroundColors,
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'right'
+                }
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

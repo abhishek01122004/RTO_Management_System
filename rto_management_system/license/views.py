@@ -590,8 +590,10 @@ def edit_license_type(request, type_id):
 
 @login_required
 @user_passes_test(lambda u: u.user_type in ['OFFICER', 'ADMIN'])
+@login_required
+@user_passes_test(lambda u: u.user_type in ['OFFICER', 'ADMIN'])
 def license_statistics(request):
-    """View to show license statistics"""
+    """View to show license statistics for administrators and officers"""
     # Get date range filters
     start_date = request.GET.get('start_date')
     end_date = request.GET.get('end_date')
