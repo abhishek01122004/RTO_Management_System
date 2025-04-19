@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+
+{% block title %}Traffic Rules - RTO Management System{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <h4><i class="fas fa-gavel"></i> Traffic Rules</h4>
+        </div>
+        <div class="card-body">
+            <div class="alert alert-info">
+                <p>This is the traffic rules page. This section manages all traffic rules that are enforced by the RTO.</p>
+            </div>
+            
+            {% if rules %}
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Rule Code</th>
+                                <th>Description</th>
+                                <th>Penalty Amount</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for rule in rules %}
+                            <tr>
+                                <td>{{ rule.rule_code }}</td>
+                                <td>{{ rule.description }}</td>
+                                <td>₹{{ rule.penalty_amount }}</td>
+                                <td>
+                                    {% if rule.is_active %}
+                                    <span class="badge bg-success">Active</span>
+                                    {% else %}
+                                    <span class="badge bg-danger">Inactive</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="#" class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-edit"></i> Edit
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="alert alert-warning">
+                    No traffic rules found in the system.
+                </div>
+            {% endif %}
+            
+            <a href="#" class="btn btn-success mt-3">
+                <i class="fas fa-plus"></i> Add New Traffic Rule
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+
+{% block title %}Challan Types - RTO Management System{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <h4><i class="fas fa-receipt"></i> Challan Types</h4>
+        </div>
+        <div class="card-body">
+            <div class="alert alert-info">
+                <p>This is the challan types page. This section manages different types of challans that can be issued for traffic violations.</p>
+            </div>
+            
+            {% if challan_types %}
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Description</th>
+                                <th>Default Penalty</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for challan_type in challan_types %}
+                            <tr>
+                                <td>{{ challan_type.name }}</td>
+                                <td>{{ challan_type.description }}</td>
+                                <td>₹{{ challan_type.default_penalty }}</td>
+                                <td>
+                                    {% if challan_type.is_active %}
+                                    <span class="badge bg-success">Active</span>
+                                    {% else %}
+                                    <span class="badge bg-danger">Inactive</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="#" class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-edit"></i> Edit
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="alert alert-warning">
+                    No challan types found in the system.
+                </div>
+            {% endif %}
+            
+            <a href="#" class="btn btn-success mt-3">
+                <i class="fas fa-plus"></i> Add New Challan Type
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
