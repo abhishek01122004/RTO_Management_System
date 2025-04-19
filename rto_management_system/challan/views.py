@@ -117,7 +117,7 @@ def pay_challan(request, challan_number):
         # Citizens can pay their own challans or challans for their vehicles
         user_vehicles = VehicleRegistration.objects.filter(
             owner=request.user,
-            status='REGISTERED'
+            is_active=True
         ).values_list('registration_number', flat=True)
         
         is_allowed = (challan.violator == request.user or 
@@ -276,7 +276,7 @@ def dispute_challan(request, challan_number):
         # Citizens can dispute their own challans or challans for their vehicles
         user_vehicles = VehicleRegistration.objects.filter(
             owner=request.user,
-            status='REGISTERED'
+            is_active=True
         ).values_list('registration_number', flat=True)
         
         is_allowed = (challan.violator == request.user or 
@@ -370,7 +370,7 @@ def generate_challan(request):
                 try:
                     vehicle = VehicleRegistration.objects.get(
                         registration_number=challan.vehicle_number,
-                        status='REGISTERED'
+                        is_active=True
                     )
                     challan.violator = vehicle.owner
                 except VehicleRegistration.DoesNotExist:
