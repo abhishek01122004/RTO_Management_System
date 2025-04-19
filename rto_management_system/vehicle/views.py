@@ -82,8 +82,8 @@ def my_vehicles(request):
         messages.error(request, "Access denied.")
         return redirect('home')
     
-    # Modified query to match the database schema, using registration_date instead of registered_date
-    vehicles = VehicleRegistration.objects.filter(owner=request.user).order_by('-registration_date')
+    # Modified query to match the database schema, using registered_date
+    vehicles = VehicleRegistration.objects.filter(owner=request.user).order_by('-registered_date')
     
     return render(request, 'vehicle/my_vehicles.html', {'vehicles': vehicles})
 
