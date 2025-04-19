@@ -1,8 +1,11 @@
+"""
+Script to create test users for the RTO Management System
+"""
 import os
 import django
 import datetime
 
-# Set the Django settings module
+# Set up Django environment
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'rto_management_system.settings')
 django.setup()
 
@@ -12,92 +15,93 @@ from accounts.models import User, CitizenProfile, OfficerProfile
 
 def create_test_users():
     """Create test users with different roles"""
+    print("Creating test users...")
     
-    # Create admin user
-    admin_user, admin_created = User.objects.get_or_create(
-        email='admin@test.com',
+    # Create Citizen User
+    citizen_user, created = User.objects.get_or_create(
+        email='citizen@example.com',
         defaults={
-            'first_name': 'Admin',
-            'last_name': 'User',
+            'first_name': 'Test',
+            'last_name': 'Citizen',
+            'phone_number': '9876543210',
+            'address': '123 Citizen Street, Test City',
+            'user_type': 'CITIZEN',
+            'aadhaar_number': '123456789012',
+        }
+    )
+    
+    if created:
+        citizen_user.set_password('citizen123')
+        citizen_user.save()
+        print(f"Created citizen user: {citizen_user.email}")
+        
+        # Create citizen profile
+        citizen_profile, _ = CitizenProfile.objects.get_or_create(
+            user=citizen_user,
+            defaults={
+                'date_of_birth': datetime.date(1990, 1, 1),
+                'blood_group': 'O+',
+                'emergency_contact': '9876543211',
+            }
+        )
+        print(f"Created citizen profile for: {citizen_user.email}")
+    else:
+        print(f"Citizen user already exists: {citizen_user.email}")
+    
+    # Create Officer User
+    officer_user, created = User.objects.get_or_create(
+        email='officer@example.com',
+        defaults={
+            'first_name': 'Test',
+            'last_name': 'Officer',
+            'phone_number': '8765432109',
+            'address': '456 Officer Avenue, Test City',
+            'user_type': 'OFFICER',
+        }
+    )
+    
+    if created:
+        officer_user.set_password('officer123')
+        officer_user.save()
+        print(f"Created officer user: {officer_user.email}")
+        
+        # Create officer profile
+        officer_profile, _ = OfficerProfile.objects.get_or_create(
+            user=officer_user,
+            defaults={
+                'employee_id': 'OFF-12345',
+                'designation': 'RTO Inspector',
+                'department': 'Licenses Division',
+                'joining_date': timezone.now().date(),
+            }
+        )
+        print(f"Created officer profile for: {officer_user.email}")
+    else:
+        print(f"Officer user already exists: {officer_user.email}")
+    
+    # Create Admin User
+    admin_user, created = User.objects.get_or_create(
+        email='admin@example.com',
+        defaults={
+            'first_name': 'Test',
+            'last_name': 'Admin',
+            'phone_number': '7654321098',
+            'address': '789 Admin Road, Test City',
             'user_type': 'ADMIN',
-            'phone_number': '+1234567890',
-            'address': '123 Admin Street, Admin City, 12345',
             'is_staff': True,
             'is_superuser': True,
         }
     )
     
-    if admin_created:
-        admin_user.set_password('Admin@123')
+    if created:
+        admin_user.set_password('admin123')
         admin_user.save()
-        print(f"Admin user created with email: {admin_user.email} and password: Admin@123")
+        print(f"Created admin user: {admin_user.email}")
     else:
-        print(f"Admin user already exists with email: {admin_user.email}")
+        print(f"Admin user already exists: {admin_user.email}")
     
-    # Create officer user
-    officer_user, officer_created = User.objects.get_or_create(
-        email='officer@test.com',
-        defaults={
-            'first_name': 'Officer',
-            'last_name': 'User',
-            'user_type': 'OFFICER',
-            'phone_number': '+1987654321',
-            'address': '456 Officer Street, Officer City, 67890',
-        }
-    )
-    
-    if officer_created:
-        officer_user.set_password('Officer@123')
-        officer_user.save()
-        
-        # Create officer profile
-        OfficerProfile.objects.create(
-            user=officer_user,
-            employee_id='EMP001',
-            designation='RTO Officer',
-            department='License Department',
-            joining_date=timezone.now().date()
-        )
-        
-        print(f"Officer user created with email: {officer_user.email} and password: Officer@123")
-    else:
-        print(f"Officer user already exists with email: {officer_user.email}")
-    
-    # Create citizen user
-    citizen_user, citizen_created = User.objects.get_or_create(
-        email='citizen@test.com',
-        defaults={
-            'first_name': 'Citizen',
-            'last_name': 'User',
-            'user_type': 'CITIZEN',
-            'phone_number': '+1122334455',
-            'address': '789 Citizen Street, Citizen City, 10111',
-            'aadhaar_number': '1234 5678 9012',
-        }
-    )
-    
-    if citizen_created:
-        citizen_user.set_password('Citizen@123')
-        citizen_user.save()
-        
-        # Create citizen profile
-        CitizenProfile.objects.create(
-            user=citizen_user,
-            date_of_birth=datetime.date(1990, 1, 1),
-            blood_group='O+',
-            emergency_contact='+1567891234'
-        )
-        
-        print(f"Citizen user created with email: {citizen_user.email} and password: Citizen@123")
-    else:
-        print(f"Citizen user already exists with email: {citizen_user.email}")
-    
-    return {
-        'admin': {'email': 'admin@test.com', 'password': 'Admin@123'},
-        'officer': {'email': 'officer@test.com', 'password': 'Officer@123'},
-        'citizen': {'email': 'citizen@test.com', 'password': 'Citizen@123'}
-    }
+    print("Test users creation completed.")
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     create_test_users()
