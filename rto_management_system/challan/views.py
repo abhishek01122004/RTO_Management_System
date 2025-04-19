@@ -54,7 +54,7 @@ def my_challans(request):
     # Get user's vehicles
     user_vehicles = VehicleRegistration.objects.filter(
         owner=request.user,
-        status='REGISTERED'
+        is_active=True
     ).values_list('registration_number', flat=True)
     
     # Get challans for user's vehicles (even if user is not set as violator)
@@ -78,7 +78,7 @@ def view_challan(request, challan_number):
         # Citizens can view their own challans or challans for their vehicles
         user_vehicles = VehicleRegistration.objects.filter(
             owner=request.user,
-            status='REGISTERED'
+            is_active=True
         ).values_list('registration_number', flat=True)
         
         is_allowed = (challan.violator == request.user or 
