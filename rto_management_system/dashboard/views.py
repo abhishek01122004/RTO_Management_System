@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.utils import timezone
+from license.models import LicenseApplication
 
 
 @login_required
@@ -82,3 +83,21 @@ def check_application_status(request, application_type, application_number):
     }
     
     return render(request, 'dashboard/check_status.html', context)
+
+
+@login_required
+def track_license_status(request):
+    """View to track status of all license applications for the logged-in citizen"""
+    # Check if user is a citizen
+    if request.user.user_type != 'CITIZEN':
+        return redirect('dashboard')
+    
+    # Get all license applications for the current user
+    applications = LicenseApplication.objects.filter(applicant=request.user).order_by('-application_date')
+    
+    context = {
+        'applications': applications,
+        'current_date': timezone.now(),
+    }
+    
+    return render(request, 'dashboard/track_license_status.html', context)
