@@ -261,7 +261,8 @@ def review_registration_application(request, application_number):
 @user_passes_test(lambda u: u.user_type in ['OFFICER', 'ADMIN'])
 def schedule_inspection(request, application_number):
     """View for scheduling a vehicle inspection"""
-    application = get_object_or_404(VehicleRegistration, registration_number=application_number)
+    # Modified to get by registration_number instead of application_number
+    vehicle = get_object_or_404(VehicleRegistration, registration_number=application_number)
     
     if request.method == 'POST':
         # Handle form submission
@@ -279,34 +280,38 @@ def schedule_inspection(request, application_number):
                 inspection_datetime = datetime.datetime.combine(inspection_date, inspection_time)
                 inspection_datetime = timezone.make_aware(inspection_datetime)
                 
-                # Update application
-                application.status = 'INSPECTION_SCHEDULED'
-                application.inspection_date = inspection_datetime
+                # Update vehicle
+                vehicle.status = 'INSPECTION_SCHEDULED'
+                vehicle.inspection_date = inspection_datetime
                 if remarks:
-                    application.inspection_notes = remarks
-                application.updated_at = timezone.now()
-                application.save()
+                    vehicle.inspection_notes = remarks
+                vehicle.updated_at = timezone.now()
+                vehicle.save()
                 
-                # Send notification to the applicant
-                if application.owner:
+                # Send notification to the owner
+                if vehicle.owner:
                     try:
+                        # Use make and model directly from vehicle
+                        make = vehicle.make if hasattr(vehicle, 'make') else "Unknown Make"
+                        model = vehicle.model if hasattr(vehicle, 'model') else "Unknown Model"
+                        
                         send_notification(
-                            application.owner,
+                            vehicle.owner,
                             "Vehicle Inspection Scheduled",
-                            f"Your vehicle inspection for {application.make} {application.model} has been scheduled for {inspection_date_str} at {inspection_time_str}.",
+                            f"Your vehicle inspection for {make} {model} has been scheduled for {inspection_date_str} at {inspection_time_str}.",
                             "INSPECTION"
                         )
                         
                         send_email(
-                            application.owner.email,
+                            vehicle.owner.email,
                             "Vehicle Inspection Scheduled",
-                            f"Dear {application.owner.get_full_name()},\n\nYour vehicle inspection for {application.make} {application.model} has been scheduled for {inspection_date_str} at {inspection_time_str}.\n\nPlease bring your vehicle to the RTO office on the scheduled date and time.\n\nThank you,\nRTO Office"
+                            f"Dear {vehicle.owner.get_full_name()},\n\nYour vehicle inspection for {make} {model} has been scheduled for {inspection_date_str} at {inspection_time_str}.\n\nPlease bring your vehicle to the RTO office on the scheduled date and time.\n\nThank you,\nRTO Office"
                         )
                         
-                        if application.owner.phone_number:
+                        if vehicle.owner.phone_number:
                             send_sms(
-                                application.owner.phone_number,
-                                f"Your vehicle inspection for {application.registration_number} has been scheduled for {inspection_date_str} at {inspection_time_str}. Please bring your vehicle to the RTO office on time. Thank you, RTO Office"
+                                vehicle.owner.phone_number,
+                                f"Your vehicle inspection for {vehicle.registration_number} has been scheduled for {inspection_date_str} at {inspection_time_str}. Please bring your vehicle to the RTO office on time. Thank you, RTO Office"
                             )
                     except Exception as e:
                         messages.warning(request, f"Could not send notification: {str(e)}")
@@ -318,7 +323,7 @@ def schedule_inspection(request, application_number):
     
     # Prepare context for GET request
     context = {
-        'application': application,
+        'application': vehicle,  # Use vehicle instead of application
         'min_date': timezone.now().date().strftime('%Y-%m-%d'),
         'min_time': timezone.now().time().strftime('%H:%M'),
     }
@@ -330,7 +335,7 @@ def schedule_inspection(request, application_number):
 @user_passes_test(lambda u: u.user_type in ['OFFICER', 'ADMIN'])
 def record_inspection_result(request, application_number):
     """View for recording vehicle inspection results"""
-    application = get_object_or_404(VehicleRegistration, registration_number=application_number)
+    vehicle = get_object_or_404(VehicleRegistration, registration_number=application_number)
     
     if request.method == 'POST':
         # Handle form submission
@@ -338,36 +343,40 @@ def record_inspection_result(request, application_number):
         inspection_notes = request.POST.get('inspection_notes')
         
         if inspection_result:
-            # Update application status based on inspection result
+            # Update vehicle status based on inspection result
             if inspection_result == 'PASSED':
-                application.status = 'INSPECTION_PASSED'
-                application.inspection_result = True
+                vehicle.status = 'INSPECTION_PASSED'
+                vehicle.inspection_result = True
             else:
-                application.status = 'INSPECTION_FAILED'
-                application.inspection_result = False
+                vehicle.status = 'INSPECTION_FAILED'
+                vehicle.inspection_result = False
             
             # Update inspection data
             if inspection_notes:
-                application.inspection_notes = inspection_notes
+                vehicle.inspection_notes = inspection_notes
             
-            application.updated_at = timezone.now()
-            application.save()
+            vehicle.updated_at = timezone.now()
+            vehicle.save()
             
-            # Send notification to the applicant
-            if application.owner:
+            # Send notification to the owner
+            if vehicle.owner:
                 try:
+                    # Use make and model directly from vehicle
+                    make = vehicle.make if hasattr(vehicle, 'make') else "Unknown Make"
+                    model = vehicle.model if hasattr(vehicle, 'model') else "Unknown Model"
+                    
                     result_text = "passed" if inspection_result == 'PASSED' else "failed"
                     send_notification(
-                        application.owner,
+                        vehicle.owner,
                         f"Vehicle Inspection {result_text.capitalize()}",
-                        f"Your vehicle inspection for {application.make} {application.model} has {result_text}.",
+                        f"Your vehicle inspection for {make} {model} has {result_text}.",
                         "INSPECTION"
                     )
                     
                     send_email(
-                        application.owner.email,
+                        vehicle.owner.email,
                         f"Vehicle Inspection {result_text.capitalize()}",
-                        f"Dear {application.owner.get_full_name()},\n\nYour vehicle inspection for {application.make} {application.model} has {result_text}.\n\n" +
+                        f"Dear {vehicle.owner.get_full_name()},\n\nYour vehicle inspection for {make} {model} has {result_text}.\n\n" +
                         (f"Please proceed with the registration process.\n\n" if inspection_result == 'PASSED' else f"Please address the following issues and schedule another inspection:\n\n{inspection_notes}\n\n") +
                         "Thank you,\nRTO Office"
                     )
@@ -379,7 +388,7 @@ def record_inspection_result(request, application_number):
     
     # Prepare context for GET request
     context = {
-        'application': application,
+        'application': vehicle,  # Use vehicle instead of application
     }
     
     return render(request, 'vehicle/record_inspection.html', context)
