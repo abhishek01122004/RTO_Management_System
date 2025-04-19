@@ -4,7 +4,8 @@ from . import views
 urlpatterns = [
     # Citizen URLs
     path('dashboard/', views.vehicle_dashboard, name='vehicle_dashboard'),
-    path('register/', views.apply_for_registration, name='apply_for_registration'),
+    path('register/', views.apply_for_registration, name='register_vehicle'),  # Fixed URL name for template compatibility
+    path('register/', views.apply_for_registration, name='apply_for_registration'),  # Keep original name for backward compatibility
     path('application/<str:application_number>/', views.registration_application_detail, name='registration_application_detail'),
     path('applications/', views.my_registration_applications, name='my_registration_applications'),
     path('my-vehicles/', views.my_vehicles, name='my_vehicles'),
