@@ -203,15 +203,15 @@ def review_registration_applications(request):
     registration_type_filter = request.GET.get('registration_type', '')
     
     # Build query with filters
-    query_filters = {'payment_status': True}
+    query_filters = {'application__payment_status': True}  # Use correct related field in RegistrationApplication
     
     if status_filter:
         query_filters['status'] = status_filter
         
     if registration_type_filter:
-        query_filters['registration_type'] = registration_type_filter
+        query_filters['application__application_type'] = registration_type_filter  # Updated to use correct related field
     
-    applications = VehicleRegistration.objects.filter(**query_filters).order_by('-application_date')
+    applications = VehicleRegistration.objects.filter(**query_filters).order_by('-created_at')  # Changed to use created_at instead of application_date
     
     return render(request, 'vehicle/review_applications.html', {
         'applications': applications,
