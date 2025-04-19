@@ -56,9 +56,11 @@
                             <div class="row mb-3">
                                 <div class="col-md-6">
                                     <label class="form-label">Vehicle Model</label>
-                                    <select name="vehicle_model" class="form-select" required id="vehicle-model-select" disabled>
+                                    <select name="vehicle_model" class="form-select" required id="vehicle-model-select">
                                         <option value="">-- Select Vehicle Model --</option>
-                                        <!-- Models will be populated via JavaScript based on maker selection -->
+                                        {% for model in vehicle_models %}
+                                        <option value="{{ model.id }}" data-maker="{{ model.maker_id }}">{{ model.name }} ({{ model.vehicle_type }})</option>
+                                        {% endfor %}
                                     </select>
                                 </div>
                                 <div class="col-md-6">
@@ -211,6 +213,16 @@
         const makerSelect = document.getElementById('vehicle-maker-select');
         const modelSelect = document.getElementById('vehicle-model-select');
         
+        // Store all model options on page load for filtering
+        const allModelOptions = [];
+        if (modelSelect) {
+            Array.from(modelSelect.options).forEach(option => {
+                if (option.value) { // Skip the default "Select" option
+                    allModelOptions.push(option.cloneNode(true));
+                }
+            });
+        }
+        
         if (makerSelect && modelSelect) {
             makerSelect.addEventListener('change', function() {
                 const makerId = this.value;
@@ -219,26 +231,32 @@
                 modelSelect.innerHTML = '<option value="">-- Select Vehicle Model --</option>';
                 
                 if (makerId) {
-                    // Enable the model dropdown
-                    modelSelect.disabled = false;
+                    // Filter and add models that match the selected maker
+                    let modelsFound = false;
                     
-                    // Here you'd typically fetch models via AJAX
-                    // For now, we'll add a placeholder message
-                    const option = document.createElement('option');
-                    option.text = 'Loading models...';
-                    option.disabled = true;
-                    modelSelect.add(option);
+                    allModelOptions.forEach(option => {
+                        if (option.dataset.maker === makerId) {
+                            modelSelect.appendChild(option.cloneNode(true));
+                            modelsFound = true;
+                        }
+                    });
                     
-                    // Fetch models via AJAX (to be implemented)
-                    // fetchVehicleModels(makerId);
+                    if (!modelsFound) {
+                        const option = document.createElement('option');
+                        option.text = 'No models available for this maker';
+                        option.disabled = true;
+                        modelSelect.appendChild(option);
+                    }
                 } else {
-                    // If no maker is selected, disable the model dropdown
-                    modelSelect.disabled = true;
+                    // If no maker selected, add all models
+                    allModelOptions.forEach(option => {
+                        modelSelect.appendChild(option.cloneNode(true));
+                    });
                 }
             });
         }
         
-        // Form validation (can be expanded)
+        // Form validation
         const form = document.getElementById('vehicle-registration-form');
         if (form) {
             form.addEventListener('submit', function(event) {
@@ -250,11 +268,5 @@
             });
         }
     });
-    
-    // Function to fetch vehicle models via AJAX (to be implemented)
-    function fetchVehicleModels(makerId) {
-        // AJAX request to get models for the selected maker
-        // This would be implemented later with proper backend endpoint
-    }
 </script>
 {% endblock %}

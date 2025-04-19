@@ -122,9 +122,11 @@ def apply_for_registration(request):
         # Prepare context for GET request
         vehicle_classes = VehicleClass.objects.filter(is_active=True)
         vehicle_makers = VehicleMaker.objects.filter(is_active=True)
+        vehicle_models = VehicleModel.objects.filter(is_active=True)
         context = {
             'vehicle_classes': vehicle_classes,
             'vehicle_makers': vehicle_makers,
+            'vehicle_models': vehicle_models,
         }
     
     return render(request, 'vehicle/apply.html', context)
