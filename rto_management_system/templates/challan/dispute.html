@@ -1,0 +1,144 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Dispute Challan{% endblock %}
+
+{% block extra_css %}
+<style>
+    .dispute-card {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+    .challan-details {
+        background-color: #f8f9fa;
+        border-radius: 5px;
+        padding: 15px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row mb-4">
+        <div class="col">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'my_challans' %}">My Challans</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'view_challan' challan_number=challan.challan_number %}">Challan #{{ challan.challan_number }}</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Dispute</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+    
+    <div class="card shadow dispute-card">
+        <div class="card-header bg-warning text-dark">
+            <h4 class="mb-0">Dispute Challan</h4>
+        </div>
+        <div class="card-body">
+            <div class="challan-details mb-4">
+                <div class="row">
+                    <div class="col-md-4">
+                        <p class="mb-1"><strong>Challan Number:</strong></p>
+                        <p>{{ challan.challan_number }}</p>
+                    </div>
+                    <div class="col-md-4">
+                        <p class="mb-1"><strong>Issue Date:</strong></p>
+                        <p>{{ challan.issue_date|date:"d M Y" }}</p>
+                    </div>
+                    <div class="col-md-4">
+                        <p class="mb-1"><strong>Status:</strong></p>
+                        <p>
+                            <span class="badge {% if challan.status == 'PAID' %}bg-success{% elif challan.status == 'DISPUTED' %}bg-warning{% else %}bg-danger{% endif %}">
+                                {{ challan.get_status_display }}
+                            </span>
+                        </p>
+                    </div>
+                </div>
+                <div class="row mt-2">
+                    <div class="col-md-4">
+                        <p class="mb-1"><strong>Vehicle Number:</strong></p>
+                        <p>{{ challan.vehicle_number }}</p>
+                    </div>
+                    <div class="col-md-4">
+                        <p class="mb-1"><strong>Due Date:</strong></p>
+                        <p>{{ challan.due_date|date:"d M Y" }}</p>
+                    </div>
+                    <div class="col-md-4">
+                        <p class="mb-1"><strong>Amount:</strong></p>
+                        <p class="h4 text-danger">₹{{ challan.total_amount }}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="alert alert-info">
+                <h5 class="alert-heading">Dispute Information</h5>
+                <p>You are about to dispute this challan. Please provide a detailed explanation of why you believe this challan was issued in error.</p>
+                <p class="mb-0">Your dispute will be reviewed by an RTO officer, and you will be notified of the decision.</p>
+            </div>
+            
+            {% if messages %}
+                <div class="mb-4">
+                    {% for message in messages %}
+                        <div class="alert {% if message.tags == 'error' %}alert-danger{% else %}alert-{{ message.tags }}{% endif %} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+            
+            <form method="post" class="mt-4">
+                {% csrf_token %}
+                
+                <div class="mb-3">
+                    <label for="dispute_reason" class="form-label">Reason for Dispute *</label>
+                    <textarea id="dispute_reason" name="dispute_reason" class="form-control" rows="5" required></textarea>
+                    <div class="form-text">Provide a clear and detailed explanation of why you are disputing this challan</div>
+                </div>
+                
+                <div class="mb-3 form-check">
+                    <input type="checkbox" class="form-check-input" id="confirmDispute" required>
+                    <label class="form-check-label" for="confirmDispute">
+                        I confirm that the information provided is accurate and truthful.
+                    </label>
+                </div>
+                
+                <div class="alert alert-warning">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    <strong>Note:</strong> Filing a false dispute may result in additional penalties.
+                </div>
+                
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                    <a href="{% url 'view_challan' challan_number=challan.challan_number %}" class="btn btn-outline-secondary me-md-2">Cancel</a>
+                    <button type="submit" class="btn btn-warning">Submit Dispute</button>
+                </div>
+            </form>
+        </div>
+        <div class="card-footer">
+            <div class="small text-muted">
+                <i class="bi bi-info-circle me-2"></i> Disputes are typically reviewed within 7-10 business days.
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Form validation
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.querySelector('form');
+        const disputeReason = document.getElementById('dispute_reason');
+        
+        form.addEventListener('submit', function(e) {
+            if (disputeReason.value.trim().length < 20) {
+                e.preventDefault();
+                alert('Please provide a more detailed reason for the dispute (at least 20 characters).');
+                disputeReason.focus();
+            }
+        });
+    });
+</script>
+{% endblock %}
