@@ -9,6 +9,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('vehicle', '0006_auto_20250419_1127'),
+        migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
@@ -50,7 +51,7 @@ class Migration(migrations.Migration):
                 ('year_of_manufacture', models.IntegerField()),
                 ('created_at', models.DateTimeField(auto_now_add=True)),
                 ('is_active', models.BooleanField(default=True)),
-                ('maker', models.ForeignKey(on_delete=models.deletion.CASCADE, related_name='models', to='vehicle.vehiclemaker')),
+                ('maker', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='models', to='vehicle.vehiclemaker')),
             ],
         ),
         migrations.CreateModel(
@@ -90,9 +91,9 @@ class Migration(migrations.Migration):
                 ('applicant', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
                 ('inspection_officer', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='vehicle_inspections', to=settings.AUTH_USER_MODEL)),
                 ('reviewed_by', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='vehicle_applications_reviewed', to=settings.AUTH_USER_MODEL)),
-                ('vehicle_class', models.ForeignKey(on_delete=models.deletion.PROTECT, to='vehicle.vehicleclass')),
-                ('vehicle_maker', models.ForeignKey(on_delete=models.deletion.PROTECT, to='vehicle.vehiclemaker')),
-                ('vehicle_model', models.ForeignKey(on_delete=models.deletion.PROTECT, to='vehicle.vehiclemodel')),
+                ('vehicle_class', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='vehicle.vehicleclass')),
+                ('vehicle_maker', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='vehicle.vehiclemaker')),
+                ('vehicle_model', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='vehicle.vehiclemodel')),
             ],
         ),
     ]
