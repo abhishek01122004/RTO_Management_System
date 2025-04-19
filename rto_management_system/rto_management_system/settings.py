@@ -86,8 +86,15 @@ WSGI_APPLICATION = 'rto_management_system.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
-# Use MySQL if MYSQL_DATABASE is available, otherwise fallback to SQLite
-if os.environ.get('MYSQL_DATABASE'):
+# Use PostgreSQL with DATABASE_URL
+if os.environ.get('DATABASE_URL'):
+    # Parse the DATABASE_URL
+    import dj_database_url
+    DATABASES = {
+        'default': dj_database_url.config(default=os.environ.get('DATABASE_URL'))
+    }
+elif os.environ.get('MYSQL_DATABASE'):
+    # Fallback to MySQL if configured
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.mysql',
@@ -102,6 +109,7 @@ if os.environ.get('MYSQL_DATABASE'):
         }
     }
 else:
+    # Final fallback to SQLite
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
