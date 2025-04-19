@@ -127,8 +127,42 @@ def pay_challan(request, challan_number):
             messages.error(request, "You don't have permission to pay this challan.")
             return redirect('home')
     
-    # Initialize Razorpay
-    client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
+    # Handle POST for development mode direct payment
+    if request.method == 'POST' and not settings.RAZORPAY_KEY_ID:
+        # Create payment record in development mode
+        ChallanPayment.objects.create(
+            challan=challan,
+            amount=challan.total_amount,
+            payment_method='ONLINE',
+            transaction_id=f"mock_payment_{timezone.now().strftime('%Y%m%d%H%M%S')}",
+            payment_gateway_response="Development mode payment"
+        )
+        
+        # Send notification
+        if challan.violator:
+            try:
+                send_notification(
+                    user=challan.violator,
+                    title="Challan Payment Successful",
+                    message=f"Payment for challan #{challan.challan_number} has been received.",
+                    notification_type="PAYMENT"
+                )
+                
+                send_email(
+                    to_email=challan.violator.email,
+                    subject="Challan Payment Successful",
+                    message=f"Your payment for challan #{challan.challan_number} has been received. "
+                            f"Thank you for the payment."
+                )
+            except Exception as e:
+                # Continue even if notification fails
+                print(f"Notification error: {str(e)}")
+        
+        messages.success(request, "Development mode: Payment completed successfully.")
+        return redirect('view_challan', challan_number=challan_number)
+    
+    # Initialize Razorpay client
+    client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID or 'rzp_test_mock', settings.RAZORPAY_KEY_SECRET or 'mock_secret'))
     
     # Create order
     amount = int(challan.total_amount * 100)  # Convert to paise
@@ -142,18 +176,27 @@ def pay_challan(request, challan_number):
         }
     }
     
-    # Create Razorpay order
+    # Check if in development mode without Razorpay keys
+    dev_mode = not settings.RAZORPAY_KEY_ID
+    
     try:
-        order = client.order.create(data=payment_data)
+        # Create Razorpay order if keys are available
+        if not dev_mode:
+            order = client.order.create(data=payment_data)
+            order_id = order['id']
+        else:
+            # Mock order ID for development
+            order_id = f"dev_order_{timezone.now().strftime('%Y%m%d%H%M%S')}"
         
         context = {
             'challan': challan,
-            'order_id': order['id'],
+            'order_id': order_id,
             'amount': amount / 100,  # Convert back to rupees for display
             'key_id': settings.RAZORPAY_KEY_ID,
             'user_name': f"{request.user.first_name} {request.user.last_name}",
             'user_email': request.user.email,
             'user_phone': request.user.phone_number,
+            'dev_mode': dev_mode
         }
         
         return render(request, 'challan/pay.html', context)
