@@ -1,8 +1,49 @@
 from django import forms
 from django.core.validators import RegexValidator
-from .models import Challan, TrafficRule, ChallanPayment
+from .models import Challan, TrafficRule, ChallanPayment, ChallanType
 from accounts.models import User
 from vehicle.models import VehicleRegistration
+
+
+class TrafficRuleForm(forms.ModelForm):
+    """Form for creating and editing traffic rules"""
+    class Meta:
+        model = TrafficRule
+        fields = ['rule_code', 'description', 'penalty_amount', 'is_active']
+        widgets = {
+            'rule_code': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Rule Code (e.g., TR001)'}),
+            'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Detailed description of the traffic rule violation'}),
+            'penalty_amount': forms.NumberInput(attrs={'class': 'form-control', 'min': '0', 'step': '0.01'}),
+            'is_active': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        }
+        
+    def clean_rule_code(self):
+        """Ensure rule code is unique"""
+        rule_code = self.cleaned_data.get('rule_code')
+        
+        # If editing an existing instance, exclude the current instance from uniqueness check
+        instance = getattr(self, 'instance', None)
+        if instance and instance.pk:
+            if TrafficRule.objects.filter(rule_code=rule_code).exclude(pk=instance.pk).exists():
+                raise forms.ValidationError("This rule code already exists. Please choose a different one.")
+        else:  # New instance
+            if TrafficRule.objects.filter(rule_code=rule_code).exists():
+                raise forms.ValidationError("This rule code already exists. Please choose a different one.")
+                
+        return rule_code
+
+
+class ChallanTypeForm(forms.ModelForm):
+    """Form for creating and editing challan types"""
+    class Meta:
+        model = ChallanType
+        fields = ['name', 'description', 'default_penalty', 'is_active']
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Challan Type Name'}),
+            'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Description of this challan type'}),
+            'default_penalty': forms.NumberInput(attrs={'class': 'form-control', 'min': '0', 'step': '0.01'}),
+            'is_active': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        }
 
 
 class ChallanGenerationForm(forms.ModelForm):
