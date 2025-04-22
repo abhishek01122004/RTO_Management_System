@@ -75,3 +75,4 @@ def create_vehicle_classes():
 
 if __name__ == "__main__":
     create_vehicle_classes()
+    

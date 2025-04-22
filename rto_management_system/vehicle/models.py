@@ -4,6 +4,8 @@ from django.db import models
 from django.utils import timezone
 from django.conf import settings
 
+from RTOManagementSystem.rto_management_system.vehicle.admin import RegistrationApplicationAdmin
+
 # Vehicle class constants
 VEHICLE_CLASSES = (
     ('MCWOG', 'Motorcycle Without Gear'),
@@ -189,20 +191,24 @@ class RegistrationApplication(models.Model):
         super().save(*args, **kwargs)
 
 
-class VehicleRegistration(models.Model):
-    """Vehicle registration model"""
-    registration_number = models.CharField(max_length=20, unique=True, blank=True)
-    application = models.OneToOneField(RegistrationApplication, on_delete=models.CASCADE, related_name='registration')
-    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='owned_vehicles')
-    registered_date = models.DateField(auto_now_add=True)
-    expiry_date = models.DateField()
-    fitness_certificate_expiry = models.DateField(blank=True, null=True)
-    tax_paid_upto = models.DateField(blank=True, null=True)
-    emission_test_validity = models.DateField(blank=True, null=True)
-    insurance_validity = models.DateField()
-    is_active = models.BooleanField(default=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+
+
+    def __str__(self):
+        return f"{self.owner.username} - {self.registration_type} - {self.chassis_number}"
+    
+    class VehicleRegistration(models.Model):
+        registration_number = models.CharField(max_length=20, unique=True, blank=True)
+        application = models.OneToOneField(RegistrationApplication, on_delete=models.CASCADE, related_name='registration')
+        owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='owned_vehicles')
+        registered_date = models.DateField(auto_now_add=True)
+        expiry_date = models.DateField()
+        fitness_certificate_expiry = models.DateField(blank=True, null=True)
+        tax_paid_upto = models.DateField(blank=True, null=True)
+        emission_test_validity = models.DateField(blank=True, null=True)
+        insurance_validity = models.DateField()
+        is_active = models.BooleanField(default=True)
+        created_at = models.DateTimeField(auto_now_add=True)
+        updated_at = models.DateTimeField(auto_now=True)
     
     # RC smart card data
     rc_card_number = models.CharField(max_length=50, blank=True, null=True)
@@ -277,3 +283,24 @@ class VehicleTransfer(models.Model):
     
     def __str__(self):
         return f"Transfer of {self.vehicle.registration_number} from {self.current_owner} to {self.new_owner}"
+    # models.py
+
+from django.db import models
+from django.contrib.auth import get_user_model
+from .models import VehicleRegistration  # ensure this is imported if not in the same file
+
+User = get_user_model()
+
+class VehicleInspection(models.Model):
+    vehicle = models.ForeignKey(VehicleRegistration, on_delete=models.CASCADE)
+    scheduled_date = models.DateTimeField()
+    venue = models.CharField(max_length=255)
+    instructions = models.TextField(blank=True)
+    passed = models.BooleanField(null=True, blank=True)
+    notes = models.TextField(blank=True)
+    inspection_report = models.FileField(upload_to='inspection_reports/', blank=True, null=True)
+    inspected_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Inspection for {self.vehicle.registration_number} on {self.scheduled_date}"

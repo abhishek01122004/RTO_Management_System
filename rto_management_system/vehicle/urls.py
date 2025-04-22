@@ -21,6 +21,13 @@ urlpatterns = [
     path('application/<str:application_number>/issue/', views.issue_registration, name='issue_registration'),
     path('transfers/review/', views.review_transfer_applications, name='review_transfer_applications'),
     path('transfer/<int:transfer_id>/review/', views.review_transfer, name='review_transfer'),
+    path('registered/', views.list_registered_vehicles, name='list_registered_vehicles'),
+    path('vehicle/<str:registration_number>/edit/', views.edit_vehicle, name='edit_vehicle'),
+    path('vehicle/<str:registration_number>/delete/', views.delete_vehicle, name='delete_vehicle'),
+    path('registrations/pending/', views.pending_registrations, name='pending_registrations'),
+    path('registration/<int:registration_id>/review/', views.review_registration, name='review_registration'),
+
+
     
     # Admin URLs
     path('classes/', views.vehicle_classes, name='vehicle_classes'),
@@ -32,6 +39,9 @@ urlpatterns = [
     path('models/', views.vehicle_models, name='vehicle_models'),
     path('model/add/', views.add_vehicle_model, name='add_vehicle_model'),
     path('model/<int:model_id>/edit/', views.edit_vehicle_model, name='edit_vehicle_model'),
+    path('delete/<int:id>/', views.delete_vehicle, name='delete_vehicle'),
+    path('registered/', views.all_registered_vehicles, name='all_registered_vehicles'),
+    path('review/<int:id>/', views.review_vehicle_registration, name='review_vehicle'),
     
     # Statistics
     path('statistics/', views.vehicle_statistics, name='vehicle_statistics'),

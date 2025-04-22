@@ -11,9 +11,16 @@ from django.urls import reverse
 from django.db.models import Count, Q, Sum
 from django.utils import timezone
 
-from .models import (VehicleClass, VehicleMaker, VehicleModel, 
-                    RegistrationApplication, VehicleRegistration, VehicleTransfer,
-                    FUEL_TYPES, VEHICLE_TYPES)
+from .models import (
+    VehicleClass,
+    VehicleMaker,
+    VehicleModel,
+    RegistrationApplication,
+    VehicleRegistration,
+    VehicleTransfer,
+    FUEL_TYPES,
+    VEHICLE_TYPES
+)
 from accounts.models import User
 
 # Try to import from notifications app, but fall back to local implementation if not available
@@ -107,29 +114,27 @@ def vehicle_detail(request, registration_number):
     })
 
 
+# In views.py - Update the apply_for_registration view
 @login_required
 def apply_for_registration(request):
-    """View for citizens to apply for vehicle registration"""
     if request.user.user_type != 'CITIZEN':
         messages.error(request, "Only citizens can apply for vehicle registration.")
         return redirect('home')
-    
+
     if request.method == 'POST':
-        # Handle form submission
-        # This will be implemented in a separate step with the form
-        pass
+        form = VehicleRegistrationForm(request.POST, request.FILES)
+        if form.is_valid():
+            vehicle = form.save(commit=False)
+            vehicle.owner = request.user
+            vehicle.status = 'PENDING'
+            vehicle.save()
+            
+            messages.success(request, "Vehicle registration submitted successfully! It will be reviewed by an RTO officer.")
+            return redirect('my_vehicles')
     else:
-        # Prepare context for GET request
-        vehicle_classes = VehicleClass.objects.filter(is_active=True)
-        vehicle_makers = VehicleMaker.objects.filter(is_active=True)
-        vehicle_models = VehicleModel.objects.filter(is_active=True)
-        context = {
-            'vehicle_classes': vehicle_classes,
-            'vehicle_makers': vehicle_makers,
-            'vehicle_models': vehicle_models,
-        }
-    
-    return render(request, 'vehicle/apply.html', context)
+        form = VehicleRegistrationForm()
+
+    return render(request, 'vehicle/register_vehicle.html', {'form': form})
 
 
 @login_required
@@ -731,3 +736,147 @@ def vehicle_statistics(request):
     }
     
     return render(request, 'vehicle/statistics.html', context)
+@login_required
+@user_passes_test(lambda u: u.user_type in ['OFFICER', 'ADMIN'])
+def list_registered_vehicles(request):
+    """View for officers to see all registered vehicles"""
+    vehicles = VehicleRegistration.objects.filter(status='REGISTERED').order_by('-registered_date')
+    return render(request, 'vehicle/list_registered.html', {'vehicles': vehicles})
+@login_required
+@user_passes_test(lambda u: u.user_type == 'OFFICER')
+def edit_vehicle(request, registration_number):
+    vehicle = get_object_or_404(VehicleRegistration, registration_number=registration_number)
+
+    if request.method == 'POST':
+        vehicle.chassis_number = request.POST.get('chassis_number')
+        vehicle.engine_number = request.POST.get('engine_number')
+        vehicle.rc_card_number = request.POST.get('rc_card_number')
+        vehicle.valid_until = request.POST.get('valid_until')
+        vehicle.tax_paid_upto = request.POST.get('tax_paid_upto')
+        vehicle.updated_at = timezone.now()
+        vehicle.save()
+
+        messages.success(request, f"Vehicle {registration_number} updated successfully.")
+        return redirect('vehicle_detail', registration_number=registration_number)
+
+    return render(request, 'vehicle/edit_vehicle.html', {'vehicle': vehicle})
+@login_required
+@user_passes_test(lambda u: u.user_type == 'ADMIN')
+def delete_vehicle(request, registration_number):
+    vehicle = get_object_or_404(VehicleRegistration, registration_number=registration_number)
+
+    if request.method == 'POST':
+        vehicle.delete()
+        messages.success(request, f"Vehicle {registration_number} deleted successfully.")
+        return redirect('list_registered_vehicles')
+
+    return render(request, 'vehicle/confirm_delete.html', {'vehicle': vehicle})
+# views.py
+from django.contrib.admin.views.decorators import staff_member_required
+from django.contrib.auth.decorators import login_required, user_passes_test
+
+def is_officer(user):
+    return user.is_authenticated and user.user_type == 'OFFICER'
+
+@login_required
+@user_passes_test(is_officer)
+def all_registered_vehicles(request):
+    vehicles = VehicleRegistration.objects.filter(status='REGISTERED').order_by('-registration_date')
+    return render(request, 'vehicle/registered_vehicles.html', {'vehicles': vehicles})
+@login_required
+def delete_vehicle(request, id):
+    vehicle = get_object_or_404(VehicleRegistration, id=id, owner=request.user)
+    if vehicle.status != 'PENDING':
+        messages.error(request, "Only pending applications can be deleted.")
+        return redirect('vehicle_detail', id=vehicle.id)
+
+    if request.method == 'POST':
+        vehicle.delete()
+        messages.success(request, "Vehicle registration deleted.")
+        return redirect('my_vehicles')
+    
+    return render(request, 'vehicle/confirm_delete.html', {'vehicle': vehicle})
+@login_required
+@user_passes_test(is_officer)
+def review_vehicle_registration(request, id):
+    vehicle = get_object_or_404(VehicleRegistration, id=id)
+
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        if action == 'approve':
+            vehicle.status = 'APPROVED'
+            vehicle.registration_date = timezone.now()
+            vehicle.save()
+            messages.success(request, "Vehicle approved.")
+        elif action == 'reject':
+            vehicle.status = 'REJECTED'
+            vehicle.save()
+            messages.warning(request, "Vehicle rejected.")
+        return redirect('all_registered_vehicles')
+    
+    return render(request, 'vehicle/review_vehicle.html', {'vehicle': vehicle})
+# views.py
+from .forms import VehicleRegistrationForm  # already imported
+
+@login_required
+def apply_for_registration(request):
+    """View for citizens to apply for vehicle registration"""
+    if request.user.user_type != 'CITIZEN':
+        messages.error(request, "Only citizens can apply for vehicle registration.")
+        return redirect('home')
+
+    if request.method == 'POST':
+        form = VehicleRegistrationForm(request.POST, request.FILES)
+        if form.is_valid():
+            application = form.save(commit=False)
+            application.applicant = request.user
+            application.application_type = 'NEW'  # Set default type
+            application.status = 'PENDING'
+            application.application_number = generate_application_number()
+            application.fee = application.vehicle_class.fee  # Set registration fee
+            application.save()
+
+            messages.success(request, "Vehicle registration application submitted successfully!")
+            return redirect('my_registration_applications')
+        else:
+            messages.error(request, "Please correct the errors in the form.")
+    else:
+        form = VehicleRegistrationForm()
+
+    context = {
+        'form': form,
+    }
+    return render(request, 'vehicle/register_vehicle.html', context)
+# views.py
+
+@login_required
+@user_passes_test(lambda u: u.user_type in ['OFFICER', 'ADMIN'])
+def review_registration_application(request, application_number):
+    """Officer reviews a specific registration application"""
+    application = get_object_or_404(RegistrationApplication, application_number=application_number)
+
+    if request.method == 'POST':
+        status = request.POST.get('status')
+        remarks = request.POST.get('remarks')
+        rejection_reason = request.POST.get('rejection_reason')
+
+        if status:
+            application.status = status
+            application.reviewed_by = request.user
+            application.remarks = remarks
+
+            if status == 'REJECTED':
+                application.rejection_reason = rejection_reason
+
+            application.updated_at = timezone.now()
+            application.save()
+
+            messages.success(request, f"Application #{application_number} updated to {status}.")
+            return redirect('review_registration_applications')
+
+    context = {
+        'application': application,
+    }
+    return render(request, 'vehicle/review.html', context)
+
+

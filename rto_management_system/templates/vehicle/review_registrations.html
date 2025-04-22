@@ -1,236 +1,48 @@
 {% extends 'base.html' %}
 
-{% block title %}Review Vehicle Registrations - RTO Management System{% endblock %}
+{% block title %}Review Registration{% endblock %}
 
 {% block content %}
 <div class="container py-5">
-    <div class="row mb-4">
-        <div class="col">
-            <h2>Review Vehicle Registrations</h2>
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
-                    <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
-                    <li class="breadcrumb-item active" aria-current="page">Review Registrations</li>
-                </ol>
-            </nav>
+    <h2>Review Vehicle Registration</h2>
+    
+    <div class="card shadow mt-4">
+        <div class="card-header">
+            <h4>VR-{{ registration.id }}: {{ registration.make }} {{ registration.model }}</h4>
+        </div>
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <h5>Vehicle Details</h5>
+                        <ul class="list-group">
+                            <li class="list-group-item">Make: {{ registration.make }}</li>
+                            <li class="list-group-item">Model: {{ registration.model }}</li>
+                            <li class="list-group-item">Year: {{ registration.year }}</li>
+                            <li class="list-group-item">Chassis: {{ registration.chassis_number }}</li>
+                            <li class="list-group-item">Engine: {{ registration.engine_number }}</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h5>Owner Details</h5>
+                        <ul class="list-group">
+                            <li class="list-group-item">Name: {{ registration.owner.get_full_name }}</li>
+                            <li class="list-group-item">Email: {{ registration.owner.email }}</li>
+                            <li class="list-group-item">Phone: {{ registration.owner.phone_number }}</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="mb-4">
+                    {{ form.as_p }}
+                </div>
+                
+                <button type="submit" class="btn btn-primary">Submit Review</button>
+                <a href="{% url 'pending_registrations' %}" class="btn btn-secondary">Back</a>
+            </form>
         </div>
     </div>
-
-    <div class="row mb-4">
-        <div class="col">
-            <!-- Filter Panel -->
-            <div class="card shadow mb-4">
-                <div class="card-header bg-light">
-                    <h5 class="mb-0">Filter Registrations</h5>
-                </div>
-                <div class="card-body">
-                    <form method="get" class="row gx-3 gy-2 align-items-center">
-                        <div class="col-md-3">
-                            <label for="statusFilter" class="form-label">Status</label>
-                            <select class="form-select" id="statusFilter" name="status">
-                                <option value="" {% if not status_filter %}selected{% endif %}>All Statuses</option>
-                                <option value="PENDING" {% if status_filter == 'PENDING' %}selected{% endif %}>Pending</option>
-                                <option value="DOCUMENT_VERIFICATION" {% if status_filter == 'DOCUMENT_VERIFICATION' %}selected{% endif %}>Document Verification</option>
-                                <option value="INSPECTION_SCHEDULED" {% if status_filter == 'INSPECTION_SCHEDULED' %}selected{% endif %}>Inspection Scheduled</option>
-                                <option value="INSPECTION_PASSED" {% if status_filter == 'INSPECTION_PASSED' %}selected{% endif %}>Inspection Passed</option>
-                                <option value="INSPECTION_FAILED" {% if status_filter == 'INSPECTION_FAILED' %}selected{% endif %}>Inspection Failed</option>
-                                <option value="APPROVED" {% if status_filter == 'APPROVED' %}selected{% endif %}>Approved</option>
-                                <option value="REJECTED" {% if status_filter == 'REJECTED' %}selected{% endif %}>Rejected</option>
-                                <option value="REGISTERED" {% if status_filter == 'REGISTERED' %}selected{% endif %}>Registered</option>
-                            </select>
-                        </div>
-                        <div class="col-md-3">
-                            <label for="registrationTypeFilter" class="form-label">Registration Type</label>
-                            <select class="form-select" id="registrationTypeFilter" name="registration_type">
-                                <option value="">All Types</option>
-                                <option value="NEW">New Registration</option>
-                                <option value="RENEWAL">Registration Renewal</option>
-                                <option value="TRANSFER">Ownership Transfer</option>
-                            </select>
-                        </div>
-                        <div class="col-md-3">
-                            <label for="dateFilter" class="form-label">Date Range</label>
-                            <select class="form-select" id="dateFilter" name="date_range">
-                                <option value="">All Time</option>
-                                <option value="today">Today</option>
-                                <option value="week">This Week</option>
-                                <option value="month">This Month</option>
-                                <option value="custom">Custom Range</option>
-                            </select>
-                        </div>
-                        <div class="col-md-3">
-                            <label for="searchField" class="form-label">Search</label>
-                            <div class="input-group">
-                                <input type="text" class="form-control" id="searchField" name="search" placeholder="Search registrations...">
-                                <button class="btn btn-outline-secondary" type="submit">
-                                    <i class="fas fa-search"></i>
-                                </button>
-                            </div>
-                        </div>
-                        <div class="col-12 mt-3">
-                            <button type="submit" class="btn btn-primary">Apply Filters</button>
-                            <a href="{% url 'review_vehicle_registrations' %}" class="btn btn-outline-secondary ms-2">Clear Filters</a>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col">
-            <div class="card shadow">
-                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">Vehicle Registration Applications</h5>
-                    <span class="badge bg-light text-dark">{{ registrations.count }} Applications</span>
-                </div>
-                <div class="card-body">
-                    {% if registrations %}
-                        <div class="table-responsive">
-                            <table class="table table-hover">
-                                <thead>
-                                    <tr>
-                                        <th>Registration/Temp Number</th>
-                                        <th>Applicant</th>
-                                        <th>Vehicle Details</th>
-                                        <th>Application Date</th>
-                                        <th>Status</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for registration in registrations %}
-                                        <tr>
-                                            <td>
-                                                {% if registration.registration_number %}
-                                                    <span class="badge bg-success">{{ registration.registration_number }}</span>
-                                                {% else %}
-                                                    <span class="badge bg-warning text-dark">{{ registration.temporary_number }}</span>
-                                                {% endif %}
-                                            </td>
-                                            <td>
-                                                {{ registration.owner.get_full_name }}
-                                                <small class="d-block text-muted">{{ registration.owner.email }}</small>
-                                            </td>
-                                            <td>
-                                                {{ registration.make }} {{ registration.model }} ({{ registration.year }})
-                                                <small class="d-block text-muted">{{ registration.vehicle_category.name }}</small>
-                                            </td>
-                                            <td>{{ registration.application_date|date:"d M Y" }}</td>
-                                            <td>
-                                                {% if registration.status == 'PENDING' %}
-                                                    <span class="badge bg-warning text-dark">Pending</span>
-                                                {% elif registration.status == 'DOCUMENT_VERIFICATION' %}
-                                                    <span class="badge bg-info">Document Verification</span>
-                                                {% elif registration.status == 'INSPECTION_SCHEDULED' %}
-                                                    <span class="badge bg-primary">Inspection Scheduled</span>
-                                                {% elif registration.status == 'INSPECTION_PASSED' %}
-                                                    <span class="badge bg-success">Inspection Passed</span>
-                                                {% elif registration.status == 'INSPECTION_FAILED' %}
-                                                    <span class="badge bg-danger">Inspection Failed</span>
-                                                {% elif registration.status == 'APPROVED' %}
-                                                    <span class="badge bg-success">Approved</span>
-                                                {% elif registration.status == 'REJECTED' %}
-                                                    <span class="badge bg-danger">Rejected</span>
-                                                {% elif registration.status == 'REGISTERED' %}
-                                                    <span class="badge bg-success">Registered</span>
-                                                {% endif %}
-                                            </td>
-                                            <td>
-                                                <div class="btn-group btn-group-sm">
-                                                    <a href="{% url 'review_vehicle_registration' reg_number=registration.temporary_number %}" class="btn btn-outline-primary">
-                                                        <i class="fas fa-eye"></i> Review
-                                                    </a>
-                                                    {% if registration.status == 'INSPECTION_PASSED' or registration.status == 'APPROVED' %}
-                                                        <a href="{% url 'assign_registration_number' reg_number=registration.temporary_number %}" class="btn btn-outline-success">
-                                                            <i class="fas fa-check-circle"></i> Assign Number
-                                                        </a>
-                                                    {% endif %}
-                                                    {% if registration.status == 'DOCUMENT_VERIFICATION' %}
-                                                        <a href="{% url 'schedule_inspection' reg_number=registration.temporary_number %}" class="btn btn-outline-info">
-                                                            <i class="fas fa-calendar-check"></i> Schedule Inspection
-                                                        </a>
-                                                    {% endif %}
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                    {% else %}
-                        <div class="alert alert-info">
-                            <i class="fas fa-info-circle me-2"></i> No vehicle registration applications match your filter criteria.
-                        </div>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Pagination Section -->
-    {% if registrations.has_other_pages %}
-        <div class="row mt-4">
-            <div class="col">
-                <nav aria-label="Page navigation">
-                    <ul class="pagination justify-content-center">
-                        {% if registrations.has_previous %}
-                            <li class="page-item">
-                                <a class="page-link" href="?page={{ registrations.previous_page_number }}&status={{ status_filter }}" aria-label="Previous">
-                                    <span aria-hidden="true">&laquo;</span>
-                                </a>
-                            </li>
-                        {% else %}
-                            <li class="page-item disabled">
-                                <span class="page-link" aria-hidden="true">&laquo;</span>
-                            </li>
-                        {% endif %}
-                        
-                        {% for i in registrations.paginator.page_range %}
-                            {% if registrations.number == i %}
-                                <li class="page-item active">
-                                    <span class="page-link">{{ i }}</span>
-                                </li>
-                            {% else %}
-                                <li class="page-item">
-                                    <a class="page-link" href="?page={{ i }}&status={{ status_filter }}">{{ i }}</a>
-                                </li>
-                            {% endif %}
-                        {% endfor %}
-                        
-                        {% if registrations.has_next %}
-                            <li class="page-item">
-                                <a class="page-link" href="?page={{ registrations.next_page_number }}&status={{ status_filter }}" aria-label="Next">
-                                    <span aria-hidden="true">&raquo;</span>
-                                </a>
-                            </li>
-                        {% else %}
-                            <li class="page-item disabled">
-                                <span class="page-link" aria-hidden="true">&raquo;</span>
-                            </li>
-                        {% endif %}
-                    </ul>
-                </nav>
-            </div>
-        </div>
-    {% endif %}
 </div>
-{% endblock %}
-
-{% block extra_js %}
-<script>
-    // Handle date range selection logic
-    document.addEventListener('DOMContentLoaded', function() {
-        const dateFilter = document.getElementById('dateFilter');
-        
-        dateFilter.addEventListener('change', function() {
-            if (this.value === 'custom') {
-                // Implementation for custom date range picker would go here
-                alert('Custom date range feature will be implemented soon.');
-                this.value = ''; // Reset to default for now
-            }
-        });
-    });
-</script>
 {% endblock %}
