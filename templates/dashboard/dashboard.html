@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - RTO Management System{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row mb-4">
+        <div class="col">
+            <h2>Dashboard</h2>
+            <p class="text-muted">Welcome to your RTO Management System dashboard</p>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card shadow mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Welcome!</h5>
+                </div>
+                <div class="card-body">
+                    <p>You'll be redirected to your role-specific dashboard shortly.</p>
+                    <p>If you're not redirected, please click one of the following links:</p>
+                    
+                    <div class="mt-4">
+                        <a href="{% url 'citizen_dashboard' %}" class="btn btn-outline-primary me-2">Citizen Dashboard</a>
+                        <a href="{% url 'officer_dashboard' %}" class="btn btn-outline-success me-2">Officer Dashboard</a>
+                        <a href="{% url 'admin_dashboard' %}" class="btn btn-outline-danger">Admin Dashboard</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card shadow">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Need Help?</h5>
+                </div>
+                <div class="card-body">
+                    <p class="small">If you have any questions about the system, please contact our support team:</p>
+                    <p class="small mb-2"><i class="bi bi-telephone"></i> Helpline: 1800-XXX-XXXX</p>
+                    <p class="small mb-2"><i class="bi bi-envelope"></i> Email: support@rto.gov.in</p>
+                    <p class="small"><i class="bi bi-clock"></i> Hours: Mon-Fri, 9AM - 5PM</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Auto-redirect based on user type
+    document.addEventListener('DOMContentLoaded', function() {
+        // This assumes the redirection should happen automatically
+        // The server-side view should handle this already, but this is a fallback
+        {% if user.is_authenticated %}
+            {% if user.user_type == 'CITIZEN' %}
+                window.location.href = "{% url 'citizen_dashboard' %}";
+            {% elif user.user_type == 'OFFICER' %}
+                window.location.href = "{% url 'officer_dashboard' %}";
+            {% elif user.user_type == 'ADMIN' %}
+                window.location.href = "{% url 'admin_dashboard' %}";
+            {% endif %}
+        {% endif %}
+    });
+</script>
+{% endblock %}

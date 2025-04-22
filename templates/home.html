@@ -1,0 +1,203 @@
+{% extends 'base.html' %}
+
+{% block title %}Welcome to RTO Management System{% endblock %}
+
+{% block extra_css %}
+<style>
+    .hero-section {
+        background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('https://images.unsplash.com/photo-1465447142348-e9952c393450?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2274&q=80');
+        background-size: cover;
+        background-position: center;
+        color: white;
+        padding: 100px 0;
+        margin-bottom: 50px;
+    }
+    .hero-content {
+        max-width: 700px;
+        margin: 0 auto;
+        text-align: center;
+    }
+    .hero-title {
+        font-size: 3rem;
+        font-weight: bold;
+        margin-bottom: 20px;
+    }
+    .hero-subtitle {
+        font-size: 1.2rem;
+        margin-bottom: 30px;
+        opacity: 0.9;
+    }
+    .feature-card {
+        height: 100%;
+        border: none;
+        border-radius: 10px;
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease;
+    }
+    .feature-card:hover {
+        transform: translateY(-5px);
+    }
+    .feature-icon {
+        font-size: 3rem;
+        margin-bottom: 20px;
+    }
+    .cta-section {
+        background-color: #0d6efd;
+        color: white;
+        padding: 70px 0;
+        margin-top: 50px;
+    }
+    .footer-title {
+        color: white;
+        font-weight: bold;
+        margin-bottom: 20px;
+    }
+    .footer ul {
+        list-style: none;
+        padding-left: 0;
+    }
+    .footer ul li {
+        margin-bottom: 10px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <div class="hero-content">
+            <h1 class="hero-title">Regional Transport Office Management System</h1>
+            <p class="hero-subtitle">Streamlining vehicle registration, driving licenses, and traffic challan services through a unified digital platform.</p>
+            {% if not user.is_authenticated %}
+            <div class="d-grid gap-2 d-md-block">
+                <a href="{% url 'login' %}" class="btn btn-primary btn-lg me-md-2">Login</a>
+                <a href="{% url 'register_citizen' %}" class="btn btn-outline-light btn-lg">Register</a>
+            </div>
+            {% else %}
+            <a href="{% url 'dashboard' %}" class="btn btn-primary btn-lg">Go to Dashboard</a>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="container mb-5">
+    <h2 class="text-center mb-5">Our Services</h2>
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="card feature-card text-center p-4">
+                <div class="card-body">
+                    <i class="bi bi-card-list feature-icon text-primary"></i>
+                    <h3 class="card-title">License Management</h3>
+                    <p class="card-text">Apply for new driving licenses, renew existing ones, or request duplicates with ease and efficiency.</p>
+                    <a href="#" class="btn btn-outline-primary mt-3">Learn More</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card feature-card text-center p-4">
+                <div class="card-body">
+                    <i class="bi bi-truck feature-icon text-success"></i>
+                    <h3 class="card-title">Vehicle Registration</h3>
+                    <p class="card-text">Register your new vehicles, transfer ownership, or update vehicle details through our digital platform.</p>
+                    <a href="#" class="btn btn-outline-success mt-3">Learn More</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card feature-card text-center p-4">
+                <div class="card-body">
+                    <i class="bi bi-receipt feature-icon text-danger"></i>
+                    <h3 class="card-title">Challan Management</h3>
+                    <p class="card-text">View and pay traffic violation challans online, check challan status, and maintain a clean driving record.</p>
+                    <a href="#" class="btn btn-outline-danger mt-3">Learn More</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Stats Section -->
+<section class="bg-light py-5">
+    <div class="container">
+        <div class="row text-center">
+            <div class="col-md-3 mb-4 mb-md-0">
+                <h2 class="fw-bold text-primary">500,000+</h2>
+                <p class="text-muted">Registered Users</p>
+            </div>
+            <div class="col-md-3 mb-4 mb-md-0">
+                <h2 class="fw-bold text-success">1 Million+</h2>
+                <p class="text-muted">Vehicle Registrations</p>
+            </div>
+            <div class="col-md-3 mb-4 mb-md-0">
+                <h2 class="fw-bold text-danger">750,000+</h2>
+                <p class="text-muted">Licenses Issued</p>
+            </div>
+            <div class="col-md-3">
+                <h2 class="fw-bold text-info">24/7</h2>
+                <p class="text-muted">Customer Support</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="cta-section">
+    <div class="container text-center">
+        <h2 class="mb-4">Ready to Get Started?</h2>
+        <p class="mb-4 lead">Join thousands of citizens who are already benefiting from our digital RTO services.</p>
+        {% if not user.is_authenticated %}
+        <a href="{% url 'register_citizen' %}" class="btn btn-light btn-lg">Register Now</a>
+        {% else %}
+        <a href="{% url 'dashboard' %}" class="btn btn-light btn-lg">Go to Dashboard</a>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Additional Footer Content -->
+<section class="bg-dark text-white py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4 mb-4 mb-md-0">
+                <h5 class="footer-title">About RTO Management System</h5>
+                <p>A comprehensive online platform designed to streamline all RTO services, making it easier for citizens to access government transport services.</p>
+                <div class="mt-4">
+                    <a href="#" class="social-icon"><i class="bi bi-facebook"></i></a>
+                    <a href="#" class="social-icon"><i class="bi bi-twitter"></i></a>
+                    <a href="#" class="social-icon"><i class="bi bi-instagram"></i></a>
+                    <a href="#" class="social-icon"><i class="bi bi-linkedin"></i></a>
+                </div>
+            </div>
+            <div class="col-md-2 mb-4 mb-md-0">
+                <h5 class="footer-title">Quick Links</h5>
+                <ul>
+                    <li><a href="{% url 'home' %}">Home</a></li>
+                    <li><a href="#">Services</a></li>
+                    <li><a href="#">About Us</a></li>
+                    <li><a href="#">Contact</a></li>
+                    <li><a href="#">FAQs</a></li>
+                </ul>
+            </div>
+            <div class="col-md-3 mb-4 mb-md-0">
+                <h5 class="footer-title">Our Services</h5>
+                <ul>
+                    <li><a href="#">License Management</a></li>
+                    <li><a href="#">Vehicle Registration</a></li>
+                    <li><a href="#">Challan Management</a></li>
+                    <li><a href="#">Vehicle Fitness</a></li>
+                    <li><a href="#">Permit Services</a></li>
+                </ul>
+            </div>
+            <div class="col-md-3">
+                <h5 class="footer-title">Contact Us</h5>
+                <ul>
+                    <li><i class="bi bi-geo-alt me-2"></i> 123 RTO Building, Transport Nagar</li>
+                    <li><i class="bi bi-telephone me-2"></i> +91 1234567890</li>
+                    <li><i class="bi bi-envelope me-2"></i> info@rtosystem.com</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

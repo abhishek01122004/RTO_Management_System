@@ -1,0 +1,150 @@
+{% extends 'base.html' %}
+
+{% block title %}Manage Challans{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row mb-4">
+        <div class="col">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Manage Challans</li>
+                </ol>
+            </nav>
+            <h2 class="mt-3">Manage Challans</h2>
+            <p class="text-muted">View and manage traffic violation challans</p>
+        </div>
+    </div>
+    
+    <div class="row mb-4">
+        <div class="col">
+            <div class="card shadow">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Filter Challans</h5>
+                    <a href="{% url 'generate_challan' %}" class="btn btn-primary btn-sm">
+                        <i class="bi bi-plus-circle me-1"></i> New Challan
+                    </a>
+                </div>
+                <div class="card-body">
+                    <form method="get" class="row g-3">
+                        <div class="col-md-3">
+                            <label class="form-label">Status</label>
+                            <select name="status" class="form-select">
+                                <option value="">All Status</option>
+                                <option value="PENDING" {% if status_filter == 'PENDING' %}selected{% endif %}>Pending</option>
+                                <option value="PAID" {% if status_filter == 'PAID' %}selected{% endif %}>Paid</option>
+                                <option value="DISPUTED" {% if status_filter == 'DISPUTED' %}selected{% endif %}>Disputed</option>
+                                <option value="CANCELED" {% if status_filter == 'CANCELED' %}selected{% endif %}>Canceled</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">From Date</label>
+                            <input type="date" name="date_from" class="form-control" value="{{ date_from|date:'Y-m-d' }}">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">To Date</label>
+                            <input type="date" name="date_to" class="form-control" value="{{ date_to|date:'Y-m-d' }}">
+                        </div>
+                        <div class="col-md-3 d-flex align-items-end">
+                            <button type="submit" class="btn btn-primary w-100">Apply Filters</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col">
+            <div class="card shadow">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Challan List</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Challan No.</th>
+                                    <th>Vehicle No.</th>
+                                    <th>Violator</th>
+                                    <th>Issue Date</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                    <th>Payment</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if challans %}
+                                    {% for challan in challans %}
+                                    <tr>
+                                        <td>{{ challan.challan_number }}</td>
+                                        <td>{{ challan.vehicle_number }}</td>
+                                        <td>
+                                            {% if challan.violator %}
+                                                <div>{{ challan.violator.get_full_name }}</div>
+                                                <small class="text-muted">{{ challan.violator.email }}</small>
+                                            {% else %}
+                                                <span class="text-muted">Not identified</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ challan.issue_date|date:"d M Y" }}</td>
+                                        <td>₹{{ challan.total_amount }}</td>
+                                        <td>
+                                            {% if challan.status == 'PENDING' %}
+                                            <span class="badge bg-warning text-dark">Pending</span>
+                                            {% elif challan.status == 'PAID' %}
+                                            <span class="badge bg-success">Paid</span>
+                                            {% elif challan.status == 'DISPUTED' %}
+                                            <span class="badge bg-danger">Disputed</span>
+                                            {% elif challan.status == 'CANCELED' %}
+                                            <span class="badge bg-secondary">Canceled</span>
+                                            {% else %}
+                                            <span class="badge bg-secondary">{{ challan.status }}</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if challan.payment_status %}
+                                            <span class="badge bg-success">Paid</span>
+                                            {% else %}
+                                            <span class="badge bg-danger">Unpaid</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <div class="btn-group btn-group-sm">
+                                                <a href="{% url 'view_challan' challan_number=challan.challan_number %}" class="btn btn-outline-primary">
+                                                    <i class="bi bi-eye"></i>
+                                                </a>
+                                                <a href="{% url 'update_challan' challan_number=challan.challan_number %}" class="btn btn-outline-secondary">
+                                                    <i class="bi bi-pencil"></i>
+                                                </a>
+                                                {% if not challan.payment_status %}
+                                                <a href="{% url 'record_offline_payment' challan_number=challan.challan_number %}" class="btn btn-outline-success">
+                                                    <i class="bi bi-cash"></i>
+                                                </a>
+                                                {% endif %}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr>
+                                        <td colspan="8" class="text-center py-4">
+                                            <div class="text-muted">
+                                                <i class="bi bi-inbox fs-3 d-block mb-2"></i>
+                                                <p>No challans found matching your criteria.</p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

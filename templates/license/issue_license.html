@@ -1,0 +1,193 @@
+{% extends 'base.html' %}
+
+{% block title %}Issue Driving License{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row mb-4">
+        <div class="col">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'review_license_applications' %}">License Applications</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'review_license_application' application_number=application.application_number %}">Review #{{ application.application_number }}</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Issue License</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card shadow">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0">Issue Driving License</h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info mb-4">
+                        <h5 class="alert-heading">Confirmation</h5>
+                        <p>You are about to issue a driving license for the following application. Please verify all details before proceeding.</p>
+                    </div>
+                    
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h6>Application Information</h6>
+                            <table class="table table-bordered">
+                                <tr>
+                                    <th width="40%">Application #</th>
+                                    <td>{{ application.application_number }}</td>
+                                </tr>
+                                <tr>
+                                    <th>License Type</th>
+                                    <td>{{ application.license_type.name }} ({{ application.license_type.code }})</td>
+                                </tr>
+                                <tr>
+                                    <th>Application Type</th>
+                                    <td>{{ application.get_application_type_display }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Application Date</th>
+                                    <td>{{ application.application_date|date:"d M Y" }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Current Status</th>
+                                    <td>
+                                        <span class="badge bg-success">{{ application.get_status_display }}</span>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Applicant Information</h6>
+                            <table class="table table-bordered">
+                                <tr>
+                                    <th width="40%">Name</th>
+                                    <td>{{ application.applicant.get_full_name }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Date of Birth</th>
+                                    <td>{{ application.applicant.citizen_profile.date_of_birth|date:"d M Y" }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Blood Group</th>
+                                    <td>{{ application.applicant.citizen_profile.blood_group }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Address</th>
+                                    <td>{{ application.applicant.address }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-4">
+                        <div class="col-md-3 text-center">
+                            <div class="card">
+                                <div class="card-header py-2">Photo</div>
+                                <div class="card-body p-2">
+                                    <img src="{{ application.photo.url }}" alt="Photo" class="img-fluid">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 text-center">
+                            <div class="card">
+                                <div class="card-header py-2">Signature</div>
+                                <div class="card-body p-2">
+                                    <img src="{{ application.signature.url }}" alt="Signature" class="img-fluid">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card h-100">
+                                <div class="card-header py-2">Test Results</div>
+                                <div class="card-body p-2">
+                                    {% if test_schedules %}
+                                    <div class="table-responsive">
+                                        <table class="table table-sm table-bordered">
+                                            <thead>
+                                                <tr>
+                                                    <th>Test Type</th>
+                                                    <th>Date</th>
+                                                    <th>Result</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for test in test_schedules %}
+                                                {% if test.is_completed %}
+                                                <tr>
+                                                    <td>{{ test.get_test_type_display }}</td>
+                                                    <td>{{ test.scheduled_date|date:"d M Y" }}</td>
+                                                    <td>
+                                                        {% if test.passed %}
+                                                        <span class="badge bg-success">Passed</span>
+                                                        {% else %}
+                                                        <span class="badge bg-danger">Failed</span>
+                                                        {% endif %}
+                                                    </td>
+                                                </tr>
+                                                {% endif %}
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    {% else %}
+                                    <p class="text-center text-muted my-2">No test records found</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="license_number" class="form-label">License Number</label>
+                                    <input type="text" class="form-control" id="license_number" name="license_number" value="{{ generated_license_number }}" readonly>
+                                    <div class="form-text">Auto-generated license number</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="valid_years" class="form-label">Validity (Years)</label>
+                                    <input type="number" class="form-control" id="valid_years" name="valid_years" value="{{ application.license_type.validity_years }}" min="1" max="20">
+                                    <div class="form-text">Number of years the license will be valid</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="alert alert-warning">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="confirmIssue" required>
+                                <label class="form-check-label" for="confirmIssue">
+                                    I confirm that all details are verified and the applicant has passed all required tests. The license can now be issued.
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{% url 'review_license_application' application_number=application.application_number %}" class="btn btn-outline-secondary me-md-2">Cancel</a>
+                            <button type="submit" class="btn btn-success" id="issueBtn" disabled>Issue License</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const confirmCheckbox = document.getElementById('confirmIssue');
+        const issueBtn = document.getElementById('issueBtn');
+        
+        confirmCheckbox.addEventListener('change', function() {
+            issueBtn.disabled = !this.checked;
+        });
+    });
+</script>
+{% endblock %}

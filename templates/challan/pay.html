@@ -1,0 +1,160 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Pay Challan{% endblock %}
+
+{% block extra_css %}
+<style>
+    .payment-card {
+        max-width: 600px;
+        margin: 0 auto;
+    }
+    .challan-details {
+        background-color: #f8f9fa;
+        border-radius: 5px;
+        padding: 15px;
+    }
+    .razorpay-payment-button {
+        display: block;
+        width: 100%;
+        padding: 0.5rem 1rem;
+        background-color: #0d6efd;
+        color: white;
+        border: none;
+        border-radius: 0.25rem;
+        font-size: 1rem;
+        cursor: pointer;
+    }
+    .razorpay-payment-button:hover {
+        background-color: #0b5ed7;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row mb-4">
+        <div class="col">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'my_challans' %}">My Challans</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'view_challan' challan_number=challan.challan_number %}">Challan #{{ challan.challan_number }}</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Payment</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+    
+    <div class="card shadow payment-card">
+        <div class="card-header bg-success text-white">
+            <h4 class="mb-0">Challan Payment</h4>
+        </div>
+        <div class="card-body">
+            <div class="challan-details mb-4">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p class="mb-1"><strong>Challan Number:</strong></p>
+                        <p>{{ challan.challan_number }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p class="mb-1"><strong>Issue Date:</strong></p>
+                        <p>{{ challan.issue_date|date:"d M Y" }}</p>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <p class="mb-1"><strong>Vehicle Number:</strong></p>
+                        <p>{{ challan.vehicle_number }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p class="mb-1"><strong>Amount:</strong></p>
+                        <p class="h4 text-success">₹{{ amount }}</p>
+                    </div>
+                </div>
+                <div class="row mt-2">
+                    <div class="col-12">
+                        <p class="mb-1"><strong>Due Date:</strong></p>
+                        <p>{{ challan.due_date|date:"d M Y" }}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="alert alert-info">
+                <h5 class="alert-heading">Payment Information</h5>
+                <p>You are about to make a payment for your traffic challan. Please review the details carefully before proceeding.</p>
+                <p class="mb-0">Upon successful payment, your challan will be marked as paid and you will receive a payment confirmation.</p>
+            </div>
+            
+            <div id="paymentError" class="mb-3"></div>
+            
+            {% if key_id %}
+                <!-- Real Razorpay payment form -->
+                <form id="razorpayPaymentForm" 
+                      action="{% url 'challan_payment_success' challan_number=challan.challan_number %}" 
+                      method="POST"
+                      data-key="{{ key_id }}"
+                      data-order-id="{{ order_id }}"
+                      data-amount="{{ amount|floatformat:2|stringformat:'g' }}00"
+                      data-currency="INR"
+                      data-name="RTO Management System"
+                      data-description="Challan Payment"
+                      data-image="https://upload.wikimedia.org/wikipedia/commons/5/55/Emblem_of_India.svg"
+                      data-user-name="{{ user_name }}"
+                      data-user-email="{{ user_email }}"
+                      data-user-phone="{{ user_phone }}"
+                >
+                    {% csrf_token %}
+                    <input type="hidden" name="razorpay_payment_id" id="razorpay_payment_id">
+                    <input type="hidden" name="razorpay_order_id" id="razorpay_order_id">
+                    <input type="hidden" name="razorpay_signature" id="razorpay_signature">
+                    
+                    <button type="button" id="razorpayButton" class="btn btn-success btn-lg w-100">
+                        <i class="bi bi-credit-card me-2"></i> Pay Now ₹{{ amount }}
+                    </button>
+                </form>
+            {% else %}
+                <!-- Development mode simplified payment form -->
+                <div class="alert alert-warning">
+                    <h5 class="alert-heading">Development Mode</h5>
+                    <p>This is a development environment without Razorpay keys. You can simulate payment by clicking the button below.</p>
+                </div>
+                
+                <form action="{% url 'pay_challan' challan_number=challan.challan_number %}" method="POST" class="mt-3">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-success btn-lg w-100">
+                        <i class="bi bi-credit-card me-2"></i> Simulate Payment of ₹{{ amount }}
+                    </button>
+                </form>
+            {% endif %}
+            
+            <div class="text-center mt-3">
+                <a href="{% url 'view_challan' challan_number=challan.challan_number %}" class="btn btn-outline-secondary">
+                    Cancel and Go Back
+                </a>
+            </div>
+        </div>
+        <div class="card-footer">
+            <div class="d-flex justify-content-between align-items-center">
+                <small class="text-muted">Powered by Razorpay</small>
+                <div>
+                    <img src="https://razorpay.com/assets/razorpay-logo.svg" alt="Razorpay" height="20">
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="text-center mt-4">
+        <div class="card shadow payment-card p-3">
+            <h5>Other Payment Methods</h5>
+            <p class="text-muted">You can also pay the challan offline at any RTO office.</p>
+            <p>For offline payment, please visit the nearest RTO office with your challan number and valid ID proof.</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script src="{% static 'js/payments.js' %}"></script>
+{% endblock %}

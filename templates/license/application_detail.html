@@ -1,0 +1,287 @@
+{% extends 'base.html' %}
+
+{% block title %}License Application Details{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row mb-4">
+        <div class="col">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'my_license_applications' %}">My Applications</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Application #{{ application.application_number }}</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+    
+    <div class="row">
+        <!-- Application Status Card -->
+        <div class="col-md-4">
+            <div class="card shadow mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Application Status</h5>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-4">
+                        {% if application.status == 'PENDING' %}
+                        <div class="display-1 text-warning mb-2"><i class="bi bi-hourglass-split"></i></div>
+                        <h4 class="text-warning">{{ application.get_status_display }}</h4>
+                        <p class="text-muted">Your application is waiting for review.</p>
+                        {% elif application.status == 'DOCUMENT_VERIFICATION' %}
+                        <div class="display-1 text-info mb-2"><i class="bi bi-file-earmark-check"></i></div>
+                        <h4 class="text-info">{{ application.get_status_display }}</h4>
+                        <p class="text-muted">Your documents are being verified.</p>
+                        {% elif application.status == 'SCHEDULED_FOR_TEST' %}
+                        <div class="display-1 text-primary mb-2"><i class="bi bi-calendar-check"></i></div>
+                        <h4 class="text-primary">{{ application.get_status_display }}</h4>
+                        <p class="text-muted">Your driving test has been scheduled.</p>
+                        {% elif application.status == 'TEST_PASSED' %}
+                        <div class="display-1 text-success mb-2"><i class="bi bi-check-circle"></i></div>
+                        <h4 class="text-success">{{ application.get_status_display }}</h4>
+                        <p class="text-muted">Congratulations! You passed the test.</p>
+                        {% elif application.status == 'TEST_FAILED' %}
+                        <div class="display-1 text-danger mb-2"><i class="bi bi-x-circle"></i></div>
+                        <h4 class="text-danger">{{ application.get_status_display }}</h4>
+                        <p class="text-muted">Unfortunately, you did not pass the test.</p>
+                        {% elif application.status == 'APPROVED' %}
+                        <div class="display-1 text-success mb-2"><i class="bi bi-check2-all"></i></div>
+                        <h4 class="text-success">{{ application.get_status_display }}</h4>
+                        <p class="text-muted">Your license application is approved.</p>
+                        {% elif application.status == 'REJECTED' %}
+                        <div class="display-1 text-danger mb-2"><i class="bi bi-x-octagon"></i></div>
+                        <h4 class="text-danger">{{ application.get_status_display }}</h4>
+                        <p class="text-muted">Your application has been rejected.</p>
+                        {% elif application.status == 'ISSUED' %}
+                        <div class="display-1 text-success mb-2"><i class="bi bi-card-text"></i></div>
+                        <h4 class="text-success">{{ application.get_status_display }}</h4>
+                        <p class="text-muted">Your license has been issued.</p>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        {% if not application.payment_status %}
+                        <a href="{% url 'license_payment' application_number=application.application_number %}" class="btn btn-success">
+                            <i class="bi bi-credit-card"></i> Make Payment
+                        </a>
+                        {% endif %}
+                        
+                        {% if application.status == 'ISSUED' %}
+                        <a href="{% url 'license_detail' license_number=application.issued_license.license_number %}" class="btn btn-primary">
+                            <i class="bi bi-card-heading"></i> View License
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <small class="text-muted">Last updated: {{ application.updated_at|date:"d M Y, h:i A" }}</small>
+                </div>
+            </div>
+            
+            <!-- Payment Information -->
+            <div class="card shadow mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">Payment Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Status:</span>
+                        <span>
+                            {% if application.payment_status %}
+                            <span class="badge bg-success">Paid</span>
+                            {% else %}
+                            <span class="badge bg-danger">Pending</span>
+                            {% endif %}
+                        </span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Amount:</span>
+                        <span>₹{{ application.license_type.fee }}</span>
+                    </div>
+                    {% if application.payment_status %}
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Date:</span>
+                        <span>{{ application.payment_date|date:"d M Y" }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Transaction ID:</span>
+                        <span>{{ application.payment_transaction_id }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Application Details Card -->
+        <div class="col-md-8">
+            <div class="card shadow mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Application Details</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h6>Application Information</h6>
+                            <table class="table table-bordered">
+                                <tr>
+                                    <th>Application Number</th>
+                                    <td>{{ application.application_number }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Application Date</th>
+                                    <td>{{ application.application_date|date:"d M Y" }}</td>
+                                </tr>
+                                <tr>
+                                    <th>License Type</th>
+                                    <td>{{ application.license_type.name }} ({{ application.license_type.code }})</td>
+                                </tr>
+                                <tr>
+                                    <th>Application Type</th>
+                                    <td>{{ application.get_application_type_display }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Applicant Information</h6>
+                            <table class="table table-bordered">
+                                <tr>
+                                    <th>Name</th>
+                                    <td>{{ application.applicant.get_full_name }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Email</th>
+                                    <td>{{ application.applicant.email }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Phone</th>
+                                    <td>{{ application.applicant.phone_number }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Address</th>
+                                    <td>{{ application.applicant.address }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <!-- Uploaded Documents -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h6>Uploaded Documents</h6>
+                            <div class="row">
+                                <div class="col-md-3 text-center mb-3">
+                                    <div class="card h-100">
+                                        <div class="card-body p-2">
+                                            <img src="{{ application.photo.url }}" alt="Photo" class="img-fluid mb-2">
+                                            <p class="small mb-0">Photo</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 text-center mb-3">
+                                    <div class="card h-100">
+                                        <div class="card-body p-2">
+                                            <img src="{{ application.signature.url }}" alt="Signature" class="img-fluid mb-2">
+                                            <p class="small mb-0">Signature</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 text-center mb-3">
+                                    <div class="card h-100">
+                                        <div class="card-body p-2">
+                                            <a href="{{ application.id_proof.url }}" target="_blank" class="btn btn-sm btn-outline-primary mb-2">
+                                                <i class="bi bi-file-earmark-text"></i> View
+                                            </a>
+                                            <p class="small mb-0">ID Proof</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 text-center mb-3">
+                                    <div class="card h-100">
+                                        <div class="card-body p-2">
+                                            <a href="{{ application.address_proof.url }}" target="_blank" class="btn btn-sm btn-outline-primary mb-2">
+                                                <i class="bi bi-file-earmark-text"></i> View
+                                            </a>
+                                            <p class="small mb-0">Address Proof</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Test Schedules -->
+                    {% if test_schedules %}
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h6>Test Schedules</h6>
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-striped">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Test Type</th>
+                                            <th>Scheduled Date</th>
+                                            <th>Venue</th>
+                                            <th>Status</th>
+                                            <th>Result</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for test in test_schedules %}
+                                        <tr>
+                                            <td>{{ test.get_test_type_display }}</td>
+                                            <td>{{ test.scheduled_date|date:"d M Y, h:i A" }}</td>
+                                            <td>{{ test.venue }}</td>
+                                            <td>
+                                                {% if test.is_completed %}
+                                                <span class="badge bg-success">Completed</span>
+                                                {% else %}
+                                                <span class="badge bg-warning text-dark">Scheduled</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if test.is_completed %}
+                                                    {% if test.passed %}
+                                                    <span class="badge bg-success">Pass</span>
+                                                    {% else %}
+                                                    <span class="badge bg-danger">Fail</span>
+                                                    {% endif %}
+                                                {% else %}
+                                                <span class="badge bg-secondary">Pending</span>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            
+                            {% for test in test_schedules %}
+                            {% if not test.is_completed and test.instructions %}
+                            <div class="alert alert-info mt-3">
+                                <h6 class="alert-heading">Instructions for {{ test.get_test_type_display }}</h6>
+                                <p>{{ test.instructions }}</p>
+                            </div>
+                            {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Rejection Reason (if applicable) -->
+                    {% if application.status == 'REJECTED' and application.rejection_reason %}
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="alert alert-danger">
+                                <h6 class="alert-heading">Reason for Rejection:</h6>
+                                <p>{{ application.rejection_reason }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

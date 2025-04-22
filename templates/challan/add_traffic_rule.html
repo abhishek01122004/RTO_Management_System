@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block title %}Add Traffic Rule - RTO Management System{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <h4><i class="fas fa-plus-circle"></i> Add New Traffic Rule</h4>
+        </div>
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                
+                <div class="mb-3">
+                    <label for="rule_code" class="form-label">Rule Code <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="rule_code" name="rule_code" required>
+                    <div class="form-text">A unique code for the traffic rule (e.g., TR001, SPD01)</div>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="description" class="form-label">Description <span class="text-danger">*</span></label>
+                    <textarea class="form-control" id="description" name="description" rows="3" required></textarea>
+                    <div class="form-text">Detailed description of the traffic rule violation</div>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="penalty_amount" class="form-label">Penalty Amount (₹) <span class="text-danger">*</span></label>
+                    <input type="number" class="form-control" id="penalty_amount" name="penalty_amount" min="0" step="0.01" required>
+                    <div class="form-text">The fine amount for violating this rule</div>
+                </div>
+                
+                <div class="mb-3 form-check">
+                    <input type="checkbox" class="form-check-input" id="is_active" name="is_active" checked>
+                    <label class="form-check-label" for="is_active">Active</label>
+                    <div class="form-text">Uncheck to temporarily disable this rule</div>
+                </div>
+                
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Save Traffic Rule
+                    </button>
+                    <a href="{% url 'traffic_rules' %}" class="btn btn-outline-secondary ms-2">
+                        <i class="fas fa-times"></i> Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,549 @@
+{% extends 'base.html' %}
+
+{% block title %}Review Registration Application{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row mb-4">
+        <div class="col">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'review_registration_applications' %}">Review Registrations</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Application #{{ application.registration_number }}</li>
+                </ol>
+            </nav>
+            <h2 class="mt-3">Review Vehicle Registration Application</h2>
+            <p class="text-muted">Application #{{ application.registration_number }}</p>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Application Details</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h5 class="mb-3">Owner Information</h5>
+                            <table class="table table-borderless">
+                                <tr>
+                                    <td class="text-muted">Name:</td>
+                                    <td class="fw-medium">{{ application.owner.get_full_name }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="text-muted">Email:</td>
+                                    <td class="fw-medium">{{ application.owner.email }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="text-muted">Phone:</td>
+                                    <td class="fw-medium">{{ application.owner.phone_number }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="text-muted">Aadhaar:</td>
+                                    <td class="fw-medium">{{ application.owner.aadhaar_number }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="text-muted">Address:</td>
+                                    <td class="fw-medium">{{ application.owner.address }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <h5 class="mb-3">Application Information</h5>
+                            <table class="table table-borderless">
+                                <tr>
+                                    <td class="text-muted">Registration Number:</td>
+                                    <td class="fw-medium">{{ application.registration_number }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="text-muted">Registration Type:</td>
+                                    <td class="fw-medium">{{ application.get_registration_type_display }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="text-muted">Application Date:</td>
+                                    <td class="fw-medium">{{ application.application_date|date:"d M Y, h:i A" }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="text-muted">Current Status:</td>
+                                    <td>
+                                        {% if application.status == 'PENDING' %}
+                                        <span class="badge bg-warning text-dark">Pending</span>
+                                        {% elif application.status == 'DOCUMENT_VERIFICATION' %}
+                                        <span class="badge bg-info">Document Verification</span>
+                                        {% elif application.status == 'INSPECTION_SCHEDULED' %}
+                                        <span class="badge bg-primary">Inspection Scheduled</span>
+                                        {% elif application.status == 'INSPECTION_PASSED' %}
+                                        <span class="badge bg-success">Inspection Passed</span>
+                                        {% elif application.status == 'INSPECTION_FAILED' %}
+                                        <span class="badge bg-danger">Inspection Failed</span>
+                                        {% elif application.status == 'APPROVED' %}
+                                        <span class="badge bg-success">Approved</span>
+                                        {% elif application.status == 'REJECTED' %}
+                                        <span class="badge bg-danger">Rejected</span>
+                                        {% elif application.status == 'REGISTERED' %}
+                                        <span class="badge bg-success">Registered</span>
+                                        {% else %}
+                                        <span class="badge bg-secondary">{{ application.status }}</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="text-muted">Payment Status:</td>
+                                    <td>
+                                        {% if application.payment_status %}
+                                        <span class="badge bg-success">Paid</span>
+                                        {% else %}
+                                        <span class="badge bg-danger">Unpaid</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h5 class="mb-3">Vehicle Information</h5>
+                            <table class="table table-bordered">
+                                <tr>
+                                    <td class="bg-light" width="30%">Vehicle Type</td>
+                                    <td>{{ application.get_registration_type_display }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="bg-light">Maker & Model</td>
+                                    <td>{{ application.make }} {{ application.model }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="bg-light">Fuel Type</td>
+                                    <td>{{ application.get_fuel_type_display }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="bg-light">Seating Capacity</td>
+                                    <td>{{ application.seating_capacity }} persons</td>
+                                </tr>
+                                <tr>
+                                    <td class="bg-light">Engine Number</td>
+                                    <td>{{ application.engine_number }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="bg-light">Chassis Number</td>
+                                    <td>{{ application.chassis_number }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="bg-light">Color</td>
+                                    <td>{{ application.color }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="bg-light">Purchase Date</td>
+                                    <td>{{ application.purchase_date|date:"d M Y" }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="bg-light">Dealer Name</td>
+                                    <td>{{ application.dealer_name }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="bg-light">Temporary Registration</td>
+                                    <td>{{ application.temporary_registration|default:"Not Available" }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h5 class="mb-3">Insurance Information</h5>
+                            <table class="table table-bordered">
+                                <tr>
+                                    <td class="bg-light" width="30%">Insurance Provider</td>
+                                    <td>{{ application.insurance_provider }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="bg-light">Insurance Number</td>
+                                    <td>{{ application.insurance_number }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="bg-light">Validity</td>
+                                    <td>{{ application.insurance_validity|date:"d M Y" }}</td>
+                                </tr>
+                                {% if application.emission_test_number %}
+                                <tr>
+                                    <td class="bg-light">Emission Test Number</td>
+                                    <td>{{ application.emission_test_number }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="bg-light">Emission Test Validity</td>
+                                    <td>{{ application.emission_test_validity|date:"d M Y" }}</td>
+                                </tr>
+                                {% endif %}
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-12">
+                            <h5 class="mb-3">Document Verification</h5>
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <div class="card">
+                                        <div class="card-header bg-light">
+                                            <h6 class="mb-0">Invoice Copy</h6>
+                                        </div>
+                                        <div class="card-body text-center p-2">
+                                            <a href="{{ application.invoice_copy.url }}" class="btn btn-sm btn-primary" target="_blank">
+                                                <i class="bi bi-file-earmark-pdf me-1"></i> View Document
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card">
+                                        <div class="card-header bg-light">
+                                            <h6 class="mb-0">Insurance Copy</h6>
+                                        </div>
+                                        <div class="card-body text-center p-2">
+                                            <a href="{{ application.insurance_copy.url }}" class="btn btn-sm btn-primary" target="_blank">
+                                                <i class="bi bi-file-earmark-pdf me-1"></i> View Document
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            {% if application.emission_certificate %}
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <div class="card">
+                                        <div class="card-header bg-light">
+                                            <h6 class="mb-0">Emission Certificate</h6>
+                                        </div>
+                                        <div class="card-body text-center p-2">
+                                            <a href="{{ application.emission_certificate.url }}" class="btn btn-sm btn-primary" target="_blank">
+                                                <i class="bi bi-file-earmark-pdf me-1"></i> View Document
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <div class="card">
+                                        <div class="card-header bg-light">
+                                            <h6 class="mb-0">Owner ID Proof</h6>
+                                        </div>
+                                        <div class="card-body text-center p-2">
+                                            <a href="{{ application.owner_id_proof.url }}" class="btn btn-sm btn-primary" target="_blank">
+                                                <i class="bi bi-file-earmark-pdf me-1"></i> View Document
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card">
+                                        <div class="card-header bg-light">
+                                            <h6 class="mb-0">Owner Address Proof</h6>
+                                        </div>
+                                        <div class="card-body text-center p-2">
+                                            <a href="{{ application.owner_address_proof.url }}" class="btn btn-sm btn-primary" target="_blank">
+                                                <i class="bi bi-file-earmark-pdf me-1"></i> View Document
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            {% if application.status == 'PENDING' or application.status == 'DOCUMENT_VERIFICATION' %}
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Review Decision</h4>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label for="status" class="form-label">Update Status *</label>
+                            <select name="status" id="status" class="form-select" required>
+                                {% if application.status == 'PENDING' %}
+                                <option value="DOCUMENT_VERIFICATION">Approve for Document Verification</option>
+                                <option value="REJECTED">Reject Application</option>
+                                {% elif application.status == 'DOCUMENT_VERIFICATION' %}
+                                <option value="INSPECTION_SCHEDULED">Schedule for Inspection</option>
+                                <option value="REJECTED">Reject Application</option>
+                                {% endif %}
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="remarks" class="form-label">Remarks</label>
+                            <textarea name="remarks" id="remarks" class="form-control" rows="3"></textarea>
+                            <div class="form-text">Add any comments or notes about this application review.</div>
+                        </div>
+                        
+                        <div class="mb-3" id="rejection_reason_div" style="display: none;">
+                            <label for="rejection_reason" class="form-label">Rejection Reason *</label>
+                            <textarea name="rejection_reason" id="rejection_reason" class="form-control" rows="3"></textarea>
+                            <div class="form-text">Please provide a detailed reason for rejecting this application.</div>
+                        </div>
+                        
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">Submit Review</button>
+                            <a href="{% url 'review_registration_applications' %}" class="btn btn-outline-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        
+        <div class="col-lg-4">
+            <div class="card shadow mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Application Status</h5>
+                </div>
+                <div class="card-body p-0">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex align-items-center {% if application.status == 'PENDING' %}bg-light fw-bold{% endif %}">
+                            <div class="me-3">
+                                {% if application.status == 'PENDING' %}
+                                <span class="badge rounded-circle bg-warning">&nbsp;</span>
+                                {% elif application.status in 'DOCUMENT_VERIFICATION,INSPECTION_SCHEDULED,INSPECTION_PASSED,APPROVED,REGISTERED' %}
+                                <span class="badge rounded-circle bg-success">&nbsp;</span>
+                                {% elif application.status == 'REJECTED' or application.status == 'INSPECTION_FAILED' %}
+                                <span class="badge rounded-circle bg-danger">&nbsp;</span>
+                                {% else %}
+                                <span class="badge rounded-circle bg-secondary">&nbsp;</span>
+                                {% endif %}
+                            </div>
+                            <div>
+                                <div>Pending</div>
+                                <small class="text-muted">Application submitted</small>
+                            </div>
+                        </li>
+                        <li class="list-group-item d-flex align-items-center {% if application.status == 'DOCUMENT_VERIFICATION' %}bg-light fw-bold{% endif %}">
+                            <div class="me-3">
+                                {% if application.status == 'DOCUMENT_VERIFICATION' %}
+                                <span class="badge rounded-circle bg-warning">&nbsp;</span>
+                                {% elif application.status in 'INSPECTION_SCHEDULED,INSPECTION_PASSED,APPROVED,REGISTERED' %}
+                                <span class="badge rounded-circle bg-success">&nbsp;</span>
+                                {% elif application.status == 'REJECTED' %}
+                                <span class="badge rounded-circle bg-danger">&nbsp;</span>
+                                {% elif application.status == 'PENDING' %}
+                                <span class="badge rounded-circle bg-secondary">&nbsp;</span>
+                                {% endif %}
+                            </div>
+                            <div>
+                                <div>Document Verification</div>
+                                <small class="text-muted">Documents under review</small>
+                            </div>
+                        </li>
+                        <li class="list-group-item d-flex align-items-center {% if application.status == 'INSPECTION_SCHEDULED' %}bg-light fw-bold{% endif %}">
+                            <div class="me-3">
+                                {% if application.status == 'INSPECTION_SCHEDULED' %}
+                                <span class="badge rounded-circle bg-warning">&nbsp;</span>
+                                {% elif application.status in 'INSPECTION_PASSED,APPROVED,REGISTERED' %}
+                                <span class="badge rounded-circle bg-success">&nbsp;</span>
+                                {% elif application.status == 'INSPECTION_FAILED' %}
+                                <span class="badge rounded-circle bg-danger">&nbsp;</span>
+                                {% elif application.status in 'PENDING,DOCUMENT_VERIFICATION' %}
+                                <span class="badge rounded-circle bg-secondary">&nbsp;</span>
+                                {% endif %}
+                            </div>
+                            <div>
+                                <div>Inspection Scheduled</div>
+                                <small class="text-muted">
+                                    {% if application.inspection_date %}
+                                        {{ application.inspection_date|date:"d M Y, h:i A" }}
+                                    {% else %}
+                                        Awaiting scheduling
+                                    {% endif %}
+                                </small>
+                            </div>
+                        </li>
+                        <li class="list-group-item d-flex align-items-center {% if application.status == 'INSPECTION_PASSED' %}bg-light fw-bold{% endif %}">
+                            <div class="me-3">
+                                {% if application.status == 'INSPECTION_PASSED' %}
+                                <span class="badge rounded-circle bg-warning">&nbsp;</span>
+                                {% elif application.status in 'APPROVED,REGISTERED' %}
+                                <span class="badge rounded-circle bg-success">&nbsp;</span>
+                                {% elif application.status in 'PENDING,DOCUMENT_VERIFICATION,INSPECTION_SCHEDULED' %}
+                                <span class="badge rounded-circle bg-secondary">&nbsp;</span>
+                                {% endif %}
+                            </div>
+                            <div>
+                                <div>Inspection Complete</div>
+                                <small class="text-muted">
+                                    {% if application.inspection_remarks %}
+                                        {{ application.inspection_remarks|truncatechars:30 }}
+                                    {% else %}
+                                        Awaiting inspection
+                                    {% endif %}
+                                </small>
+                            </div>
+                        </li>
+                        <li class="list-group-item d-flex align-items-center {% if application.status == 'APPROVED' %}bg-light fw-bold{% endif %}">
+                            <div class="me-3">
+                                {% if application.status == 'APPROVED' %}
+                                <span class="badge rounded-circle bg-warning">&nbsp;</span>
+                                {% elif application.status == 'REGISTERED' %}
+                                <span class="badge rounded-circle bg-success">&nbsp;</span>
+                                {% elif application.status in 'PENDING,DOCUMENT_VERIFICATION,INSPECTION_SCHEDULED,INSPECTION_PASSED' %}
+                                <span class="badge rounded-circle bg-secondary">&nbsp;</span>
+                                {% endif %}
+                            </div>
+                            <div>
+                                <div>Approved</div>
+                                <small class="text-muted">Ready for registration</small>
+                            </div>
+                        </li>
+                        <li class="list-group-item d-flex align-items-center {% if application.status == 'REGISTERED' %}bg-light fw-bold{% endif %}">
+                            <div class="me-3">
+                                {% if application.status == 'REGISTERED' %}
+                                <span class="badge rounded-circle bg-success">&nbsp;</span>
+                                {% else %}
+                                <span class="badge rounded-circle bg-secondary">&nbsp;</span>
+                                {% endif %}
+                            </div>
+                            <div>
+                                <div>Registered</div>
+                                <small class="text-muted">
+                                    {% if application.status == 'REGISTERED' and application.registration %}
+                                        {{ application.registration.registration_number }}
+                                    {% else %}
+                                        Pending registration
+                                    {% endif %}
+                                </small>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            {% if application.remarks or application.rejection_reason %}
+            <div class="card shadow mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Notes & Remarks</h5>
+                </div>
+                <div class="card-body">
+                    {% if application.remarks %}
+                    <h6 class="text-muted">Officer Remarks</h6>
+                    <p>{{ application.remarks }}</p>
+                    {% endif %}
+                    
+                    {% if application.rejection_reason %}
+                    <h6 class="text-muted">Rejection Reason</h6>
+                    <p>{{ application.rejection_reason }}</p>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+            
+            {% if application.inspection_officer or application.reviewed_by %}
+            <div class="card shadow mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Processed By</h5>
+                </div>
+                <div class="card-body">
+                    {% if application.reviewed_by %}
+                    <h6 class="text-muted">Reviewed By</h6>
+                    <p>{{ application.reviewed_by.get_full_name }}</p>
+                    {% endif %}
+                    
+                    {% if application.inspection_officer %}
+                    <h6 class="text-muted">Inspection Officer</h6>
+                    <p>{{ application.inspection_officer.get_full_name }}</p>
+                    <p>{{ application.inspection_date|date:"d M Y, h:i A" }}</p>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+            
+            <div class="card shadow">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Required Actions</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="list-group list-group-flush">
+                        {% if application.status == 'PENDING' %}
+                        <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                            <div>
+                                <div class="fw-medium">Review Application</div>
+                                <small class="text-muted">Verify application details</small>
+                            </div>
+                            <span class="badge bg-danger rounded-pill">Required</span>
+                        </a>
+                        {% endif %}
+                        
+                        {% if application.status == 'DOCUMENT_VERIFICATION' %}
+                        <a href="{% url 'schedule_inspection' application_number=application.registration_number %}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                            <div>
+                                <div class="fw-medium">Schedule Inspection</div>
+                                <small class="text-muted">Set date and time for vehicle inspection</small>
+                            </div>
+                            <span class="badge bg-danger rounded-pill">Required</span>
+                        </a>
+                        {% endif %}
+                        
+                        {% if application.status == 'INSPECTION_SCHEDULED' %}
+                        <a href="{% url 'record_inspection_result' application_number=application.registration_number %}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                            <div>
+                                <div class="fw-medium">Record Inspection Result</div>
+                                <small class="text-muted">Enter inspection findings</small>
+                            </div>
+                            <span class="badge bg-danger rounded-pill">Required</span>
+                        </a>
+                        {% endif %}
+                        
+                        {% if application.status == 'INSPECTION_PASSED' %}
+                        <a href="{% url 'issue_registration' application_number=application.registration_number %}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                            <div>
+                                <div class="fw-medium">Issue Registration</div>
+                                <small class="text-muted">Generate RC and number plate details</small>
+                            </div>
+                            <span class="badge bg-danger rounded-pill">Required</span>
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Show/hide rejection reason based on status selection
+        const statusSelect = document.getElementById('status');
+        const rejectionDiv = document.getElementById('rejection_reason_div');
+        const rejectionField = document.getElementById('rejection_reason');
+        
+        if (statusSelect && rejectionDiv) {
+            statusSelect.addEventListener('change', function() {
+                if (this.value === 'REJECTED') {
+                    rejectionDiv.style.display = 'block';
+                    rejectionField.setAttribute('required', 'required');
+                } else {
+                    rejectionDiv.style.display = 'none';
+                    rejectionField.removeAttribute('required');
+                }
+            });
+            
+            // Initial check
+            if (statusSelect.value === 'REJECTED') {
+                rejectionDiv.style.display = 'block';
+                rejectionField.setAttribute('required', 'required');
+            }
+        }
+    });
+</script>
+{% endblock %}

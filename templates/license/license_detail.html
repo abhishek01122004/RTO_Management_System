@@ -1,0 +1,202 @@
+{% extends 'base.html' %}
+
+{% block title %}Driving License Details{% endblock %}
+
+{% block extra_css %}
+<style>
+    .license-card {
+        border-radius: 10px;
+        overflow: hidden;
+        border: none;
+        max-width: 600px;
+        margin: 0 auto;
+    }
+    .license-header {
+        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+        color: white;
+        padding: 20px;
+    }
+    .license-logo {
+        max-width: 60px;
+    }
+    .license-photo {
+        border: 3px solid #fff;
+        border-radius: 5px;
+        max-width: 120px;
+    }
+    .license-signature {
+        max-width: 120px;
+        border-bottom: 1px solid #333;
+    }
+    .license-qr {
+        max-width: 100px;
+    }
+    .validity-badge {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        transform: rotate(15deg);
+    }
+    @media print {
+        .no-print {
+            display: none;
+        }
+        .license-card {
+            border: 1px solid #ddd;
+            box-shadow: none !important;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row mb-4 no-print">
+        <div class="col">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'my_licenses' %}">My Licenses</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">License #{{ license.license_number }}</li>
+                </ol>
+            </nav>
+        </div>
+        <div class="col-auto">
+            <button onclick="window.print()" class="btn btn-outline-primary">
+                <i class="bi bi-printer"></i> Print License
+            </button>
+        </div>
+    </div>
+    
+    <div class="card license-card shadow mb-5">
+        {% if not license.is_active %}
+        <div class="validity-badge">
+            <div class="badge bg-danger p-2" style="font-size: 1rem;">EXPIRED</div>
+        </div>
+        {% endif %}
+        
+        <div class="license-header">
+            <div class="row align-items-center">
+                <div class="col-auto">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/5/55/Emblem_of_India.svg" alt="Government Logo" class="license-logo">
+                </div>
+                <div class="col text-center">
+                    <h4 class="mb-0">Government of India</h4>
+                    <h6>Ministry of Road Transport & Highways</h6>
+                    <h3 class="mb-0">Driving License</h3>
+                </div>
+                <div class="col-auto">
+                    <img src="https://upload.wikimedia.org/wikipedia/en/d/d4/Ashoka_Chakra.svg" alt="Ashoka Chakra" class="license-logo">
+                </div>
+            </div>
+        </div>
+        
+        <div class="card-body p-4">
+            <div class="row">
+                <div class="col-md-8">
+                    <table class="table table-borderless">
+                        <tr>
+                            <th width="40%">License Number:</th>
+                            <td>{{ license.license_number }}</td>
+                        </tr>
+                        <tr>
+                            <th>Name:</th>
+                            <td>{{ license.holder.get_full_name }}</td>
+                        </tr>
+                        <tr>
+                            <th>Date of Birth:</th>
+                            <td>{{ license.holder.citizen_profile.date_of_birth|date:"d M Y" }}</td>
+                        </tr>
+                        <tr>
+                            <th>Blood Group:</th>
+                            <td>{{ license.holder.citizen_profile.blood_group }}</td>
+                        </tr>
+                        <tr>
+                            <th>Address:</th>
+                            <td>{{ license.holder.address }}</td>
+                        </tr>
+                        <tr>
+                            <th>License Type:</th>
+                            <td>{{ license.license_type.name }} ({{ license.license_type.code }})</td>
+                        </tr>
+                        <tr>
+                            <th>Issued Date:</th>
+                            <td>{{ license.issued_date|date:"d M Y" }}</td>
+                        </tr>
+                        <tr>
+                            <th>Valid Until:</th>
+                            <td>{{ license.valid_until|date:"d M Y" }}</td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="col-md-4 text-center">
+                    <div class="mb-3">
+                        {% if license.holder.profile_picture %}
+                        <img src="{{ license.holder.profile_picture.url }}" alt="License Photo" class="license-photo img-fluid mb-2">
+                        {% else %}
+                        <div class="license-photo bg-light d-flex align-items-center justify-content-center mx-auto">
+                            <i class="bi bi-person" style="font-size: 3rem;"></i>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <img src="{{ license.application.signature.url }}" alt="Signature" class="license-signature img-fluid">
+                        <div class="mt-1 small">Signature of License Holder</div>
+                    </div>
+                    
+                    {% if license.qr_code %}
+                    <div>
+                        <img src="{{ license.qr_code.url }}" alt="QR Code" class="license-qr img-fluid">
+                        <div class="mt-1 small">Scan to verify</div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="card-footer bg-light">
+            <div class="small text-center">
+                <p class="mb-1">This license is property of the Government of India.</p>
+                <p class="mb-0">If found, please return to the nearest RTO office.</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="card shadow no-print">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">License History</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Application Number</th>
+                            <th>Application Type</th>
+                            <th>Application Date</th>
+                            <th>Issued Date</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>{{ license.application.application_number }}</td>
+                            <td>{{ license.application.get_application_type_display }}</td>
+                            <td>{{ license.application.application_date|date:"d M Y" }}</td>
+                            <td>{{ license.issued_date|date:"d M Y" }}</td>
+                            <td>
+                                {% if license.is_active %}
+                                <span class="badge bg-success">Active</span>
+                                {% else %}
+                                <span class="badge bg-danger">Expired</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

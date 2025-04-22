@@ -1,0 +1,312 @@
+nse applications"""
+    status_filter = request.GET.get('status', '')
+    
+    if status_filter:
+        applications = LicenseApplication.objects.filter(
+            status=status_filter,
+            payment_status=True
+        ).order_by('-application_date')
+    else:
+        applications = LicenseApplication.objects.filter(
+            payment_status=True
+        ).order_by('-application_date')
+    
+    return render(request, 'license/review_applications.html', {
+        'applications': applications,
+        'status_filter': status_filter
+    })
+
+
+@login_required
+@user_passes_test(lambda u: u.user_type in ['OFFICER', 'ADMIN'])
+def review_license_application(request, application_number):
+    """View for officers to review a specific license application"""
+    application = get_object_or_404(
+        LicenseApplication, 
+        application_number=application_number
+    )
+    
+    if request.method == 'POST':
+        form = LicenseApplicationReviewForm(request.POST, instance=application)
+        if form.is_valid():
+            updated_application = form.save(commit=False)
+            updated_application.reviewed_by = request.user
+            updated_application.save()
+            
+            # Send notification
+            send_notification(
+                user=application.applicant,
+                title="License Application Status Updated",
+                message=f"Your license application #{application.application_number} status has been updated to {application.get_status_display()}.",
+                notification_type="APPLICATION_STATUS"
+            )
+            
+            send_email(
+                to_email=application.applicant.email,
+                subject="License Application Status Updated",
+                message=f"Your license application #{application.application_number} status has been updated to {application.get_status_display()}. "
+                        f"Please check your dashboard for more details."
+            )
+            
+            if application.status == 'REJECTED':
+                rejection_reason = application.rejection_reason or "No specific reason provided"
+                send_email(
+                    to_email=application.applicant.email,
+                    subject="License Application Rejected",
+                    message=f"Your license application #{application.application_number} has been rejected. "
+                            f"Reason: {rejection_reason}. "
+                            f"Please contact the RTO office for more information."
+                )
+            
+            messages.success(request, f"Application status updated to {application.get_status_display()}.")
+            return redirect('review_license_applications')
+    else:
+        form = LicenseApplicationReviewForm(instance=application)
+    
+    test_schedules = TestSchedule.objects.filter(application=application).order_by('-scheduled_date')
+    
+    return render(request, 'license/review.html', {
+        'application': application,
+        'form': form,
+        'test_schedules': test_schedules
+    })
+
+
+@login_required
+@user_passes_test(lambda u: u.user_type in ['OFFICER', 'ADMIN'])
+def schedule_license_test(request, application_number):
+    """View for officers to schedule driving test"""
+    application = get_object_or_404(
+        LicenseApplication, 
+        application_number=application_number
+    )
+    
+    # Check if application is approved for test
+    if application.status != 'APPROVED':
+        messages.error(request, "Application must be approved before scheduling a test.")
+        return redirect('review_license_application', application_number=application_number)
+    
+    if request.method == 'POST':
+        form = TestScheduleForm(request.POST)
+        if form.is_valid():
+            test_schedule = form.save(commit=False)
+            test_schedule.application = application
+            test_schedule.scheduled_by = request.user
+            test_schedule.save()
+            
+            # Send notification
+            send_notification(
+                user=application.applicant,
+                title="Driving Test Scheduled",
+                message=f"Your driving test for license application #{application.application_number} has been scheduled for {test_schedule.scheduled_date.strftime('%d %b %Y')} at {test_schedule.scheduled_time.strftime('%I:%M %p')}.",
+                notification_type="TEST_SCHEDULE"
+            )
+            
+            send_email(
+                to_email=application.applicant.email,
+                subject="Driving Test Scheduled",
+                message=f"Your driving test for license application #{application.application_number} has been scheduled for {test_schedule.scheduled_date.strftime('%d %b %Y')} at {test_schedule.scheduled_time.strftime('%I:%M %p')}. "
+                        f"Please arrive at the testing center at least 30 minutes before your scheduled time. "
+                        f"Don't forget to bring all your original documents for verification."
+            )
+            
+            if application.applicant.phone_number:
+                send_sms(
+                    to_number=application.applicant.phone_number,
+                    message=f"Your driving test is scheduled on {test_schedule.scheduled_date.strftime('%d %b %Y')} at {test_schedule.scheduled_time.strftime('%I:%M %p')}. Bring all original documents. RTO Office."
+                )
+            
+            messages.success(request, "Driving test scheduled successfully.")
+            return redirect('review_license_application', application_number=application_number)
+    else:
+        form = TestScheduleForm()
+    
+    existing_schedules = TestSchedule.objects.filter(application=application).order_by('-scheduled_date')
+    
+    return render(request, 'license/schedule_test.html', {
+        'application': application,
+        'form': form,
+        'existing_schedules': existing_schedules
+    })
+
+
+@login_required
+@user_passes_test(lambda u: u.user_type in ['OFFICER', 'ADMIN'])
+def record_test_result(request, test_id):
+    """View for officers to record driving test result"""
+    test = get_object_or_404(TestSchedule, id=test_id)
+    application = test.application
+    
+    if request.method == 'POST':
+        form = TestResultForm(request.POST, instance=test)
+        if form.is_valid():
+            updated_test = form.save(commit=False)
+            updated_test.result_recorded_by = request.user
+            updated_test.result_date = timezone.now().date()
+            updated_test.save()
+            
+            # Update application status based on test result
+            if updated_test.result == 'PASS':
+                application.status = 'TEST_PASSED'
+                send_notification(
+                    user=application.applicant,
+                    title="Driving Test Passed",
+                    message=f"Congratulations! You have passed your driving test for license application #{application.application_number}.",
+                    notification_type="TEST_RESULT"
+                )
+                
+                send_email(
+                    to_email=application.applicant.email,
+                    subject="Driving Test Passed",
+                    message=f"Congratulations! You have passed your driving test for license application #{application.application_number}. "
+                            f"Your license will be issued soon."
+                )
+            else:
+                application.status = 'TEST_FAILED'
+                send_notification(
+                    user=application.applicant,
+                    title="Driving Test Failed",
+                    message=f"We regret to inform you that you did not pass your driving test for license application #{application.application_number}.",
+                    notification_type="TEST_RESULT"
+                )
+                
+                send_email(
+                    to_email=application.applicant.email,
+                    subject="Driving Test Failed",
+                    message=f"We regret to inform you that you did not pass your driving test for license application #{application.application_number}. "
+                            f"Reason: {updated_test.remarks}. "
+                            f"You can apply for a retest after 15 days."
+                )
+            
+            application.save()
+            
+            messages.success(request, "Test result recorded successfully.")
+            return redirect('review_license_application', application_number=application.application_number)
+    else:
+        form = TestResultForm(instance=test)
+    
+    return render(request, 'license/record_test_result.html', {
+        'test': test,
+        'application': application,
+        'form': form
+    })
+
+
+@login_required
+@user_passes_test(lambda u: u.user_type in ['OFFICER', 'ADMIN'])
+def issue_license(request, application_number):
+    """View for officers to issue driving license"""
+    application = get_object_or_404(
+        LicenseApplication, 
+        application_number=application_number,
+        status='TEST_PASSED'
+    )
+    
+    # Check if license is already issued
+    existing_license = DrivingLicense.objects.filter(application=application).first()
+    if existing_license:
+        messages.info(request, "License has already been issued for this application.")
+        return redirect('license_detail', license_number=existing_license.license_number)
+    
+    # Generate new license
+    license_number = generate_license_number()
+    valid_from = timezone.now().date()
+    valid_until = valid_from.replace(year=valid_from.year + application.license_type.validity_years)
+    
+    license = DrivingLicense.objects.create(
+        license_number=license_number,
+        holder=application.applicant,
+        application=application,
+        license_type=application.license_type,
+        issued_by=request.user,
+        issued_date=valid_from,
+        valid_from=valid_from,
+        valid_until=valid_until,
+        blood_group=getattr(application.applicant.citizen_profile, 'blood_group', ''),
+        address=application.applicant.address
+    )
+    
+    # Update application status
+    application.status = 'LICENSE_ISSUED'
+    application.save()
+    
+    # Send notification
+    send_notification(
+        user=application.applicant,
+        title="Driving License Issued",
+        message=f"Your driving license #{license_number} has been issued successfully.",
+        notification_type="LICENSE_ISSUED"
+    )
+    
+    send_email(
+        to_email=application.applicant.email,
+        subject="Driving License Issued",
+        message=f"Your driving license #{license_number} has been issued successfully. "
+                f"The license is valid from {valid_from.strftime('%d %b %Y')} to {valid_until.strftime('%d %b %Y')}. "
+                f"You can collect your physical license from the RTO office after 7 working days."
+    )
+    
+    if application.applicant.phone_number:
+        send_sms(
+            to_number=application.applicant.phone_number,
+            message=f"Your driving license #{license_number} has been issued. Valid till {valid_until.strftime('%d-%m-%Y')}. Collect from RTO after 7 working days. RTO Office."
+        )
+    
+    messages.success(request, f"License #{license_number} issued successfully.")
+    return redirect('license_detail', license_number=license_number)
+
+
+# Admin views
+@login_required
+@user_passes_test(lambda u: u.user_type == 'ADMIN')
+def manage_license_types(request):
+    """View for admin to manage license types"""
+    license_types = LicenseType.objects.all().order_by('name')
+    
+    return render(request, 'license/manage_license_types.html', {
+        'license_types': license_types
+    })
+
+
+@login_required
+@user_passes_test(lambda u: u.user_type == 'ADMIN')
+def license_statistics(request):
+    """View for admin to see license statistics"""
+    # Applications by status
+    status_counts = LicenseApplication.objects.values('status').annotate(count=Count('status'))
+    
+    # Applications by month
+    month_filter = request.GET.get('month', '')
+    year_filter = request.GET.get('year', '')
+    
+    if month_filter and year_filter:
+        month_applications = LicenseApplication.objects.filter(
+            application_date__month=month_filter,
+            application_date__year=year_filter
+        )
+    else:
+        # Default to current month
+        current_date = timezone.now()
+        month_applications = LicenseApplication.objects.filter(
+            application_date__month=current_date.month,
+            application_date__year=current_date.year
+        )
+    
+    # Licenses issued by type
+    license_type_counts = DrivingLicense.objects.values('license_type__name').annotate(count=Count('license_type'))
+    
+    # Revenue by month
+    revenue_data = LicenseApplication.objects.filter(
+        payment_status=True
+    ).values('payment_date__month', 'payment_date__year').annotate(
+        total=Count('id')
+    ).order_by('-payment_date__year', '-payment_date__month')
+    
+    return render(request, 'license/statistics.html', {
+        'status_counts': status_counts,
+        'month_applications': month_applications,
+        'license_type_counts': license_type_counts,
+        'revenue_data': revenue_data,
+        'month_filter': month_filter,
+        'year_filter': year_filter
+    })
