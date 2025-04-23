@@ -1,5 +1,6 @@
 from django import forms
 from .models import LicenseApplication, TestSchedule
+from django.utils import timezone
 
 
 class LicenseApplicationForm(forms.ModelForm):
@@ -31,27 +32,67 @@ class LicenseApplicationForm(forms.ModelForm):
 class LicenseApplicationReviewForm(forms.ModelForm):
     """Form for RTO officers to review license applications"""
     
+    test_date = forms.DateTimeField(
+        required=False,
+        input_formats=['%Y-%m-%dT%H:%M'],
+        widget=forms.DateTimeInput(
+            attrs={
+                'class': 'form-control',
+                'type': 'datetime-local',
+                'min': timezone.now().strftime('%Y-%m-%dT%H:%M')
+            }
+        ),
+        help_text="Select date and time for the test"
+    )
+    
     class Meta:
         model = LicenseApplication
-        fields = ['status', 'rejection_reason']
+        fields = ['status', 'rejection_reason', 'test_date']
         widgets = {
             'status': forms.Select(attrs={'class': 'form-control'}),
             'rejection_reason': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
         }
+    
+    def clean_test_date(self):
+        test_date = self.cleaned_data.get('test_date')
+        if test_date:
+            # Ensure test_date is timezone-aware
+            if timezone.is_naive(test_date):
+                test_date = timezone.make_aware(test_date)
+            
+            if test_date < timezone.now():
+                raise forms.ValidationError("Test date cannot be in the past.")
+        return test_date
 
 
 class TestScheduleForm(forms.ModelForm):
     """Form for scheduling license tests"""
+    
+    scheduled_date = forms.DateTimeField(
+        input_formats=['%Y-%m-%dT%H:%M'],
+        widget=forms.DateTimeInput(
+            attrs={
+                'class': 'form-control',
+                'type': 'datetime-local',
+                'min': timezone.now().strftime('%Y-%m-%dT%H:%M')
+            }
+        )
+    )
     
     class Meta:
         model = TestSchedule
         fields = ['test_type', 'scheduled_date', 'venue', 'instructions']
         widgets = {
             'test_type': forms.Select(attrs={'class': 'form-control'}),
-            'scheduled_date': forms.DateTimeInput(attrs={'class': 'form-control', 'type': 'datetime-local'}),
             'venue': forms.TextInput(attrs={'class': 'form-control'}),
             'instructions': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
         }
+    
+    def clean_scheduled_date(self):
+        scheduled_date = self.cleaned_data.get('scheduled_date')
+        if scheduled_date and scheduled_date < timezone.now():
+            raise forms.ValidationError("Test date cannot be in the past.")
+        return scheduled_date
 
 
 class TestResultForm(forms.ModelForm):

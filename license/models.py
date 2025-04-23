@@ -44,7 +44,7 @@ class LicenseApplication(models.Model):
     signature = models.ImageField(upload_to='license_signatures/')
     id_proof = models.FileField(upload_to='license_id_proofs/')
     address_proof = models.FileField(upload_to='license_address_proofs/')
-    test_date = models.DateTimeField(null=True, blank=True)
+    test_date = models.DateTimeField(null=True, blank=True, help_text="Date and time when the test is scheduled")
     test_result = models.BooleanField(null=True, blank=True)
     rejection_reason = models.TextField(blank=True, null=True)
     payment_status = models.BooleanField(default=False)

@@ -343,49 +343,75 @@ def review_license_applications(request):
 @login_required
 @user_passes_test(lambda u: u.user_type in ['OFFICER', 'ADMIN'])
 def review_license_application(request, application_number):
-    """View for officers to review a specific license application"""
-    application = get_object_or_404(
-        LicenseApplication, 
-        application_number=application_number
-    )
+    """View for reviewing a license application"""
+    application = get_object_or_404(LicenseApplication, application_number=application_number)
     
     if request.method == 'POST':
         form = LicenseApplicationReviewForm(request.POST, instance=application)
         if form.is_valid():
-            updated_application = form.save(commit=False)
-            updated_application.reviewed_by = request.user
-            updated_application.save()
+            application = form.save(commit=False)
+            application.reviewed_by = request.user
             
-            # Send notification
-            send_notification(
-                user=application.applicant,
-                title="License Application Status Updated",
-                message=f"Your license application #{application.application_number} status has been updated to {application.get_status_display()}.",
-                notification_type="APPLICATION_STATUS"
-            )
-            
-            send_email(
-                to_email=application.applicant.email,
-                subject="License Application Status Updated",
-                message=f"Your license application #{application.application_number} status has been updated to {application.get_status_display()}. "
-                        f"Please check your dashboard for more details."
-            )
-            
-            if application.status == 'REJECTED':
-                rejection_reason = application.rejection_reason or "No specific reason provided"
-                send_email(
-                    to_email=application.applicant.email,
-                    subject="License Application Rejected",
-                    message=f"Your license application #{application.application_number} has been rejected. "
-                            f"Reason: {rejection_reason}. "
-                            f"Please contact the RTO office for more information."
+            # Handle test date scheduling
+            test_date = form.cleaned_data.get('test_date')
+            if test_date and not application.test_date:
+                # Ensure test_date is timezone-aware
+                if timezone.is_naive(test_date):
+                    test_date = timezone.make_aware(test_date)
+                
+                application.test_date = test_date
+                application.status = 'SCHEDULED_FOR_TEST'
+                
+                # Create test schedule
+                TestSchedule.objects.create(
+                    application=application,
+                    test_type='WRITTEN',
+                    scheduled_date=test_date,
+                    venue="RTO Office",
+                    instructions="Please bring your original documents and application receipt.",
+                    examiner=request.user
+                )
+                
+                # Send notification
+                send_notification(
+                    user=application.applicant,
+                    title="Test Scheduled",
+                    message=f"Your written test has been scheduled for {test_date.strftime('%Y-%m-%d %I:%M %p')} at RTO Office.",
+                    notification_type="TEST_SCHEDULED"
                 )
             
-            messages.success(request, f"Application status updated to {application.get_status_display()}.")
+            # Check if the application has a test date and if it has passed
+            if application.test_date:
+                current_time = timezone.now()
+                if current_time < application.test_date:
+                    if application.status in ['APPROVED', 'REJECTED']:
+                        messages.error(request, "Cannot approve/reject application before the scheduled test date.")
+                        return redirect('review_license_application', application_number=application_number)
+            
+            if application.status == 'REJECTED':
+                # Send rejection notification
+                send_notification(
+                    user=application.applicant,
+                    title="Application Rejected",
+                    message=f"Your license application #{application.application_number} has been rejected. Reason: {application.rejection_reason}",
+                    notification_type="APPLICATION_REJECTED"
+                )
+            elif application.status == 'APPROVED':
+                # Send approval notification
+                send_notification(
+                    user=application.applicant,
+                    title="Application Approved",
+                    message=f"Your license application #{application.application_number} has been approved.",
+                    notification_type="APPLICATION_APPROVED"
+                )
+            
+            application.save()
+            messages.success(request, "Application reviewed successfully.")
             return redirect('review_license_applications')
     else:
         form = LicenseApplicationReviewForm(instance=application)
     
+    # Get test schedules for this application
     test_schedules = TestSchedule.objects.filter(application=application).order_by('-scheduled_date')
     
     return render(request, 'license/review.html', {
@@ -398,17 +424,15 @@ def review_license_application(request, application_number):
 @login_required
 @user_passes_test(lambda u: u.user_type in ['OFFICER', 'ADMIN'])
 def schedule_test(request, application_number):
-    """View for scheduling a test for a license application"""
-    application = get_object_or_404(
-        LicenseApplication, 
-        application_number=application_number
-    )
+    """View for scheduling a license test"""
+    application = get_object_or_404(LicenseApplication, application_number=application_number)
     
     if request.method == 'POST':
         form = TestScheduleForm(request.POST)
         if form.is_valid():
             test_schedule = form.save(commit=False)
             test_schedule.application = application
+            test_schedule.examiner = request.user
             test_schedule.save()
             
             # Update application status
@@ -416,29 +440,13 @@ def schedule_test(request, application_number):
             application.test_date = test_schedule.scheduled_date
             application.save()
             
-            # Send notification
+            # Send notification to applicant
             send_notification(
                 user=application.applicant,
-                title="License Test Scheduled",
-                message=f"Your {test_schedule.get_test_type_display()} has been scheduled on {test_schedule.scheduled_date.strftime('%d-%m-%Y %H:%M')} at {test_schedule.venue}.",
-                notification_type="TEST_SCHEDULE"
+                title="Test Scheduled",
+                message=f"Your {test_schedule.get_test_type_display()} has been scheduled for {test_schedule.scheduled_date.strftime('%Y-%m-%d %H:%M')} at {test_schedule.venue}.",
+                notification_type="TEST_SCHEDULED"
             )
-            
-            send_email(
-                to_email=application.applicant.email,
-                subject="License Test Scheduled",
-                message=f"Your {test_schedule.get_test_type_display()} for license application #{application.application_number} "
-                        f"has been scheduled on {test_schedule.scheduled_date.strftime('%d-%m-%Y %H:%M')} at {test_schedule.venue}. "
-                        f"Instructions: {test_schedule.instructions}"
-            )
-            
-            # Send SMS if phone number is available
-            if application.applicant.phone_number:
-                send_sms(
-                    to_number=application.applicant.phone_number,
-                    message=f"RTO: Your {test_schedule.get_test_type_display()} is scheduled on "
-                            f"{test_schedule.scheduled_date.strftime('%d-%m-%Y %H:%M')} at {test_schedule.venue}."
-                )
             
             messages.success(request, "Test scheduled successfully.")
             return redirect('review_license_application', application_number=application_number)
@@ -446,8 +454,8 @@ def schedule_test(request, application_number):
         form = TestScheduleForm()
     
     return render(request, 'license/schedule_test.html', {
-        'application': application,
-        'form': form
+        'form': form,
+        'application': application
     })
 
 

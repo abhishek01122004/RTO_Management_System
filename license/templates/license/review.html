@@ -1,0 +1,176 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Review License Application{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Review License Application</h2>
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">Application Details</h5>
+            <div class="row">
+                <div class="col-md-6">
+                    <p><strong>Application Number:</strong> {{ application.application_number }}</p>
+                    <p><strong>Applicant Name:</strong> {{ application.applicant.get_full_name }}</p>
+                    <p><strong>Application Date:</strong> {{ application.application_date|date:"d M Y" }}</p>
+                    <p><strong>License Type:</strong> {{ application.get_license_type_display }}</p>
+                    {% if application.issued_date %}
+                        <p><strong>Issued Date:</strong> {{ application.issued_date|date:"d M Y" }}</p>
+                    {% endif %}
+                    {% if application.valid_until %}
+                        <p><strong>Valid Until:</strong> {{ application.valid_until|date:"d M Y" }}</p>
+                    {% endif %}
+                </div>
+                <div class="col-md-6">
+                    <p><strong>Current Status:</strong> {{ application.get_status_display }}</p>
+                    {% if application.test_date %}
+                        <p><strong>Scheduled Test Date:</strong> {{ application.test_date|date:"d M Y" }} {{ application.test_date|time:"g:i A" }}</p>
+                        <p><strong>Test Status:</strong> {{ application.get_test_status_display }}</p>
+                    {% endif %}
+                    {% if application.payment_date %}
+                        <p><strong>Payment Date:</strong> {{ application.payment_date|date:"d M Y" }} {{ application.payment_date|time:"g:i A" }}</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mt-4">
+        <div class="card-body">
+            <h5 class="card-title">Application Timeline</h5>
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item px-4 py-3">
+                    <div class="d-flex">
+                        <div class="me-3">
+                            <div class="bg-success rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                <i class="bi bi-file-earmark-text text-white"></i>
+                            </div>
+                        </div>
+                        <div>
+                            <h6 class="mb-1">Application Submitted</h6>
+                            <p class="small text-muted mb-0">{{ application.application_date|date:"d M Y" }}</p>
+                        </div>
+                    </div>
+                </li>
+                
+                {% if application.payment_status %}
+                <li class="list-group-item px-4 py-3">
+                    <div class="d-flex">
+                        <div class="me-3">
+                            <div class="bg-success rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                <i class="bi bi-credit-card text-white"></i>
+                            </div>
+                        </div>
+                        <div>
+                            <h6 class="mb-1">Payment Completed</h6>
+                            <p class="small text-muted mb-0">{{ application.payment_date|date:"d M Y" }} {{ application.payment_date|time:"g:i A" }}</p>
+                        </div>
+                    </div>
+                </li>
+                {% endif %}
+
+                {% if application.test_date %}
+                <li class="list-group-item px-4 py-3">
+                    <div class="d-flex">
+                        <div class="me-3">
+                            <div class="bg-success rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                <i class="bi bi-calendar-check text-white"></i>
+                            </div>
+                        </div>
+                        <div>
+                            <h6 class="mb-1">Test Scheduled</h6>
+                            <p class="small text-muted mb-0">{{ application.test_date|date:"d M Y" }} {{ application.test_date|time:"g:i A" }}</p>
+                        </div>
+                    </div>
+                </li>
+                {% endif %}
+
+                {% if application.issued_date %}
+                <li class="list-group-item px-4 py-3">
+                    <div class="d-flex">
+                        <div class="me-3">
+                            <div class="bg-success rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                <i class="bi bi-check-circle text-white"></i>
+                            </div>
+                        </div>
+                        <div>
+                            <h6 class="mb-1">License Issued</h6>
+                            <p class="small text-muted mb-0">{{ application.issued_date|date:"d M Y" }}</p>
+                        </div>
+                    </div>
+                </li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+
+    <div class="card mt-4">
+        <div class="card-body">
+            <h5 class="card-title">Review Application</h5>
+            <form method="post">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="id_status">Status</label>
+                    {{ form.status }}
+                    {% if form.status.errors %}
+                        <div class="alert alert-danger">{{ form.status.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label for="id_rejection_reason">Rejection Reason</label>
+                    {{ form.rejection_reason }}
+                    {% if form.rejection_reason.errors %}
+                        <div class="alert alert-danger">{{ form.rejection_reason.errors }}</div>
+                    {% endif %}
+                </div>
+
+                {% if not application.test_date %}
+                    <div class="form-group">
+                        <label for="id_test_date">Test Date</label>
+                        {{ form.test_date }}
+                        <small class="form-text text-muted">{{ form.test_date.help_text }}</small>
+                        {% if form.test_date.errors %}
+                            <div class="alert alert-danger">{{ form.test_date.errors }}</div>
+                        {% endif %}
+                    </div>
+                {% endif %}
+
+                <button type="submit" class="btn btn-primary">Submit Review</button>
+                <a href="{% url 'review_license_applications' %}" class="btn btn-secondary">Back to List</a>
+            </form>
+        </div>
+    </div>
+
+    {% if test_schedules %}
+        <div class="card mt-4">
+            <div class="card-body">
+                <h5 class="card-title">Test Schedules</h5>
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Test Type</th>
+                                <th>Scheduled Date</th>
+                                <th>Venue</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for test in test_schedules %}
+                                <tr>
+                                    <td>{{ test.get_test_type_display }}</td>
+                                    <td>{{ test.scheduled_date|date:"d M Y" }} {{ test.scheduled_date|time:"g:i A" }}</td>
+                                    <td>{{ test.venue }}</td>
+                                    <td>{{ test.get_status_display }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %} 
