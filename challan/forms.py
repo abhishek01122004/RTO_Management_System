@@ -2,7 +2,7 @@ from django import forms
 from django.core.validators import RegexValidator
 from .models import Challan, TrafficRule, ChallanPayment, ChallanType
 from accounts.models import User
-from vehicle.models import VehicleRegistration
+from vehicle.models import Vehicle
 
 
 class TrafficRuleForm(forms.ModelForm):
@@ -94,8 +94,8 @@ class ChallanGenerationForm(forms.ModelForm):
     def clean_vehicle_number(self):
         vehicle_number = self.cleaned_data.get('vehicle_number')
         try:
-            VehicleRegistration.objects.get(registration_number=vehicle_number)
-        except VehicleRegistration.DoesNotExist:
+            Vehicle.objects.get(registration_number=vehicle_number)
+        except Vehicle.DoesNotExist:
             raise forms.ValidationError("This vehicle registration number is not in our records.")
         return vehicle_number
     

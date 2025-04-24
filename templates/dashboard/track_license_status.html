@@ -55,12 +55,12 @@
                                         {% endif %}
                                     </td>
                                     <td>
-                                        <a href="{% url 'license_application_detail' application.application_number %}" class="btn btn-sm btn-info">
+                                        <a href="{% url 'license:license_application_detail' application.application_number %}" class="btn btn-sm btn-info">
                                             <i class="fas fa-eye"></i> View Details
                                         </a>
                                         
                                         {% if not application.payment_status %}
-                                            <a href="{% url 'license_payment' application.application_number %}" class="btn btn-sm btn-success">
+                                            <a href="{% url 'license:license_payment' application.application_number %}" class="btn btn-sm btn-success">
                                                 <i class="fas fa-rupee-sign"></i> Pay Fee
                                             </a>
                                         {% endif %}
@@ -77,7 +77,7 @@
             {% else %}
                 <div class="alert alert-info">
                     <h5 class="alert-heading"><i class="fas fa-info-circle me-2"></i> No License Applications Found</h5>
-                    <p class="mb-0">You haven't applied for any licenses yet. To apply for a new license, please visit the <a href="{% url 'apply_for_license' %}" class="alert-link">Apply for License</a> page.</p>
+                    <p class="mb-0">You haven't applied for any licenses yet. To apply for a new license, please visit the <a href="{% url 'license:apply_for_license' %}" class="alert-link">Apply for License</a> page.</p>
                 </div>
             {% endif %}
         </div>
@@ -85,7 +85,7 @@
             <a href="{% url 'citizen_dashboard' %}" class="btn btn-secondary">
                 <i class="fas fa-arrow-left me-2"></i> Back to Dashboard
             </a>
-            <a href="{% url 'apply_for_license' %}" class="btn btn-primary float-end">
+            <a href="{% url 'license:apply_for_license' %}" class="btn btn-primary float-end">
                 <i class="fas fa-plus me-2"></i> Apply for New License
             </a>
         </div>

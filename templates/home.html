@@ -47,18 +47,6 @@
         padding: 70px 0;
         margin-top: 50px;
     }
-    .footer-title {
-        color: white;
-        font-weight: bold;
-        margin-bottom: 20px;
-    }
-    .footer ul {
-        list-style: none;
-        padding-left: 0;
-    }
-    .footer ul li {
-        margin-bottom: 10px;
-    }
 </style>
 {% endblock %}
 
@@ -152,52 +140,6 @@
         {% else %}
         <a href="{% url 'dashboard' %}" class="btn btn-light btn-lg">Go to Dashboard</a>
         {% endif %}
-    </div>
-</section>
-
-<!-- Additional Footer Content -->
-<section class="bg-dark text-white py-5">
-    <div class="container">
-        <div class="row">
-            <div class="col-md-4 mb-4 mb-md-0">
-                <h5 class="footer-title">About RTO Management System</h5>
-                <p>A comprehensive online platform designed to streamline all RTO services, making it easier for citizens to access government transport services.</p>
-                <div class="mt-4">
-                    <a href="#" class="social-icon"><i class="bi bi-facebook"></i></a>
-                    <a href="#" class="social-icon"><i class="bi bi-twitter"></i></a>
-                    <a href="#" class="social-icon"><i class="bi bi-instagram"></i></a>
-                    <a href="#" class="social-icon"><i class="bi bi-linkedin"></i></a>
-                </div>
-            </div>
-            <div class="col-md-2 mb-4 mb-md-0">
-                <h5 class="footer-title">Quick Links</h5>
-                <ul>
-                    <li><a href="{% url 'home' %}">Home</a></li>
-                    <li><a href="#">Services</a></li>
-                    <li><a href="#">About Us</a></li>
-                    <li><a href="#">Contact</a></li>
-                    <li><a href="#">FAQs</a></li>
-                </ul>
-            </div>
-            <div class="col-md-3 mb-4 mb-md-0">
-                <h5 class="footer-title">Our Services</h5>
-                <ul>
-                    <li><a href="#">License Management</a></li>
-                    <li><a href="#">Vehicle Registration</a></li>
-                    <li><a href="#">Challan Management</a></li>
-                    <li><a href="#">Vehicle Fitness</a></li>
-                    <li><a href="#">Permit Services</a></li>
-                </ul>
-            </div>
-            <div class="col-md-3">
-                <h5 class="footer-title">Contact Us</h5>
-                <ul>
-                    <li><i class="bi bi-geo-alt me-2"></i> 123 RTO Building, Transport Nagar</li>
-                    <li><i class="bi bi-telephone me-2"></i> +91 1234567890</li>
-                    <li><i class="bi bi-envelope me-2"></i> info@rtosystem.com</li>
-                </ul>
-            </div>
-        </div>
     </div>
 </section>
 {% endblock %}

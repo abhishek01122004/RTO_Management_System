@@ -1,0 +1,106 @@
+[
+    {
+        "model": "vehicle.vehiclemake",
+        "pk": 1,
+        "fields": {
+            "name": "Maruti Suzuki",
+            "description": "India's largest car manufacturer"
+        }
+    },
+    {
+        "model": "vehicle.vehiclemake",
+        "pk": 2,
+        "fields": {
+            "name": "Hyundai",
+            "description": "South Korean automobile manufacturer"
+        }
+    },
+    {
+        "model": "vehicle.vehiclemake",
+        "pk": 3,
+        "fields": {
+            "name": "Honda",
+            "description": "Japanese automobile manufacturer"
+        }
+    },
+    {
+        "model": "vehicle.vehiclemake",
+        "pk": 4,
+        "fields": {
+            "name": "Toyota",
+            "description": "Japanese automobile manufacturer"
+        }
+    },
+    {
+        "model": "vehicle.vehiclemodel",
+        "pk": 1,
+        "fields": {
+            "make": 1,
+            "name": "Swift",
+            "description": "Compact hatchback"
+        }
+    },
+    {
+        "model": "vehicle.vehiclemodel",
+        "pk": 2,
+        "fields": {
+            "make": 1,
+            "name": "Baleno",
+            "description": "Premium hatchback"
+        }
+    },
+    {
+        "model": "vehicle.vehiclemodel",
+        "pk": 3,
+        "fields": {
+            "make": 2,
+            "name": "i20",
+            "description": "Premium hatchback"
+        }
+    },
+    {
+        "model": "vehicle.vehiclemodel",
+        "pk": 4,
+        "fields": {
+            "make": 2,
+            "name": "Creta",
+            "description": "Compact SUV"
+        }
+    },
+    {
+        "model": "vehicle.vehiclemodel",
+        "pk": 5,
+        "fields": {
+            "make": 3,
+            "name": "City",
+            "description": "Mid-size sedan"
+        }
+    },
+    {
+        "model": "vehicle.vehiclemodel",
+        "pk": 6,
+        "fields": {
+            "make": 3,
+            "name": "Amaze",
+            "description": "Compact sedan"
+        }
+    },
+    {
+        "model": "vehicle.vehiclemodel",
+        "pk": 7,
+        "fields": {
+            "make": 4,
+            "name": "Innova",
+            "description": "MPV"
+        }
+    },
+    {
+        "model": "vehicle.vehiclemodel",
+        "pk": 8,
+        "fields": {
+            "make": 4,
+            "name": "Fortuner",
+            "description": "SUV"
+        }
+    }
+] 

@@ -20,22 +20,22 @@
                 </div>
                 <div class="card-body">
                     <div class="d-grid gap-3">
-                        <a href="{% url 'apply_for_license' %}" class="btn btn-outline-primary">
+                        <a href="{% url 'license:apply_for_license' %}" class="btn btn-outline-primary">
                             <i class="bi bi-card-heading"></i> Apply for License
                         </a>
-                        <a href="{% url 'my_license_applications' %}" class="btn btn-outline-primary">
+                        <a href="{% url 'license:my_license_applications' %}" class="btn btn-outline-primary">
                             <i class="bi bi-list-check"></i> My License Applications
                         </a>
-                        <a href="{% url 'my_licenses' %}" class="btn btn-outline-primary">
+                        <a href="{% url 'license:my_licenses' %}" class="btn btn-outline-primary">
                             <i class="bi bi-card-list"></i> My Licenses
                         </a>
-                        <a href="{% url 'apply_for_registration' %}" class="btn btn-outline-primary">
+                        <a href="{% url 'vehicle:register_vehicle' %}" class="btn btn-outline-primary">
                             <i class="bi bi-car-front"></i> Register New Vehicle
                         </a>
-                        <a href="{% url 'my_registration_applications' %}" class="btn btn-outline-primary">
+                        <a href="{% url 'vehicle:my_vehicles' %}" class="btn btn-outline-primary">
                             <i class="bi bi-truck"></i> My Vehicles
                         </a>
-                        <a href="{% url 'my_challans' %}" class="btn btn-outline-primary">
+                        <a href="{% url 'challan:my_challans' %}" class="btn btn-outline-primary">
                             <i class="bi bi-receipt"></i> My Challans
                         </a>
                     </div>
@@ -80,7 +80,7 @@
                                             {% endif %}
                                         </td>
                                         <td>
-                                            <a href="{% url 'license_application_detail' application_number=application.application_number %}" class="btn btn-sm btn-primary">
+                                            <a href="{% url 'license:license_application_detail' application_number=application.application_number %}" class="btn btn-sm btn-primary">
                                                 <i class="bi bi-eye"></i> View
                                             </a>
                                         </td>
@@ -95,7 +95,7 @@
                         </table>
                     </div>
                     <div class="text-end mt-3">
-                        <a href="{% url 'my_license_applications' %}" class="btn btn-sm btn-outline-primary">View All Applications</a>
+                        <a href="{% url 'license:my_license_applications' %}" class="btn btn-sm btn-outline-primary">View All Applications</a>
                     </div>
                 </div>
             </div>
@@ -133,7 +133,7 @@
                                             {% endif %}
                                         </td>
                                         <td>
-                                            <a href="{% url 'license_detail' license_number=license.license_number %}" class="btn btn-sm btn-primary">
+                                            <a href="{% url 'license:license_detail' license_number=license.license_number %}" class="btn btn-sm btn-primary">
                                                 <i class="bi bi-eye"></i> View
                                             </a>
                                         </td>
@@ -148,7 +148,7 @@
                         </table>
                     </div>
                     <div class="text-end mt-3">
-                        <a href="{% url 'my_licenses' %}" class="btn btn-sm btn-outline-primary">View All Licenses</a>
+                        <a href="{% url 'license:my_licenses' %}" class="btn btn-sm btn-outline-primary">View All Licenses</a>
                     </div>
                 </div>
             </div>

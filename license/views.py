@@ -101,7 +101,7 @@ def apply_for_license(request):
             )
             
             messages.success(request, "Your license application has been submitted successfully.")
-            return redirect('license_application_detail', application_number=application.application_number)
+            return redirect('license:license_application_detail', application_number=application.application_number)
     else:
         form = LicenseApplicationForm(user=request.user)
     
@@ -163,7 +163,40 @@ def license_detail(request, license_number):
         messages.error(request, "You don't have permission to view this license.")
         return redirect('home')
     
-    return render(request, 'license/license_detail.html', {'license': license})
+    # Generate QR code
+    import qrcode
+    from io import BytesIO
+    import base64
+    
+    # Create QR code with license details
+    qr = qrcode.QRCode(
+        version=1,
+        error_correction=qrcode.constants.ERROR_CORRECT_L,
+        box_size=10,
+        border=4,
+    )
+    
+    # Add license details to QR code
+    qr_data = f"License Number: {license.license_number}\n"
+    qr_data += f"Name: {license.holder.get_full_name()}\n"
+    qr_data += f"Valid Until: {license.valid_until.strftime('%d-%m-%Y')}\n"
+    qr_data += f"Status: {'Active' if license.is_active else 'Expired'}"
+    
+    qr.add_data(qr_data)
+    qr.make(fit=True)
+    
+    # Create QR code image
+    img = qr.make_image(fill_color="black", back_color="white")
+    
+    # Convert to base64
+    buffered = BytesIO()
+    img.save(buffered, format="PNG")
+    qr_code = base64.b64encode(buffered.getvalue()).decode()
+    
+    return render(request, 'license/license_detail.html', {
+        'license': license,
+        'qr_code': qr_code
+    })
 
 
 @login_required
@@ -182,7 +215,7 @@ def license_payment(request, application_number):
     # Check if payment is already done
     if application.payment_status:
         messages.info(request, "Payment has already been completed for this application.")
-        return redirect('license_application_detail', application_number=application_number)
+        return redirect('license:license_application_detail', application_number=application_number)
     
     if request.method == 'POST':
         # In development mode, automatically mark payment as successful
@@ -217,7 +250,7 @@ def license_payment(request, application_number):
             print(f"Notification error: {str(e)}")
             
         messages.success(request, "Payment completed successfully. Your application will now be reviewed.")
-        return redirect('license_application_detail', application_number=application_number)
+        return redirect('license:license_application_detail', application_number=application_number)
         
     # Initialize Razorpay (or mock if keys not available)
     client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID or 'rzp_test_mock', settings.RAZORPAY_KEY_SECRET or 'mock_secret'))
@@ -259,7 +292,7 @@ def license_payment(request, application_number):
         return render(request, 'license/payment.html', context)
     except Exception as e:
         messages.error(request, f"Payment initialization failed: {str(e)}")
-        return redirect('license_application_detail', application_number=application_number)
+        return redirect('license:license_application_detail', application_number=application_number)
 
 
 @login_required
@@ -308,13 +341,13 @@ def license_payment_success(request, application_number):
             )
             
             messages.success(request, "Payment successful! Your application will be reviewed by an RTO officer.")
-            return redirect('license_application_detail', application_number=application_number)
+            return redirect('license:license_application_detail', application_number=application_number)
         
         except Exception as e:
             messages.error(request, f"Payment verification failed: {str(e)}")
-            return redirect('license_payment', application_number=application_number)
+            return redirect('license:license_payment', application_number=application_number)
     
-    return redirect('license_application_detail', application_number=application_number)
+    return redirect('license:license_application_detail', application_number=application_number)
 
 
 # Officer views
@@ -386,7 +419,7 @@ def review_license_application(request, application_number):
                 if current_time < application.test_date:
                     if application.status in ['APPROVED', 'REJECTED']:
                         messages.error(request, "Cannot approve/reject application before the scheduled test date.")
-                        return redirect('review_license_application', application_number=application_number)
+                        return redirect('license:review_license_application', application_number=application_number)
             
             if application.status == 'REJECTED':
                 # Send rejection notification
@@ -407,7 +440,7 @@ def review_license_application(request, application_number):
             
             application.save()
             messages.success(request, "Application reviewed successfully.")
-            return redirect('review_license_applications')
+            return redirect('license:review_license_applications')
     else:
         form = LicenseApplicationReviewForm(instance=application)
     
@@ -449,7 +482,7 @@ def schedule_test(request, application_number):
             )
             
             messages.success(request, "Test scheduled successfully.")
-            return redirect('review_license_application', application_number=application_number)
+            return redirect('license:review_license_application', application_number=application_number)
     else:
         form = TestScheduleForm()
     
@@ -505,7 +538,7 @@ def record_test_result(request, test_id):
             )
             
             messages.success(request, success_message)
-            return redirect('review_license_application', application_number=application.application_number)
+            return redirect('license:review_license_application', application_number=application.application_number)
     else:
         form = TestResultForm(instance=test)
     
@@ -523,7 +556,7 @@ def issue_license(request, application_number):
     application = get_object_or_404(
         LicenseApplication, 
         application_number=application_number,
-        status='APPROVED'
+        status__in=['TEST_PASSED', 'APPROVED']
     )
     
     if request.method == 'POST':
@@ -575,7 +608,7 @@ def issue_license(request, application_number):
             )
         
         messages.success(request, f"License #{license_number} has been issued successfully.")
-        return redirect('review_license_applications')
+        return redirect('license:review_license_applications')
     
     return render(request, 'license/issue_license.html', {
         'application': application
@@ -613,7 +646,7 @@ def add_license_type(request):
         )
         
         messages.success(request, "License type added successfully.")
-        return redirect('license_types')
+        return redirect('license:license_types')
     
     return render(request, 'license/add_license_type.html')
 
@@ -634,7 +667,7 @@ def edit_license_type(request, type_id):
         license_type.save()
         
         messages.success(request, "License type updated successfully.")
-        return redirect('license_types')
+        return redirect('license:license_types')
     
     return render(request, 'license/edit_license_type.html', {'license_type': license_type})
 

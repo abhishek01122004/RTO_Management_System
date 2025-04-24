@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Driving License Details{% endblock %}
 
@@ -23,6 +24,19 @@
         border: 3px solid #fff;
         border-radius: 5px;
         max-width: 120px;
+        height: 150px;
+        object-fit: cover;
+    }
+    .photo-placeholder {
+        width: 120px;
+        height: 150px;
+        background-color: #f8f9fa;
+        border: 3px solid #fff;
+        border-radius: 5px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #6c757d;
     }
     .license-signature {
         max-width: 120px;
@@ -56,7 +70,7 @@
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb">
                     <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
-                    <li class="breadcrumb-item"><a href="{% url 'my_licenses' %}">My Licenses</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'license:my_licenses' %}">My Licenses</a></li>
                     <li class="breadcrumb-item active" aria-current="page">License #{{ license.license_number }}</li>
                 </ol>
             </nav>
@@ -78,7 +92,7 @@
         <div class="license-header">
             <div class="row align-items-center">
                 <div class="col-auto">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/5/55/Emblem_of_India.svg" alt="Government Logo" class="license-logo">
+                    <img src="{% static 'license/images/ashoka_chakra.jpg' %}" alt="Government Logo" class="license-logo">
                 </div>
                 <div class="col text-center">
                     <h4 class="mb-0">Government of India</h4>
@@ -86,7 +100,7 @@
                     <h3 class="mb-0">Driving License</h3>
                 </div>
                 <div class="col-auto">
-                    <img src="https://upload.wikimedia.org/wikipedia/en/d/d4/Ashoka_Chakra.svg" alt="Ashoka Chakra" class="license-logo">
+                    <img src="{% static 'license/images/ashoka_chakra.jpg' %}" alt="Ashoka Chakra" class="license-logo">
                 </div>
             </div>
         </div>
@@ -131,23 +145,34 @@
                 </div>
                 <div class="col-md-4 text-center">
                     <div class="mb-3">
-                        {% if license.holder.profile_picture %}
-                        <img src="{{ license.holder.profile_picture.url }}" alt="License Photo" class="license-photo img-fluid mb-2">
-                        {% else %}
-                        <div class="license-photo bg-light d-flex align-items-center justify-content-center mx-auto">
-                            <i class="bi bi-person" style="font-size: 3rem;"></i>
+                        <div class="d-flex justify-content-center">
+                            {% if license.holder.profile_picture %}
+                            <img src="{{ license.holder.profile_picture.url }}" alt="License Photo" class="license-photo">
+                            {% else %}
+                            <div class="photo-placeholder">
+                                <div class="text-center">
+                                    <i class="bi bi-person-fill" style="font-size: 3rem;"></i>
+                                    <div class="small mt-2">Photo</div>
+                                </div>
+                            </div>
+                            {% endif %}
                         </div>
-                        {% endif %}
                     </div>
                     
                     <div class="mb-3">
-                        <img src="{{ license.application.signature.url }}" alt="Signature" class="license-signature img-fluid">
+                        {% if license.holder.signature %}
+                        <img src="{{ license.holder.signature.url }}" alt="Signature" class="license-signature img-fluid">
+                        {% else %}
+                        <div class="license-signature bg-light d-flex align-items-center justify-content-center mx-auto">
+                            <i class="bi bi-pen" style="font-size: 2rem;"></i>
+                        </div>
+                        {% endif %}
                         <div class="mt-1 small">Signature of License Holder</div>
                     </div>
                     
-                    {% if license.qr_code %}
+                    {% if qr_code %}
                     <div>
-                        <img src="{{ license.qr_code.url }}" alt="QR Code" class="license-qr img-fluid">
+                        <img src="data:image/png;base64,{{ qr_code }}" alt="QR Code" class="license-qr img-fluid">
                         <div class="mt-1 small">Scan to verify</div>
                     </div>
                     {% endif %}

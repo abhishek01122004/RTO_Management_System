@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Review Registration Applications{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Review Registration Applications</h2>
+    
+    {% if applications %}
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Application Number</th>
+                        <th>Vehicle Details</th>
+                        <th>Applicant</th>
+                        <th>Submitted On</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for application in applications %}
+                        <tr>
+                            <td>{{ application.application_number }}</td>
+                            <td>
+                                {{ application.vehicle.make.name }} {{ application.vehicle.model.name }}<br>
+                                <small class="text-muted">{{ application.vehicle.registration_number }}</small>
+                            </td>
+                            <td>{{ application.applicant.get_full_name }}</td>
+                            <td>{{ application.submitted_at|date:"d M Y" }}</td>
+                            <td>
+                                <span class="badge bg-{{ application.status|lower }}">
+                                    {{ application.get_status_display }}
+                                </span>
+                            </td>
+                            <td>
+                                <a href="{% url 'vehicle:vehicle_application_detail' application_id=application.id %}" 
+                                   class="btn btn-sm btn-primary">
+                                    Review
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="alert alert-info">
+            No pending applications to review.
+        </div>
+    {% endif %}
+</div>
+{% endblock %} 

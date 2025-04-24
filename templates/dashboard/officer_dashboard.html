@@ -20,17 +20,17 @@
                 </div>
                 <div class="card-body">
                     <div class="d-grid gap-3">
-                        <a href="{% url 'review_license_applications' %}" class="btn btn-outline-primary">
+                        <a href="{% url 'license:review_license_applications' %}" class="btn btn-outline-primary">
                             <i class="bi bi-list-check"></i> Review License Applications
                         </a>
-                        <a href="{% url 'review_registration_applications' %}" class="btn btn-outline-primary">
+                        <a href="{% url 'vehicle:review_registration_applications' %}" class="btn btn-outline-primary">
                             <i class="bi bi-car-front"></i> Vehicle Registrations
                         </a>
-                        <a href="{% url 'generate_challan' %}" class="btn btn-outline-primary">
-                            <i class="bi bi-receipt"></i> Generate Challan
+                        <a href="{% url 'challan:generate_challan' %}" class="btn btn-outline-primary">
+                            <i class="bi bi-plus-circle"></i> Generate Challan
                         </a>
-                        <a href="{% url 'manage_challans' %}" class="btn btn-outline-primary">
-                            <i class="bi bi-list-ul"></i> Manage Challans
+                        <a href="{% url 'challan:manage_challans' %}" class="btn btn-outline-primary">
+                            <i class="bi bi-list-check"></i> Manage Challans
                         </a>
                     </div>
                 </div>
@@ -111,7 +111,7 @@
                                             <span class="badge bg-warning text-dark">{{ application.get_status_display }}</span>
                                         </td>
                                         <td>
-                                            <a href="{% url 'review_license_application' application_number=application.application_number %}" class="btn btn-sm btn-primary">
+                                            <a href="{% url 'license:review_license_application' application_number=application.application_number %}" class="btn btn-sm btn-primary">
                                                 <i class="bi bi-pencil"></i> Review
                                             </a>
                                         </td>
@@ -126,7 +126,7 @@
                         </table>
                     </div>
                     <div class="text-end mt-3">
-                        <a href="{% url 'review_license_applications' %}" class="btn btn-sm btn-outline-primary">View All Applications</a>
+                        <a href="{% url 'license:review_license_applications' %}" class="btn btn-sm btn-outline-primary">View All Applications</a>
                     </div>
                 </div>
             </div>
@@ -159,7 +159,7 @@
                                         <td>{{ test.scheduled_date|date:"M d, Y h:i A" }}</td>
                                         <td>{{ test.venue }}</td>
                                         <td>
-                                            <a href="{% url 'record_test_result' test_id=test.id %}" class="btn btn-sm btn-primary">
+                                            <a href="{% url 'license:record_test_result' test_id=test.id %}" class="btn btn-sm btn-primary">
                                                 <i class="bi bi-clipboard-check"></i> Record Result
                                             </a>
                                         </td>

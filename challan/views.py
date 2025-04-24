@@ -13,7 +13,7 @@ from .models import TrafficRule, ChallanType, Challan, ChallanPayment
 from .forms import (ChallanGenerationForm, ChallanSearchForm, 
                    ChallanUpdateForm, ChallanPaymentForm)
 from accounts.models import User
-from vehicle.models import VehicleRegistration
+from vehicle.models import Vehicle
 from notifications.utils import send_notification, send_email, send_sms
 
 
@@ -52,9 +52,9 @@ def my_challans(request):
     challans = Challan.objects.filter(violator=request.user).order_by('-issue_date')
     
     # Get user's vehicles
-    user_vehicles = VehicleRegistration.objects.filter(
+    user_vehicles = Vehicle.objects.filter(
         owner=request.user,
-        is_active=True
+        status='ACTIVE'
     ).values_list('registration_number', flat=True)
     
     # Get challans for user's vehicles (even if user is not set as violator)
@@ -76,9 +76,9 @@ def view_challan(request, challan_number):
     # Check permissions
     if request.user.user_type == 'CITIZEN':
         # Citizens can view their own challans or challans for their vehicles
-        user_vehicles = VehicleRegistration.objects.filter(
+        user_vehicles = Vehicle.objects.filter(
             owner=request.user,
-            is_active=True
+            status='ACTIVE'
         ).values_list('registration_number', flat=True)
         
         is_allowed = (challan.violator == request.user or 
@@ -115,9 +115,9 @@ def pay_challan(request, challan_number):
     # Check permissions
     if request.user.user_type == 'CITIZEN':
         # Citizens can pay their own challans or challans for their vehicles
-        user_vehicles = VehicleRegistration.objects.filter(
+        user_vehicles = Vehicle.objects.filter(
             owner=request.user,
-            is_active=True
+            status='ACTIVE'
         ).values_list('registration_number', flat=True)
         
         is_allowed = (challan.violator == request.user or 
@@ -274,9 +274,9 @@ def dispute_challan(request, challan_number):
     # Check permissions
     if request.user.user_type == 'CITIZEN':
         # Citizens can dispute their own challans or challans for their vehicles
-        user_vehicles = VehicleRegistration.objects.filter(
+        user_vehicles = Vehicle.objects.filter(
             owner=request.user,
-            is_active=True
+            status='ACTIVE'
         ).values_list('registration_number', flat=True)
         
         is_allowed = (challan.violator == request.user or 
@@ -368,12 +368,12 @@ def generate_challan(request):
             # Try to find vehicle owner
             if not challan.violator:
                 try:
-                    vehicle = VehicleRegistration.objects.get(
+                    vehicle = Vehicle.objects.get(
                         registration_number=challan.vehicle_number,
-                        is_active=True
+                        status='ACTIVE'
                     )
                     challan.violator = vehicle.owner
-                except VehicleRegistration.DoesNotExist:
+                except Vehicle.DoesNotExist:
                     pass
             
             # Save challan with license number

@@ -58,59 +58,59 @@
                             <li class="nav-item dropdown">
                                 <a class="nav-link dropdown-toggle" href="#" id="licenseDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">License</a>
                                 <ul class="dropdown-menu" aria-labelledby="licenseDropdown">
-                                    <li><a class="dropdown-item" href="{% url 'apply_for_license' %}">Apply for License</a></li>
-                                    <li><a class="dropdown-item" href="{% url 'my_license_applications' %}">My Applications</a></li>
-                                    <li><a class="dropdown-item" href="{% url 'my_licenses' %}">My Licenses</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'license:apply_for_license' %}">Apply for License</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'license:my_license_applications' %}">My Applications</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'license:my_licenses' %}">My Licenses</a></li>
                                 </ul>
                             </li>
                             
                             <li class="nav-item dropdown">
                                 <a class="nav-link dropdown-toggle" href="#" id="vehicleDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">Vehicle</a>
                                 <ul class="dropdown-menu" aria-labelledby="vehicleDropdown">
-                                    <li><a class="dropdown-item" href="{% url 'apply_for_registration' %}">Register Vehicle</a></li>
-                                    <li><a class="dropdown-item" href="{% url 'my_registration_applications' %}">My Registrations</a></li>
-                                    <li><a class="dropdown-item" href="{% url 'my_vehicles' %}">My Vehicles</a></li>
-                                    <li><a class="dropdown-item" href="{% url 'vehicle_transfers' %}">My Transfers</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'vehicle:register_vehicle' %}">Register Vehicle</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'vehicle:vehicle_dashboard' %}">My Registrations</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'vehicle:my_vehicles' %}">My Vehicles</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'vehicle:vehicle_transfers' %}">My Transfers</a></li>
                                 </ul>
                             </li>
                             
                             <li class="nav-item dropdown">
                                 <a class="nav-link dropdown-toggle" href="#" id="challanDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">Challan</a>
                                 <ul class="dropdown-menu" aria-labelledby="challanDropdown">
-                                    <li><a class="dropdown-item" href="{% url 'search_challan' %}">Search Challan</a></li>
-                                    <li><a class="dropdown-item" href="{% url 'my_challans' %}">My Challans</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'challan:search_challan' %}">Search Challan</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'challan:my_challans' %}">My Challans</a></li>
                                 </ul>
                             </li>
                         {% elif user.user_type == 'OFFICER' %}
                             <li class="nav-item dropdown">
                                 <a class="nav-link dropdown-toggle" href="#" id="officerLicenseDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">License</a>
                                 <ul class="dropdown-menu" aria-labelledby="officerLicenseDropdown">
-                                    <li><a class="dropdown-item" href="{% url 'review_license_applications' %}">Review Applications</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'license:review_license_applications' %}">Review Applications</a></li>
                                 </ul>
                             </li>
                             
                             <li class="nav-item dropdown">
                                 <a class="nav-link dropdown-toggle" href="#" id="officerVehicleDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">Vehicle</a>
                                 <ul class="dropdown-menu" aria-labelledby="officerVehicleDropdown">
-                                    <li><a class="dropdown-item" href="{% url 'review_registration_applications' %}">Review Registrations</a></li>
-                                    <li><a class="dropdown-item" href="{% url 'review_transfer_applications' %}">Review Transfers</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'vehicle:review_registration_applications' %}">Review Registrations</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'vehicle:vehicle_transfers' %}">Review Transfers</a></li>
                                 </ul>
                             </li>
                             
                             <li class="nav-item dropdown">
                                 <a class="nav-link dropdown-toggle" href="#" id="officerChallanDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">Challan</a>
                                 <ul class="dropdown-menu" aria-labelledby="officerChallanDropdown">
-                                    <li><a class="dropdown-item" href="{% url 'generate_challan' %}">Generate Challan</a></li>
-                                    <li><a class="dropdown-item" href="{% url 'manage_challans' %}">Manage Challans</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'challan:generate_challan' %}">Generate Challan</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'challan:manage_challans' %}">Manage Challans</a></li>
                                 </ul>
                             </li>
                             
                             <li class="nav-item dropdown">
                                 <a class="nav-link dropdown-toggle" href="#" id="statsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">Statistics</a>
                                 <ul class="dropdown-menu" aria-labelledby="statsDropdown">
-                                    <li><a class="dropdown-item" href="{% url 'license_statistics' %}">License Statistics</a></li>
-                                    <li><a class="dropdown-item" href="{% url 'vehicle_statistics' %}">Vehicle Statistics</a></li>
-                                    <li><a class="dropdown-item" href="{% url 'challan_statistics' %}">Challan Statistics</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'license:license_statistics' %}">License Statistics</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'vehicle:vehicle_statistics' %}">Vehicle Statistics</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'challan:challan_statistics' %}">Challan Statistics</a></li>
                                 </ul>
                             </li>
                         {% elif user.user_type == 'ADMIN' %}
@@ -135,9 +135,9 @@
                             <li class="nav-item dropdown">
                                 <a class="nav-link dropdown-toggle" href="#" id="adminStatsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">Statistics</a>
                                 <ul class="dropdown-menu" aria-labelledby="adminStatsDropdown">
-                                    <li><a class="dropdown-item" href="{% url 'license_statistics' %}">License Statistics</a></li>
-                                    <li><a class="dropdown-item" href="{% url 'vehicle_statistics' %}">Vehicle Statistics</a></li>
-                                    <li><a class="dropdown-item" href="{% url 'challan_statistics' %}">Challan Statistics</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'license:license_statistics' %}">License Statistics</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'vehicle:vehicle_statistics' %}">Vehicle Statistics</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'challan:challan_statistics' %}">Challan Statistics</a></li>
                                 </ul>
                             </li>
                         {% endif %}
@@ -248,9 +248,9 @@
                 <div class="col-md-3 mb-4 mb-md-0">
                     <h5>Services</h5>
                     <ul class="list-unstyled">
-                        <li><a href="{% url 'apply_for_license' %}" class="text-light"><i class="fas fa-angle-right me-2"></i>Apply for License</a></li>
-                        <li><a href="{% url 'apply_for_registration' %}" class="text-light"><i class="fas fa-angle-right me-2"></i>Register Vehicle</a></li>
-                        <li><a href="{% url 'search_challan' %}" class="text-light"><i class="fas fa-angle-right me-2"></i>Pay Challan</a></li>
+                        <li><a href="{% url 'license:apply_for_license' %}" class="text-light"><i class="fas fa-angle-right me-2"></i>Apply for License</a></li>
+                        <li><a href="{% url 'vehicle:register_vehicle' %}" class="text-light"><i class="fas fa-angle-right me-2"></i>Register Vehicle</a></li>
+                        <li><a href="{% url 'challan:search_challan' %}" class="text-light"><i class="fas fa-angle-right me-2"></i>Pay Challan</a></li>
                     </ul>
                 </div>
                 

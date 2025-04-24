@@ -1,0 +1,213 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Application Detail{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2>Application Detail</h2>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'vehicle:vehicle_dashboard' %}">Vehicle Dashboard</a></li>
+                    <li class="breadcrumb-item active">Application Detail</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Application Information</h5>
+                    <span class="badge bg-{{ application.status|lower }}">
+                        {{ application.get_status_display }}
+                    </span>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <p class="mb-1"><strong>Application Number:</strong></p>
+                            <p>{{ application.application_number }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="mb-1"><strong>Application Date:</strong></p>
+                            <p>{{ application.created_at|date:"d M Y" }}</p>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <p class="mb-1"><strong>Vehicle Make:</strong></p>
+                            <p>{{ application.vehicle.make.name }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="mb-1"><strong>Vehicle Model:</strong></p>
+                            <p>{{ application.vehicle.model.name }}</p>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <p class="mb-1"><strong>Category:</strong></p>
+                            <p>{{ application.vehicle.get_category_display }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="mb-1"><strong>Fuel Type:</strong></p>
+                            <p>{{ application.vehicle.get_fuel_type_display }}</p>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <p class="mb-1"><strong>Engine Number:</strong></p>
+                            <p>{{ application.vehicle.engine_number }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="mb-1"><strong>Chassis Number:</strong></p>
+                            <p>{{ application.vehicle.chassis_number }}</p>
+                        </div>
+                    </div>
+
+                    {% if application.reviewed_by %}
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <p class="mb-1"><strong>Reviewed By:</strong></p>
+                            <p>{{ application.reviewed_by.get_full_name }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="mb-1"><strong>Review Date:</strong></p>
+                            <p>{{ application.reviewed_at|date:"d M Y" }}</p>
+                        </div>
+                    </div>
+
+                    {% if application.review_notes %}
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <p class="mb-1"><strong>Review Notes:</strong></p>
+                            <p>{{ application.review_notes }}</p>
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Documents</h5>
+                    {% if application.status == 'DRAFT' %}
+                    <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#uploadDocumentModal">
+                        <i class="fas fa-upload"></i> Upload Document
+                    </button>
+                    {% endif %}
+                </div>
+                <div class="card-body">
+                    {% if documents %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Document Type</th>
+                                    <th>Upload Date</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for document in documents %}
+                                <tr>
+                                    <td>{{ document.get_document_type_display }}</td>
+                                    <td>{{ document.uploaded_at|date:"d M Y" }}</td>
+                                    <td>
+                                        <span class="badge bg-{{ document.verified|yesno:'success,secondary' }}">
+                                            {{ document.verified|yesno:'Verified,Pending' }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <a href="{{ document.file.url }}" class="btn btn-sm btn-outline-primary" target="_blank">
+                                            <i class="fas fa-eye"></i> View
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-muted">No documents uploaded yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            {% if application.status == 'DRAFT' %}
+            <div class="d-grid gap-2">
+                <a href="{% url 'vehicle:submit_application' application.id %}" class="btn btn-primary">
+                    Submit Application
+                </a>
+                <a href="{% url 'vehicle:vehicle_dashboard' %}" class="btn btn-secondary">
+                    Back to Dashboard
+                </a>
+            </div>
+            {% else %}
+            <div class="d-grid">
+                <a href="{% url 'vehicle:vehicle_dashboard' %}" class="btn btn-secondary">
+                    Back to Dashboard
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Upload Document Modal -->
+<div class="modal fade" id="uploadDocumentModal" tabindex="-1" aria-labelledby="uploadDocumentModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="uploadDocumentModalLabel">Upload Document</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="{{ form.document_type.id_for_label }}" class="form-label">Document Type</label>
+                        {{ form.document_type }}
+                        {% if form.document_type.errors %}
+                        <div class="invalid-feedback d-block">
+                            {{ form.document_type.errors }}
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ form.file.id_for_label }}" class="form-label">File</label>
+                        {{ form.file }}
+                        {% if form.file.errors %}
+                        <div class="invalid-feedback d-block">
+                            {{ form.file.errors }}
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ form.notes.id_for_label }}" class="form-label">Notes</label>
+                        {{ form.notes }}
+                        {% if form.notes.errors %}
+                        <div class="invalid-feedback d-block">
+                            {{ form.notes.errors }}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Upload</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %} 

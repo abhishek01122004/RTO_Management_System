@@ -9,7 +9,7 @@
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb">
                     <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
-                    <li class="breadcrumb-item"><a href="{% url 'review_license_applications' %}">License Applications</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'license:review_license_applications' %}">License Applications</a></li>
                     <li class="breadcrumb-item active" aria-current="page">Review #{{ application.application_number }}</li>
                 </ol>
             </nav>
@@ -17,13 +17,13 @@
         <div class="col-auto">
             <div class="btn-group">
                 {% if application.status == 'DOCUMENT_VERIFICATION' or application.status == 'TEST_PASSED' %}
-                <a href="{% url 'schedule_test' application_number=application.application_number %}" class="btn btn-outline-primary">
+                <a href="{% url 'license:schedule_test' application_number=application.application_number %}" class="btn btn-outline-primary">
                     <i class="bi bi-calendar"></i> Schedule Test
                 </a>
                 {% endif %}
                 
                 {% if application.status == 'TEST_PASSED' or application.status == 'APPROVED' %}
-                <a href="{% url 'issue_license' application_number=application.application_number %}" class="btn btn-success">
+                <a href="{% url 'license:issue_license' application_number=application.application_number %}" class="btn btn-success">
                     <i class="bi bi-card-heading"></i> Issue License
                 </a>
                 {% endif %}
@@ -231,7 +231,7 @@
                                     </td>
                                     <td>
                                         {% if not test.is_completed %}
-                                        <a href="{% url 'record_test_result' test_id=test.id %}" class="btn btn-sm btn-primary">
+                                        <a href="{% url 'license:record_test_result' test_id=test.id %}" class="btn btn-sm btn-primary">
                                             Record Result
                                         </a>
                                         {% else %}

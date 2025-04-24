@@ -21,7 +21,12 @@ def login_view(request):
                 login(request, user)
                 messages.success(request, f"Welcome back, {user.get_full_name() or user.email}!")
                 
-                # Redirect based on user type
+                # Get the next URL from the request
+                next_url = request.GET.get('next')
+                if next_url:
+                    return redirect(next_url)
+                
+                # If no next URL, redirect based on user type
                 if user.user_type == 'CITIZEN':
                     return redirect('citizen_dashboard')
                 elif user.user_type == 'OFFICER':
@@ -37,7 +42,12 @@ def login_view(request):
     else:
         form = CustomAuthenticationForm()
     
-    return render(request, 'accounts/login.html', {'form': form})
+    # Get the next URL from the request and pass it to the template
+    next_url = request.GET.get('next')
+    return render(request, 'accounts/login.html', {
+        'form': form,
+        'next': next_url
+    })
 
 
 @csrf_exempt

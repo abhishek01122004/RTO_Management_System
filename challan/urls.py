@@ -1,6 +1,8 @@
 from django.urls import path
 from . import views
 
+app_name = 'challan'
+
 urlpatterns = [
     # Citizen URLs
     path('search/', views.search_challan, name='search_challan'),

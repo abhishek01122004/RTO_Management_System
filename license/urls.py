@@ -1,6 +1,8 @@
 from django.urls import path
 from . import views
 
+app_name = 'license'
+
 urlpatterns = [
     # Citizen URLs
     path('apply/', views.apply_for_license, name='apply_for_license'),

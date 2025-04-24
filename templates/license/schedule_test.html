@@ -1,112 +1,75 @@
 {% extends 'base.html' %}
 
-{% block title %}Schedule License Test{% endblock %}
+{% block title %}Schedule Test{% endblock %}
 
 {% block content %}
-<div class="container py-5">
+<div class="container-fluid py-4">
     <div class="row mb-4">
         <div class="col">
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb">
                     <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
-                    <li class="breadcrumb-item"><a href="{% url 'review_license_applications' %}">License Applications</a></li>
-                    <li class="breadcrumb-item"><a href="{% url 'review_license_application' application_number=application.application_number %}">Review #{{ application.application_number }}</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'license:review_license_applications' %}">License Applications</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'license:review_license_application' application_number=application.application_number %}">Review #{{ application.application_number }}</a></li>
                     <li class="breadcrumb-item active" aria-current="page">Schedule Test</li>
                 </ol>
             </nav>
         </div>
     </div>
-    
+
     <div class="row">
-        <div class="col-md-6 mx-auto">
+        <div class="col-md-8 mx-auto">
             <div class="card shadow">
                 <div class="card-header bg-primary text-white">
-                    <h4 class="mb-0">Schedule License Test</h4>
+                    <h5 class="mb-0">Schedule Test for Application #{{ application.application_number }}</h5>
                 </div>
                 <div class="card-body">
-                    <div class="mb-4">
-                        <h6>Applicant Information</h6>
-                        <div class="table-responsive">
-                            <table class="table table-bordered">
-                                <tr>
-                                    <th width="40%">Application #</th>
-                                    <td>{{ application.application_number }}</td>
-                                </tr>
-                                <tr>
-                                    <th>Applicant Name</th>
-                                    <td>{{ application.applicant.get_full_name }}</td>
-                                </tr>
-                                <tr>
-                                    <th>License Type</th>
-                                    <td>{{ application.license_type.name }} ({{ application.license_type.code }})</td>
-                                </tr>
-                                <tr>
-                                    <th>Status</th>
-                                    <td>
-                                        <span class="badge {% if application.status == 'DOCUMENT_VERIFICATION' %}bg-info text-dark{% elif application.status == 'TEST_PASSED' %}bg-success{% else %}bg-primary{% endif %}">
-                                            {{ application.get_status_display }}
-                                        </span>
-                                    </td>
-                                </tr>
-                            </table>
-                        </div>
-                    </div>
-                    
                     <form method="post">
                         {% csrf_token %}
                         
-                        {% if form.non_field_errors %}
-                        <div class="alert alert-danger">
-                            {{ form.non_field_errors }}
-                        </div>
-                        {% endif %}
-                        
                         <div class="mb-3">
-                            <label for="{{ form.test_type.id_for_label }}" class="form-label">Test Type *</label>
+                            <label for="{{ form.test_type.id_for_label }}" class="form-label">Test Type</label>
                             {{ form.test_type }}
                             {% if form.test_type.errors %}
-                            <div class="text-danger">
+                            <div class="text-danger mt-1">
                                 {{ form.test_type.errors }}
                             </div>
                             {% endif %}
                         </div>
-                        
+
                         <div class="mb-3">
-                            <label for="{{ form.scheduled_date.id_for_label }}" class="form-label">Test Date & Time *</label>
+                            <label for="{{ form.scheduled_date.id_for_label }}" class="form-label">Scheduled Date and Time</label>
                             {{ form.scheduled_date }}
                             {% if form.scheduled_date.errors %}
-                            <div class="text-danger">
+                            <div class="text-danger mt-1">
                                 {{ form.scheduled_date.errors }}
                             </div>
                             {% endif %}
-                            <div class="form-text">Select a future date and time for the test</div>
                         </div>
-                        
+
                         <div class="mb-3">
-                            <label for="{{ form.venue.id_for_label }}" class="form-label">Test Venue *</label>
+                            <label for="{{ form.venue.id_for_label }}" class="form-label">Test Venue</label>
                             {{ form.venue }}
                             {% if form.venue.errors %}
-                            <div class="text-danger">
+                            <div class="text-danger mt-1">
                                 {{ form.venue.errors }}
                             </div>
                             {% endif %}
-                            <div class="form-text">Provide complete address of the test venue</div>
                         </div>
-                        
+
                         <div class="mb-3">
-                            <label for="{{ form.instructions.id_for_label }}" class="form-label">Test Instructions *</label>
+                            <label for="{{ form.instructions.id_for_label }}" class="form-label">Additional Instructions</label>
                             {{ form.instructions }}
                             {% if form.instructions.errors %}
-                            <div class="text-danger">
+                            <div class="text-danger mt-1">
                                 {{ form.instructions.errors }}
                             </div>
                             {% endif %}
-                            <div class="form-text">Provide detailed instructions for the applicant</div>
                         </div>
-                        
-                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                            <a href="{% url 'review_license_application' application_number=application.application_number %}" class="btn btn-outline-secondary me-md-2">Cancel</a>
+
+                        <div class="d-grid gap-2">
                             <button type="submit" class="btn btn-primary">Schedule Test</button>
+                            <a href="{% url 'license:review_license_application' application_number=application.application_number %}" class="btn btn-outline-secondary">Cancel</a>
                         </div>
                     </form>
                 </div>

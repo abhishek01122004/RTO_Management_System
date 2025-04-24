@@ -9,8 +9,8 @@
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb">
                     <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
-                    <li class="breadcrumb-item"><a href="{% url 'review_license_applications' %}">License Applications</a></li>
-                    <li class="breadcrumb-item"><a href="{% url 'review_license_application' application_number=application.application_number %}">Review #{{ application.application_number }}</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'license:review_license_applications' %}">License Applications</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'license:review_license_application' application_number=application.application_number %}">Review #{{ application.application_number }}</a></li>
                     <li class="breadcrumb-item active" aria-current="page">Issue License</li>
                 </ol>
             </nav>
@@ -168,7 +168,7 @@
                         </div>
                         
                         <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                            <a href="{% url 'review_license_application' application_number=application.application_number %}" class="btn btn-outline-secondary me-md-2">Cancel</a>
+                            <a href="{% url 'license:review_license_application' application_number=application.application_number %}" class="btn btn-outline-secondary me-md-2">Cancel</a>
                             <button type="submit" class="btn btn-success" id="issueBtn" disabled>Issue License</button>
                         </div>
                     </form>
