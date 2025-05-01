@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'challan.apps.ChallanConfig',
     'dashboard.apps.DashboardConfig',
     'notifications.apps.NotificationsConfig',
+    'services.apps.ServicesConfig',
     'mathfilters',
 ]
 

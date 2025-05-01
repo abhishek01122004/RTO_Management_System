@@ -4,7 +4,7 @@ from django.contrib import messages
 from django.utils import timezone
 from django.db import transaction
 from django.core.exceptions import PermissionDenied
-from .models import Vehicle, RegistrationApplication, VehicleDocument, VehicleTransfer, VehicleModel
+from .models import Vehicle, RegistrationApplication, VehicleDocument, VehicleTransfer, VehicleModel, VehicleCategory, VehicleMake
 from .forms import (
     VehicleRegistrationForm, VehicleDocumentForm,
     VehicleTransferForm, VehicleReviewForm, TransferReviewForm, VehicleForm
@@ -147,7 +147,7 @@ def review_application(request, application_id):
                 application.vehicle.save()
                 
             messages.success(request, 'Application reviewed successfully.')
-            return redirect('vehicle_application_detail', application_id=application.id)
+            return redirect('vehicle:vehicle_application_detail', application_id=application.id)
     else:
         form = VehicleReviewForm(instance=application)
         
@@ -160,8 +160,36 @@ def review_application(request, application_id):
 
 @login_required
 def my_vehicles(request):
-    vehicles = Vehicle.objects.filter(owner=request.user)
-    return render(request, 'vehicle/my_vehicles.html', {'vehicles': vehicles})
+    try:
+        # Get vehicles owned by the user
+        vehicles = Vehicle.objects.filter(owner=request.user)
+        
+        # For citizens, exclude vehicles that were transferred to someone else
+        if is_citizen(request.user):
+            vehicles = vehicles.exclude(
+                vehicletransfer__status='APPROVED',
+                vehicletransfer__seller=request.user
+            )
+        
+        now = timezone.now().date()
+        
+        # Update status for all vehicles
+        for vehicle in vehicles:
+            if vehicle.expiry_date and vehicle.expiry_date < now:
+                if vehicle.status != 'EXPIRED':
+                    vehicle.status = 'EXPIRED'
+                    vehicle.save()
+        
+        context = {
+            'vehicles': vehicles,
+            'now': now
+        }
+        return render(request, 'vehicle/my_vehicles.html', context)
+    except Exception as e:
+        # Log the error for debugging
+        print(f"Error in my_vehicles view: {str(e)}")
+        # Return a proper error page or redirect
+        return render(request, 'vehicle/my_vehicles.html', {'vehicles': []})
 
 @login_required
 def vehicle_detail(request, vehicle_id):
@@ -187,7 +215,7 @@ def transfer_vehicle(request, vehicle_id):
             transfer.save()
             
             messages.success(request, 'Transfer request submitted successfully.')
-            return redirect('vehicle_detail', vehicle_id=vehicle.id)
+            return redirect('vehicle:vehicle_detail', vehicle_id=vehicle.id)
     else:
         form = VehicleTransferForm()
         
@@ -206,13 +234,15 @@ def review_transfer(request, transfer_id):
             transfer.reviewed_at = timezone.now()
             
             if transfer.status == 'APPROVED':
+                # Update vehicle ownership and status
                 transfer.vehicle.owner = transfer.buyer
+                transfer.vehicle.status = 'TRANSFERRED'  # Explicitly set status to TRANSFERRED
                 transfer.vehicle.save()
                 
             transfer.save()
             
             messages.success(request, 'Transfer reviewed successfully.')
-            return redirect('vehicle_detail', vehicle_id=transfer.vehicle.id)
+            return redirect('vehicle:vehicle_transfers')
     else:
         form = TransferReviewForm(instance=transfer)
         
@@ -220,15 +250,19 @@ def review_transfer(request, transfer_id):
 
 @login_required
 def vehicle_transfers(request):
-    """View for listing all vehicle transfers for the current user."""
-    transfers_sent = VehicleTransfer.objects.filter(current_owner=request.user)
-    transfers_received = VehicleTransfer.objects.filter(new_owner=request.user)
-    
-    context = {
-        'transfers_sent': transfers_sent,
-        'transfers_received': transfers_received,
-    }
-    return render(request, 'vehicle/transfers.html', context)
+    """View for listing vehicle transfers based on user role."""
+    if is_officer(request.user):
+        # For officers, show all pending transfers
+        transfers = VehicleTransfer.objects.filter(status='PENDING').order_by('-created_at')
+        return render(request, 'vehicle/review_transfers.html', {'transfers': transfers})
+    else:
+        # For citizens, show their transfers
+        transfers_sent = VehicleTransfer.objects.filter(seller=request.user)
+        transfers_received = VehicleTransfer.objects.filter(buyer=request.user)
+        return render(request, 'vehicle/transfers.html', {
+            'transfers_sent': transfers_sent,
+            'transfers_received': transfers_received,
+        })
 
 @require_GET
 def get_models(request):
@@ -285,4 +319,34 @@ def vehicle_statistics(request):
         'recent_transfers': recent_transfers,
     }
     
-    return render(request, 'vehicle/statistics.html', context) 
+    return render(request, 'vehicle/statistics.html', context)
+
+@login_required
+@user_passes_test(lambda u: u.is_staff)
+def vehicle_classes(request):
+    """View for displaying and managing vehicle categories."""
+    categories = VehicleCategory.objects.all()
+    context = {
+        'categories': categories,
+    }
+    return render(request, 'vehicle/vehicle_classes.html', context)
+
+@login_required
+@user_passes_test(lambda u: u.is_staff)
+def vehicle_makes(request):
+    """View for displaying and managing vehicle makes."""
+    makes = VehicleMake.objects.all()
+    context = {
+        'makes': makes,
+    }
+    return render(request, 'vehicle/vehicle_makes.html', context)
+
+@login_required
+@user_passes_test(lambda u: u.is_staff)
+def vehicle_models(request):
+    """View for displaying and managing vehicle models."""
+    models = VehicleModel.objects.all()
+    context = {
+        'models': models,
+    }
+    return render(request, 'vehicle/vehicle_models.html', context) 

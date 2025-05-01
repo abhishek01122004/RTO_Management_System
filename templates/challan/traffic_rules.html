@@ -39,7 +39,7 @@
                                     {% endif %}
                                 </td>
                                 <td>
-                                    <a href="{% url 'edit_traffic_rule' rule.id %}" class="btn btn-sm btn-outline-primary">
+                                    <a href="{% url 'challan:edit_traffic_rule' rule.id %}" class="btn btn-sm btn-outline-primary">
                                         <i class="fas fa-edit"></i> Edit
                                     </a>
                                 </td>
@@ -54,7 +54,7 @@
                 </div>
             {% endif %}
             
-            <a href="{% url 'add_traffic_rule' %}" class="btn btn-success mt-3">
+            <a href="{% url 'challan:add_traffic_rule' %}" class="btn btn-success mt-3">
                 <i class="fas fa-plus"></i> Add New Traffic Rule
             </a>
         </div>

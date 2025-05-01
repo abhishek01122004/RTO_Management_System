@@ -68,6 +68,12 @@ class Vehicle(models.Model):
     
     def __str__(self):
         return f"{self.registration_number} - {self.make.name} {self.model.name}"
+        
+    def save(self, *args, **kwargs):
+        # Update status to EXPIRED if expiry date has passed
+        if self.expiry_date and self.expiry_date < timezone.now().date():
+            self.status = 'EXPIRED'
+        super().save(*args, **kwargs)
 
 class RegistrationApplication(models.Model):
     STATUS_CHOICES = [

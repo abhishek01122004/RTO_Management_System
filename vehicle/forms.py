@@ -63,8 +63,17 @@ class VehicleReviewForm(forms.ModelForm):
         model = RegistrationApplication
         fields = ['status', 'review_notes']
         widgets = {
-            'review_notes': forms.Textarea(attrs={'rows': 4}),
+            'status': forms.Select(attrs={'class': 'form-select'}),
+            'review_notes': forms.Textarea(attrs={'rows': 4, 'class': 'form-control'}),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Only allow APPROVED or REJECTED status for review
+        self.fields['status'].choices = [
+            ('APPROVED', 'Approve'),
+            ('REJECTED', 'Reject'),
+        ]
 
 class TransferReviewForm(forms.ModelForm):
     class Meta:

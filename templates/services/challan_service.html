@@ -1,0 +1,140 @@
+{% extends 'base.html' %}
+
+{% block title %}Challan Management Service - RTO Management System{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row mb-4">
+        <div class="col">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Challan Management Service</li>
+                </ol>
+            </nav>
+            <h1 class="display-4">Challan Management Service</h1>
+            <p class="lead">Efficient traffic violation management and payment system</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card shadow mb-4">
+                <div class="card-body">
+                    <h2 class="card-title">Services Offered</h2>
+                    <ul class="list-group list-group-flush mb-4">
+                        <li class="list-group-item">
+                            <i class="bi bi-check-circle-fill text-success me-2"></i>
+                            Online Challan Payment
+                        </li>
+                        <li class="list-group-item">
+                            <i class="bi bi-check-circle-fill text-success me-2"></i>
+                            Challan Status Tracking
+                        </li>
+                        <li class="list-group-item">
+                            <i class="bi bi-check-circle-fill text-success me-2"></i>
+                            Payment History
+                        </li>
+                        <li class="list-group-item">
+                            <i class="bi bi-check-circle-fill text-success me-2"></i>
+                            E-Challan Generation
+                        </li>
+                        <li class="list-group-item">
+                            <i class="bi bi-check-circle-fill text-success me-2"></i>
+                            Dispute Resolution
+                        </li>
+                    </ul>
+
+                    <h3 class="card-title">Common Violations</h3>
+                    <ul class="list-group list-group-flush mb-4">
+                        <li class="list-group-item">
+                            <i class="bi bi-exclamation-triangle me-2 text-warning"></i>
+                            Speeding
+                        </li>
+                        <li class="list-group-item">
+                            <i class="bi bi-exclamation-triangle me-2 text-warning"></i>
+                            Signal Jumping
+                        </li>
+                        <li class="list-group-item">
+                            <i class="bi bi-exclamation-triangle me-2 text-warning"></i>
+                            No Helmet/Seat Belt
+                        </li>
+                        <li class="list-group-item">
+                            <i class="bi bi-exclamation-triangle me-2 text-warning"></i>
+                            Wrong Parking
+                        </li>
+                        <li class="list-group-item">
+                            <i class="bi bi-exclamation-triangle me-2 text-warning"></i>
+                            Document Violations
+                        </li>
+                    </ul>
+
+                    <h3 class="card-title">Payment Process</h3>
+                    <div class="timeline">
+                        <div class="timeline-item">
+                            <div class="timeline-marker"></div>
+                            <div class="timeline-content">
+                                <h4>1. Challan Generation</h4>
+                                <p>Receive challan notification via SMS/Email</p>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-marker"></div>
+                            <div class="timeline-content">
+                                <h4>2. Verification</h4>
+                                <p>Verify challan details and amount</p>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-marker"></div>
+                            <div class="timeline-content">
+                                <h4>3. Payment</h4>
+                                <p>Choose payment method and complete payment</p>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-marker"></div>
+                            <div class="timeline-content">
+                                <h4>4. Receipt</h4>
+                                <p>Download payment receipt</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-3">
+                        <a href="{% url 'challan:my_challans' %}" class="btn btn-primary">
+                            <i class="bi bi-receipt"></i> View My Challans
+                        </a>
+                        <a href="{% url 'challan:search_challan' %}" class="btn btn-outline-primary">
+                            <i class="bi bi-credit-card"></i> Pay Challan
+                        </a>
+                        <a href="{% url 'challan:search_challan' %}" class="btn btn-outline-primary">
+                            <i class="bi bi-question-circle"></i> Search Challan to Dispute
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Need Help?</h5>
+                </div>
+                <div class="card-body">
+                    <p>For any queries regarding challan services, please contact:</p>
+                    <p class="mb-2"><i class="bi bi-telephone"></i> Helpline: 1800-XXX-XXXX</p>
+                    <p class="mb-0"><i class="bi bi-envelope"></i> Email: challan@rto.gov.in</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

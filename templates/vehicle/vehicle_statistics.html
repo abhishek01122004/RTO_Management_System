@@ -1,3 +1,142 @@
-<li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
-<li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
-<a href="{% url 'vehicle:vehicle_statistics' %}" class="btn btn-outline-secondary">Reset</a> 
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Vehicle Statistics{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Vehicle Statistics</h2>
+    
+    <div class="row mt-4">
+        <!-- Total Vehicles Card -->
+        <div class="col-md-3 mb-4">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Total Vehicles</h5>
+                    <h2 class="display-4">{{ total_vehicles }}</h2>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Vehicles by Category -->
+        <div class="col-md-9 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Vehicles by Category</h5>
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Category</th>
+                                    <th>Count</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in vehicles_by_category %}
+                                    <tr>
+                                        <td>{{ item.category }}</td>
+                                        <td>{{ item.count }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Vehicles by Fuel Type -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Vehicles by Fuel Type</h5>
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Fuel Type</th>
+                                    <th>Count</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in vehicles_by_fuel %}
+                                    <tr>
+                                        <td>{{ item.fuel_type }}</td>
+                                        <td>{{ item.count }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Applications by Status -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Registration Applications by Status</h5>
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Status</th>
+                                    <th>Count</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in applications_by_status %}
+                                    <tr>
+                                        <td>{{ item.status }}</td>
+                                        <td>{{ item.count }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Recent Transfers -->
+        <div class="col-12 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Recent Vehicle Transfers</h5>
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Transfer ID</th>
+                                    <th>Vehicle</th>
+                                    <th>From</th>
+                                    <th>To</th>
+                                    <th>Date</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for transfer in recent_transfers %}
+                                    <tr>
+                                        <td>{{ transfer.id }}</td>
+                                        <td>{{ transfer.vehicle.registration_number }}</td>
+                                        <td>{{ transfer.seller.get_full_name }}</td>
+                                        <td>{{ transfer.buyer.get_full_name }}</td>
+                                        <td>{{ transfer.created_at|date:"d M Y" }}</td>
+                                        <td>
+                                            <span class="badge bg-{{ transfer.status|lower }}">
+                                                {{ transfer.status }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

@@ -1,10 +1,119 @@
-{% if vehicle.status == 'ACTIVE' %}
-    <span class="badge bg-success">Active</span>
-{% else %}
-    <span class="badge bg-danger">Inactive</span>
-{% endif %}
-<li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
-<li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
-<li class="breadcrumb-item"><a href="{% url 'vehicle:my_vehicles' %}">My Vehicles</a></li>
-<i class="fas fa-exclamation-triangle me-2"></i> You have {{ pending_challans }} pending traffic challans. <a href="{% url 'challan:my_challans' %}" class="alert-link">View details</a>
-<a href="{% url 'vehicle:initiate_vehicle_transfer' reg_number=vehicle.registration_number %}" class="btn btn-outline-primary"> 
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Vehicle Detail{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2>Vehicle Detail</h2>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'vehicle:vehicle_dashboard' %}">Vehicle Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'vehicle:my_vehicles' %}">My Vehicles</a></li>
+                    <li class="breadcrumb-item active">Vehicle Detail</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Vehicle Information</h5>
+                    <span class="badge bg-{{ vehicle.status|lower }}">
+                        {{ vehicle.get_status_display }}
+                    </span>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <p class="mb-1"><strong>Registration Number:</strong></p>
+                            <p>{{ vehicle.registration_number }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="mb-1"><strong>Make & Model:</strong></p>
+                            <p>{{ vehicle.make.name }} {{ vehicle.model.name }}</p>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <p class="mb-1"><strong>Category:</strong></p>
+                            <p>{{ vehicle.get_category_display }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="mb-1"><strong>Fuel Type:</strong></p>
+                            <p>{{ vehicle.get_fuel_type_display }}</p>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <p class="mb-1"><strong>Engine Number:</strong></p>
+                            <p>{{ vehicle.engine_number }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="mb-1"><strong>Chassis Number:</strong></p>
+                            <p>{{ vehicle.chassis_number }}</p>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <p class="mb-1"><strong>Manufacturing Year:</strong></p>
+                            <p>{{ vehicle.manufacturing_year }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="mb-1"><strong>Color:</strong></p>
+                            <p>{{ vehicle.color }}</p>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <p class="mb-1"><strong>Seating Capacity:</strong></p>
+                            <p>{{ vehicle.seating_capacity }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="mb-1"><strong>Owner:</strong></p>
+                            <p>{{ vehicle.owner.get_full_name }}</p>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <p class="mb-1"><strong>Registration Date:</strong></p>
+                            <p>{{ vehicle.registration_date|date:"d M Y" }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="mb-1"><strong>Expiry Date:</strong></p>
+                            <p>{{ vehicle.expiry_date|date:"d M Y" }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {% if vehicle.status == 'ACTIVE' %}
+            <div class="d-grid gap-2">
+                <a href="{% url 'vehicle:transfer_vehicle' vehicle.id %}" class="btn btn-primary">
+                    <i class="fas fa-exchange-alt"></i> Transfer Vehicle
+                </a>
+                <a href="{% url 'vehicle:my_vehicles' %}" class="btn btn-secondary">
+                    Back to My Vehicles
+                </a>
+            </div>
+            {% else %}
+            <div class="d-grid">
+                <a href="{% url 'vehicle:my_vehicles' %}" class="btn btn-secondary">
+                    Back to My Vehicles
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %} 

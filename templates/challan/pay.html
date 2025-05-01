@@ -38,8 +38,8 @@
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb">
                     <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
-                    <li class="breadcrumb-item"><a href="{% url 'my_challans' %}">My Challans</a></li>
-                    <li class="breadcrumb-item"><a href="{% url 'view_challan' challan_number=challan.challan_number %}">Challan #{{ challan.challan_number }}</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'challan:my_challans' %}">My Challans</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'challan:view_challan' challan_number=challan.challan_number %}">Challan #{{ challan.challan_number }}</a></li>
                     <li class="breadcrumb-item active" aria-current="page">Payment</li>
                 </ol>
             </nav>
@@ -91,7 +91,7 @@
             {% if key_id %}
                 <!-- Real Razorpay payment form -->
                 <form id="razorpayPaymentForm" 
-                      action="{% url 'challan_payment_success' challan_number=challan.challan_number %}" 
+                      action="{% url 'challan:challan_payment_success' challan_number=challan.challan_number %}" 
                       method="POST"
                       data-key="{{ key_id }}"
                       data-order-id="{{ order_id }}"
@@ -120,7 +120,7 @@
                     <p>This is a development environment without Razorpay keys. You can simulate payment by clicking the button below.</p>
                 </div>
                 
-                <form action="{% url 'pay_challan' challan_number=challan.challan_number %}" method="POST" class="mt-3">
+                <form action="{% url 'challan:pay_challan' challan_number=challan.challan_number %}" method="POST" class="mt-3">
                     {% csrf_token %}
                     <button type="submit" class="btn btn-success btn-lg w-100">
                         <i class="bi bi-credit-card me-2"></i> Simulate Payment of ₹{{ amount }}
@@ -129,7 +129,7 @@
             {% endif %}
             
             <div class="text-center mt-3">
-                <a href="{% url 'view_challan' challan_number=challan.challan_number %}" class="btn btn-outline-secondary">
+                <a href="{% url 'challan:view_challan' challan_number=challan.challan_number %}" class="btn btn-outline-secondary">
                     Cancel and Go Back
                 </a>
             </div>

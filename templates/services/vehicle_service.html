@@ -1,0 +1,147 @@
+{% extends 'base.html' %}
+
+{% block title %}Vehicle Management Service - RTO Management System{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row mb-4">
+        <div class="col">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Vehicle Management Service</li>
+                </ol>
+            </nav>
+            <h1 class="display-4">Vehicle Management Service</h1>
+            <p class="lead">Complete vehicle registration and management services</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card shadow mb-4">
+                <div class="card-body">
+                    <h2 class="card-title">Services Offered</h2>
+                    <ul class="list-group list-group-flush mb-4">
+                        <li class="list-group-item">
+                            <i class="bi bi-check-circle-fill text-success me-2"></i>
+                            New Vehicle Registration
+                        </li>
+                        <li class="list-group-item">
+                            <i class="bi bi-check-circle-fill text-success me-2"></i>
+                            Vehicle Transfer
+                        </li>
+                        <li class="list-group-item">
+                            <i class="bi bi-check-circle-fill text-success me-2"></i>
+                            Fitness Certificate
+                        </li>
+                        <li class="list-group-item">
+                            <i class="bi bi-check-circle-fill text-success me-2"></i>
+                            Duplicate RC Book
+                        </li>
+                        <li class="list-group-item">
+                            <i class="bi bi-check-circle-fill text-success me-2"></i>
+                            Vehicle Modification Approval
+                        </li>
+                    </ul>
+
+                    <h3 class="card-title">Required Documents</h3>
+                    <ul class="list-group list-group-flush mb-4">
+                        <li class="list-group-item">
+                            <i class="bi bi-file-text me-2 text-primary"></i>
+                            Vehicle Invoice
+                        </li>
+                        <li class="list-group-item">
+                            <i class="bi bi-file-text me-2 text-primary"></i>
+                            Insurance Certificate
+                        </li>
+                        <li class="list-group-item">
+                            <i class="bi bi-file-text me-2 text-primary"></i>
+                            Pollution Certificate
+                        </li>
+                        <li class="list-group-item">
+                            <i class="bi bi-file-text me-2 text-primary"></i>
+                            Address Proof
+                        </li>
+                        <li class="list-group-item">
+                            <i class="bi bi-file-text me-2 text-primary"></i>
+                            Vehicle Photographs
+                        </li>
+                    </ul>
+
+                    <h3 class="card-title">Registration Process</h3>
+                    <div class="timeline">
+                        <div class="timeline-item">
+                            <div class="timeline-marker"></div>
+                            <div class="timeline-content">
+                                <h4>1. Application Submission</h4>
+                                <p>Submit application with required documents</p>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-marker"></div>
+                            <div class="timeline-content">
+                                <h4>2. Document Verification</h4>
+                                <p>Verification of submitted documents</p>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-marker"></div>
+                            <div class="timeline-content">
+                                <h4>3. Vehicle Inspection</h4>
+                                <p>Physical inspection of the vehicle</p>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-marker"></div>
+                            <div class="timeline-content">
+                                <h4>4. Fee Payment</h4>
+                                <p>Payment of registration fees</p>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-marker"></div>
+                            <div class="timeline-content">
+                                <h4>5. RC Book Issuance</h4>
+                                <p>Receive Registration Certificate</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-3">
+                        <a href="{% url 'vehicle:register_vehicle' %}" class="btn btn-primary">
+                            <i class="bi bi-car-front"></i> Register New Vehicle
+                        </a>
+                        <a href="{% url 'vehicle:my_vehicles' %}" class="btn btn-outline-primary">
+                            <i class="bi bi-list-ul"></i> View My Vehicles
+                        </a>
+                        <a href="{% url 'vehicle:vehicle_transfers' %}" class="btn btn-outline-primary">
+                            <i class="bi bi-arrow-left-right"></i> Transfer Vehicle
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Need Help?</h5>
+                </div>
+                <div class="card-body">
+                    <p>For any queries regarding vehicle services, please contact:</p>
+                    <p class="mb-2"><i class="bi bi-telephone"></i> Helpline: 1800-XXX-XXXX</p>
+                    <p class="mb-0"><i class="bi bi-envelope"></i> Email: vehicle@rto.gov.in</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

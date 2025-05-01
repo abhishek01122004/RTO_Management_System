@@ -24,6 +24,7 @@ urlpatterns = [
     path('types/', views.license_types, name='license_types'),
     path('type/add/', views.add_license_type, name='add_license_type'),
     path('type/<int:type_id>/edit/', views.edit_license_type, name='edit_license_type'),
+    path('type/<int:type_id>/delete/', views.delete_license_type, name='delete_license_type'),
     
     # Statistics
     path('statistics/', views.license_statistics, name='license_statistics'),

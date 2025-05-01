@@ -8,6 +8,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // Handle payment verification
     setupPaymentVerification();
     
+    // Initialize payment buttons
+    initializePaymentButtons();
+    
     console.log('Payment system initialized successfully!');
 });
 
@@ -315,3 +318,28 @@ document.addEventListener('DOMContentLoaded', function() {
     handleLicensePayment();
     handleVehiclePayment();
 });
+
+// Initialize payment buttons
+function initializePaymentButtons() {
+    // Handle real payment button
+    const realPaymentBtn = document.getElementById('real-payment-btn');
+    if (realPaymentBtn) {
+        realPaymentBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            if (window.Razorpay) {
+                initializeRazorpayPayment();
+            } else {
+                showError('Razorpay SDK not loaded. Please try again.');
+            }
+        });
+    }
+
+    // Handle development mode payment button
+    const devPaymentBtn = document.getElementById('dev-payment-btn');
+    if (devPaymentBtn) {
+        devPaymentBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            simulatePayment();
+        });
+    }
+}

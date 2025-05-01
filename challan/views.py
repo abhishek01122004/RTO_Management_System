@@ -110,7 +110,7 @@ def pay_challan(request, challan_number):
     # Check if challan is already paid
     if challan.payment_status:
         messages.info(request, "This challan has already been paid.")
-        return redirect('view_challan', challan_number=challan_number)
+        return redirect('challan:view_challan', challan_number=challan_number)
     
     # Check permissions
     if request.user.user_type == 'CITIZEN':
@@ -159,7 +159,7 @@ def pay_challan(request, challan_number):
                 print(f"Notification error: {str(e)}")
         
         messages.success(request, "Development mode: Payment completed successfully.")
-        return redirect('view_challan', challan_number=challan_number)
+        return redirect('challan:view_challan', challan_number=challan_number)
     
     # Initialize Razorpay client
     client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID or 'rzp_test_mock', settings.RAZORPAY_KEY_SECRET or 'mock_secret'))
@@ -202,7 +202,7 @@ def pay_challan(request, challan_number):
         return render(request, 'challan/pay.html', context)
     except Exception as e:
         messages.error(request, f"Payment initialization failed: {str(e)}")
-        return redirect('view_challan', challan_number=challan_number)
+        return redirect('challan:view_challan', challan_number=challan_number)
 
 
 @login_required
@@ -411,7 +411,7 @@ def generate_challan(request):
                     )
             
             messages.success(request, f"Challan #{challan.challan_number} generated successfully.")
-            return redirect('view_challan', challan_number=challan.challan_number)
+            return redirect('challan:view_challan', challan_number=challan.challan_number)
     else:
         form = ChallanGenerationForm()
     
@@ -604,7 +604,7 @@ def add_traffic_rule(request):
         )
         
         messages.success(request, "Traffic rule added successfully.")
-        return redirect('traffic_rules')
+        return redirect('challan:traffic_rules')
     
     return render(request, 'challan/add_traffic_rule.html')
 

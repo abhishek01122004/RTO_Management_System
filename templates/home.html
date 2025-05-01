@@ -30,22 +30,89 @@
     .feature-card {
         height: 100%;
         border: none;
-        border-radius: 10px;
+        border-radius: 15px;
         box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
-        transition: transform 0.3s ease;
+        transition: all 0.3s ease;
+        overflow: hidden;
+        position: relative;
     }
     .feature-card:hover {
-        transform: translateY(-5px);
+        transform: translateY(-10px);
+        box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.15);
+    }
+    .feature-card .card-body {
+        padding: 2rem;
+        position: relative;
+        z-index: 1;
     }
     .feature-icon {
-        font-size: 3rem;
-        margin-bottom: 20px;
+        font-size: 3.5rem;
+        margin-bottom: 1.5rem;
+        transition: transform 0.3s ease;
+    }
+    .feature-card:hover .feature-icon {
+        transform: scale(1.1);
+    }
+    .feature-card .btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: 50px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    .feature-card .btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.1);
+        transition: all 0.3s ease;
+    }
+    .feature-card .btn:hover::before {
+        background: rgba(255, 255, 255, 0.2);
+    }
+    .feature-card .btn-outline-primary {
+        border: 2px solid #0d6efd;
+    }
+    .feature-card .btn-outline-success {
+        border: 2px solid #198754;
+    }
+    .feature-card .btn-outline-danger {
+        border: 2px solid #dc3545;
     }
     .cta-section {
         background-color: #0d6efd;
         color: white;
         padding: 70px 0;
         margin-top: 50px;
+        position: relative;
+        overflow: hidden;
+    }
+    .cta-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(45deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.2) 100%);
+    }
+    .stats-section {
+        background-color: #f8f9fa;
+        padding: 60px 0;
+    }
+    .stat-item {
+        padding: 20px;
+        border-radius: 10px;
+        transition: all 0.3s ease;
+    }
+    .stat-item:hover {
+        background-color: white;
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+        transform: translateY(-5px);
     }
 </style>
 {% endblock %}
@@ -74,32 +141,32 @@
     <h2 class="text-center mb-5">Our Services</h2>
     <div class="row g-4">
         <div class="col-md-4">
-            <div class="card feature-card text-center p-4">
+            <div class="card feature-card text-center">
                 <div class="card-body">
                     <i class="bi bi-card-list feature-icon text-primary"></i>
-                    <h3 class="card-title">License Management</h3>
-                    <p class="card-text">Apply for new driving licenses, renew existing ones, or request duplicates with ease and efficiency.</p>
-                    <a href="#" class="btn btn-outline-primary mt-3">Learn More</a>
+                    <h3 class="card-title h4 mb-3">License Management</h3>
+                    <p class="card-text mb-4">Apply for new driving licenses, renew existing ones, or request duplicates with ease and efficiency.</p>
+                    <a href="{% url 'services:license_service' %}" class="btn btn-outline-primary">Learn More</a>
                 </div>
             </div>
         </div>
         <div class="col-md-4">
-            <div class="card feature-card text-center p-4">
+            <div class="card feature-card text-center">
                 <div class="card-body">
                     <i class="bi bi-truck feature-icon text-success"></i>
-                    <h3 class="card-title">Vehicle Registration</h3>
-                    <p class="card-text">Register your new vehicles, transfer ownership, or update vehicle details through our digital platform.</p>
-                    <a href="#" class="btn btn-outline-success mt-3">Learn More</a>
+                    <h3 class="card-title h4 mb-3">Vehicle Registration</h3>
+                    <p class="card-text mb-4">Register your new vehicles, transfer ownership, or update vehicle details through our digital platform.</p>
+                    <a href="{% url 'services:vehicle_service' %}" class="btn btn-outline-success">Learn More</a>
                 </div>
             </div>
         </div>
         <div class="col-md-4">
-            <div class="card feature-card text-center p-4">
+            <div class="card feature-card text-center">
                 <div class="card-body">
                     <i class="bi bi-receipt feature-icon text-danger"></i>
-                    <h3 class="card-title">Challan Management</h3>
-                    <p class="card-text">View and pay traffic violation challans online, check challan status, and maintain a clean driving record.</p>
-                    <a href="#" class="btn btn-outline-danger mt-3">Learn More</a>
+                    <h3 class="card-title h4 mb-3">Challan Management</h3>
+                    <p class="card-text mb-4">View and pay traffic violation challans online, check challan status, and maintain a clean driving record.</p>
+                    <a href="{% url 'services:challan_service' %}" class="btn btn-outline-danger">Learn More</a>
                 </div>
             </div>
         </div>
@@ -107,24 +174,32 @@
 </section>
 
 <!-- Stats Section -->
-<section class="bg-light py-5">
+<section class="stats-section">
     <div class="container">
         <div class="row text-center">
             <div class="col-md-3 mb-4 mb-md-0">
-                <h2 class="fw-bold text-primary">500,000+</h2>
-                <p class="text-muted">Registered Users</p>
+                <div class="stat-item">
+                    <h2 class="fw-bold text-primary">500,000+</h2>
+                    <p class="text-muted">Registered Users</p>
+                </div>
             </div>
             <div class="col-md-3 mb-4 mb-md-0">
-                <h2 class="fw-bold text-success">1 Million+</h2>
-                <p class="text-muted">Vehicle Registrations</p>
+                <div class="stat-item">
+                    <h2 class="fw-bold text-success">1 Million+</h2>
+                    <p class="text-muted">Vehicle Registrations</p>
+                </div>
             </div>
             <div class="col-md-3 mb-4 mb-md-0">
-                <h2 class="fw-bold text-danger">750,000+</h2>
-                <p class="text-muted">Licenses Issued</p>
+                <div class="stat-item">
+                    <h2 class="fw-bold text-danger">750,000+</h2>
+                    <p class="text-muted">Licenses Issued</p>
+                </div>
             </div>
             <div class="col-md-3">
-                <h2 class="fw-bold text-info">24/7</h2>
-                <p class="text-muted">Customer Support</p>
+                <div class="stat-item">
+                    <h2 class="fw-bold text-info">24/7</h2>
+                    <p class="text-muted">Customer Support</p>
+                </div>
             </div>
         </div>
     </div>
@@ -132,7 +207,7 @@
 
 <!-- CTA Section -->
 <section class="cta-section">
-    <div class="container text-center">
+    <div class="container text-center position-relative">
         <h2 class="mb-4">Ready to Get Started?</h2>
         <p class="mb-4 lead">Join thousands of citizens who are already benefiting from our digital RTO services.</p>
         {% if not user.is_authenticated %}

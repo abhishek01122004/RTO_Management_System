@@ -35,13 +35,13 @@
                         <a href="{% url 'manage_officers' %}" class="btn btn-outline-primary">
                             <i class="bi bi-person-badge"></i> Manage Officers
                         </a>
-                        <a href="{% url 'manage_challan_types' %}" class="btn btn-outline-primary">
+                        <a href="{% url 'challan:challan_types' %}" class="btn btn-outline-primary">
                             <i class="bi bi-receipt"></i> Manage Challan Types
                         </a>
                         <a href="{% url 'license:license_statistics' %}" class="btn btn-outline-primary">
                             <i class="bi bi-bar-chart"></i> License Statistics
                         </a>
-                        <a href="{% url 'vehicle:statistics' %}" class="btn btn-outline-primary">
+                        <a href="{% url 'vehicle:vehicle_statistics' %}" class="btn btn-outline-primary">
                             <i class="bi bi-bar-chart"></i> Vehicle Statistics
                         </a>
                     </div>
@@ -255,7 +255,7 @@
                         </table>
                     </div>
                     <div class="text-end mt-3">
-                        <a href="{% url 'vehicle:review_applications' %}" class="btn btn-sm btn-outline-primary">View All Applications</a>
+                        <a href="{% url 'vehicle:review_registration_applications' %}" class="btn btn-sm btn-outline-primary">View All Applications</a>
                     </div>
                 </div>
             </div>

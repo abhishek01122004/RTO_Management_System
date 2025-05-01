@@ -2,6 +2,8 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.utils import timezone
 from license.models import LicenseApplication
+from vehicle.models import RegistrationApplication
+from django.contrib.auth.models import User
 
 
 @login_required
@@ -101,3 +103,29 @@ def track_license_status(request):
     }
     
     return render(request, 'dashboard/track_license_status.html', context)
+
+
+@login_required
+@user_passes_test(lambda u: u.is_staff)
+def manage_officers(request):
+    """View for managing RTO officers."""
+    officers = User.objects.filter(user_type='OFFICER')
+    context = {
+        'officers': officers,
+    }
+    return render(request, 'dashboard/manage_officers.html', context)
+
+
+@login_required
+@user_passes_test(lambda u: u.is_staff)
+def review_applications(request):
+    """View for reviewing all applications."""
+    # Get all applications that need review
+    license_applications = LicenseApplication.objects.filter(status='SUBMITTED')
+    vehicle_applications = RegistrationApplication.objects.filter(status='SUBMITTED')
+    
+    context = {
+        'license_applications': license_applications,
+        'vehicle_applications': vehicle_applications,
+    }
+    return render(request, 'dashboard/review_applications.html', context)

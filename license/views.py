@@ -673,6 +673,29 @@ def edit_license_type(request, type_id):
 
 
 @login_required
+@user_passes_test(lambda u: u.user_type == 'ADMIN')
+def delete_license_type(request, type_id):
+    """View to delete a license type"""
+    license_type = get_object_or_404(LicenseType, id=type_id)
+    
+    # Check if there are any applications or licenses using this type
+    if LicenseApplication.objects.filter(license_type=license_type).exists():
+        messages.error(request, "Cannot delete this license type as it is being used by existing applications.")
+        return redirect('license:license_types')
+    
+    if DrivingLicense.objects.filter(license_type=license_type).exists():
+        messages.error(request, "Cannot delete this license type as it is being used by existing licenses.")
+        return redirect('license:license_types')
+    
+    if request.method == 'POST':
+        license_type.delete()
+        messages.success(request, "License type deleted successfully.")
+        return redirect('license:license_types')
+    
+    return redirect('license:license_types')
+
+
+@login_required
 @user_passes_test(lambda u: u.user_type in ['OFFICER', 'ADMIN'])
 def license_statistics(request):
     """View to show license statistics for administrators and officers"""

@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Review Vehicle Transfers{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col">
+            <h2>Review Vehicle Transfers</h2>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'vehicle:vehicle_dashboard' %}">Vehicle Dashboard</a></li>
+                    <li class="breadcrumb-item active">Review Transfers</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Pending Transfer Applications</h5>
+                </div>
+                <div class="card-body">
+                    {% if transfers %}
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Transfer Number</th>
+                                        <th>Vehicle</th>
+                                        <th>Current Owner</th>
+                                        <th>New Owner</th>
+                                        <th>Transfer Date</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for transfer in transfers %}
+                                        <tr>
+                                            <td>{{ transfer.transfer_number }}</td>
+                                            <td>
+                                                {{ transfer.vehicle.make.name }} {{ transfer.vehicle.model.name }}<br>
+                                                <small class="text-muted">{{ transfer.vehicle.registration_number }}</small>
+                                            </td>
+                                            <td>{{ transfer.seller.get_full_name }}</td>
+                                            <td>{{ transfer.buyer.get_full_name }}</td>
+                                            <td>{{ transfer.transfer_date|date:"d M Y" }}</td>
+                                            <td>
+                                                <span class="badge bg-{{ transfer.status|lower }}">
+                                                    {{ transfer.get_status_display }}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <a href="{% url 'vehicle:review_transfer' transfer_id=transfer.id %}" 
+                                                   class="btn btn-sm btn-primary">
+                                                    <i class="bi bi-pencil"></i> Review
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info">
+                            <h5 class="alert-heading"><i class="bi bi-info-circle me-2"></i> No Pending Transfers</h5>
+                            <p class="mb-0">There are no vehicle transfer applications pending for review.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

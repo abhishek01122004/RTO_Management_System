@@ -24,4 +24,9 @@ urlpatterns = [
     
     # Statistics
     path('statistics/', views.vehicle_statistics, name='vehicle_statistics'),
+    
+    # Vehicle Categories
+    path('classes/', views.vehicle_classes, name='vehicle_classes'),
+    path('makes/', views.vehicle_makes, name='vehicle_makes'),
+    path('models/', views.vehicle_models, name='vehicle_models'),
 ] 

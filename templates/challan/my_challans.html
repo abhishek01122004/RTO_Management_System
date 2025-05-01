@@ -22,7 +22,7 @@
             <div class="card shadow">
                 <div class="card-header bg-white d-flex justify-content-between align-items-center">
                     <h5 class="mb-0">Filter Challans</h5>
-                    <a href="{% url 'search_challan' %}" class="btn btn-outline-primary btn-sm">
+                    <a href="{% url 'challan:search_challan' %}" class="btn btn-outline-primary btn-sm">
                         <i class="bi bi-search me-1"></i> Search Challans
                     </a>
                 </div>
@@ -104,11 +104,11 @@
                                         </td>
                                         <td>
                                             <div class="btn-group btn-group-sm">
-                                                <a href="{% url 'view_challan' challan_number=challan.challan_number %}" class="btn btn-outline-primary">
+                                                <a href="{% url 'challan:view_challan' challan_number=challan.challan_number %}" class="btn btn-outline-primary">
                                                     <i class="bi bi-eye"></i> View
                                                 </a>
                                                 {% if not challan.payment_status and challan.status == 'PENDING' %}
-                                                <a href="{% url 'pay_challan' challan_number=challan.challan_number %}" class="btn btn-outline-success">
+                                                <a href="{% url 'challan:pay_challan' challan_number=challan.challan_number %}" class="btn btn-outline-success">
                                                     <i class="bi bi-cash"></i> Pay
                                                 </a>
                                                 {% endif %}

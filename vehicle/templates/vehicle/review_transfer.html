@@ -1,1 +1,114 @@
- 
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Review Transfer Application{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2>Review Transfer Application</h2>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'vehicle:vehicle_dashboard' %}">Vehicle Dashboard</a></li>
+                    <li class="breadcrumb-item active">Review Transfer</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Transfer Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <p class="mb-1"><strong>Transfer Number:</strong></p>
+                            <p>{{ transfer.transfer_number }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="mb-1"><strong>Transfer Date:</strong></p>
+                            <p>{{ transfer.transfer_date|date:"d M Y" }}</p>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <p class="mb-1"><strong>Current Owner:</strong></p>
+                            <p>{{ transfer.seller.get_full_name }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="mb-1"><strong>New Owner:</strong></p>
+                            <p>{{ transfer.buyer.get_full_name }}</p>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <p class="mb-1"><strong>Vehicle Registration:</strong></p>
+                            <p>{{ transfer.vehicle.registration_number }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="mb-1"><strong>Vehicle Details:</strong></p>
+                            <p>{{ transfer.vehicle.make.name }} {{ transfer.vehicle.model.name }}</p>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <p class="mb-1"><strong>Engine Number:</strong></p>
+                            <p>{{ transfer.vehicle.engine_number }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="mb-1"><strong>Chassis Number:</strong></p>
+                            <p>{{ transfer.vehicle.chassis_number }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Review Transfer</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.status.id_for_label }}" class="form-label">Decision</label>
+                            {{ form.status }}
+                            {% if form.status.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.status.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.review_notes.id_for_label }}" class="form-label">Review Notes</label>
+                            {{ form.review_notes }}
+                            {% if form.review_notes.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.review_notes.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">Submit Review</button>
+                            <a href="{% url 'vehicle:vehicle_dashboard' %}" class="btn btn-secondary">
+                                Back to Dashboard
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

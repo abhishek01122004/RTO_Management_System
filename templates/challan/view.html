@@ -10,9 +10,9 @@
                 <ol class="breadcrumb">
                     <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
                     {% if request.user.user_type == 'CITIZEN' %}
-                    <li class="breadcrumb-item"><a href="{% url 'my_challans' %}">My Challans</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'challan:my_challans' %}">My Challans</a></li>
                     {% else %}
-                    <li class="breadcrumb-item"><a href="{% url 'manage_challans' %}">Manage Challans</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'challan:manage_challans' %}">Manage Challans</a></li>
                     {% endif %}
                     <li class="breadcrumb-item active" aria-current="page">Challan #{{ challan.challan_number }}</li>
                 </ol>
@@ -206,21 +206,25 @@
                     <div class="d-grid gap-2">
                         {% if request.user.user_type == 'CITIZEN' %}
                             {% if not challan.payment_status and challan.status == 'PENDING' %}
-                                <a href="{% url 'pay_challan' challan_number=challan.challan_number %}" class="btn btn-success">
+                                <a href="{% url 'challan:pay_challan' challan_number=challan.challan_number %}" class="btn btn-success">
                                     <i class="bi bi-cash me-2"></i> Pay Challan
                                 </a>
-                                <a href="{% url 'dispute_challan' challan_number=challan.challan_number %}" class="btn btn-danger">
+                                <a href="{% url 'challan:dispute_challan' challan_number=challan.challan_number %}" class="btn btn-danger">
                                     <i class="bi bi-exclamation-circle me-2"></i> Dispute Challan
+                                </a>
+                            {% elif not challan.payment_status and challan.status == 'ISSUED' %}
+                                <a href="{% url 'challan:pay_challan' challan_number=challan.challan_number %}" class="btn btn-success">
+                                    <i class="bi bi-cash me-2"></i> Pay Challan
                                 </a>
                             {% endif %}
                         {% else %}
                             {% if not challan.payment_status %}
-                                <a href="{% url 'record_offline_payment' challan_number=challan.challan_number %}" class="btn btn-success">
+                                <a href="{% url 'challan:record_offline_payment' challan_number=challan.challan_number %}" class="btn btn-success">
                                     <i class="bi bi-cash me-2"></i> Record Payment
                                 </a>
                             {% endif %}
                             
-                            <a href="{% url 'update_challan' challan_number=challan.challan_number %}" class="btn btn-primary">
+                            <a href="{% url 'challan:update_challan' challan_number=challan.challan_number %}" class="btn btn-primary">
                                 <i class="bi bi-pencil me-2"></i> Update Challan
                             </a>
                         {% endif %}
@@ -245,7 +249,7 @@
                                 </div>
                                 <div class="ms-3">
                                     <div class="fw-bold">Challan Generated</div>
-                                    <div class="text-muted small">{{ challan.issue_date|date:"d M Y, h:i A" }}</div>
+                                    <div class="text-muted small">{{ challan.issue_date|date:"d M Y" }} at {{ challan.issue_date|time:"h:i A" }}</div>
                                     <div class="small">By {{ challan.issued_by.get_full_name }}</div>
                                 </div>
                             </div>
@@ -259,7 +263,7 @@
                                 </div>
                                 <div class="ms-3">
                                     <div class="fw-bold">Challan Disputed</div>
-                                    <div class="text-muted small">{{ challan.updated_at|date:"d M Y, h:i A" }}</div>
+                                    <div class="text-muted small">{{ challan.updated_at|date:"d M Y" }} at {{ challan.updated_at|time:"h:i A" }}</div>
                                 </div>
                             </div>
                         </li>
@@ -273,7 +277,7 @@
                                 </div>
                                 <div class="ms-3">
                                     <div class="fw-bold">Challan Canceled</div>
-                                    <div class="text-muted small">{{ challan.updated_at|date:"d M Y, h:i A" }}</div>
+                                    <div class="text-muted small">{{ challan.updated_at|date:"d M Y" }} at {{ challan.updated_at|time:"h:i A" }}</div>
                                 </div>
                             </div>
                         </li>
@@ -287,7 +291,7 @@
                                 </div>
                                 <div class="ms-3">
                                     <div class="fw-bold">Payment Received</div>
-                                    <div class="text-muted small">{{ payment.payment_date|date:"d M Y, h:i A" }}</div>
+                                    <div class="text-muted small">{{ payment.payment_date|date:"d M Y" }} at {{ payment.payment_date|time:"h:i A" }}</div>
                                     <div class="small">
                                         {{ payment.get_payment_method_display }}
                                         {% if payment.transaction_id %}

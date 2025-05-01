@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Review Applications{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Review Applications</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">License Applications</h5>
+                </div>
+                <div class="card-body">
+                    {% if license_applications %}
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Application Number</th>
+                                        <th>Applicant</th>
+                                        <th>Type</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for application in license_applications %}
+                                        <tr>
+                                            <td>{{ application.application_number }}</td>
+                                            <td>{{ application.applicant.get_full_name }}</td>
+                                            <td>{{ application.license_type }}</td>
+                                            <td>
+                                                <span class="badge bg-warning">Submitted</span>
+                                            </td>
+                                            <td>
+                                                <a href="{% url 'license:review_application' application.id %}" class="btn btn-sm btn-primary">Review</a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info">
+                            No license applications to review.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Vehicle Registration Applications</h5>
+                </div>
+                <div class="card-body">
+                    {% if vehicle_applications %}
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Application Number</th>
+                                        <th>Applicant</th>
+                                        <th>Vehicle</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for application in vehicle_applications %}
+                                        <tr>
+                                            <td>{{ application.application_number }}</td>
+                                            <td>{{ application.applicant.get_full_name }}</td>
+                                            <td>{{ application.vehicle.make }} {{ application.vehicle.model }}</td>
+                                            <td>
+                                                <span class="badge bg-warning">Submitted</span>
+                                            </td>
+                                            <td>
+                                                <a href="{% url 'vehicle:review_application' application.id %}" class="btn btn-sm btn-primary">Review</a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info">
+                            No vehicle registration applications to review.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

@@ -13,8 +13,9 @@ urlpatterns = [
     path('accounts/', include('accounts.urls')),
     path('license/', include('license.urls')),
     path('vehicle/', include('vehicle.urls')),
-    path('challan/', include('challan.urls')),
+    path('challan/', include('challan.urls', namespace='challan')),
     path('dashboard/', include('dashboard.urls')),
+    path('services/', include('services.urls', namespace='services')),
 ]
 
 # Serve media files in development

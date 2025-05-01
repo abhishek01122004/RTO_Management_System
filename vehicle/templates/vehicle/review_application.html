@@ -77,7 +77,6 @@
                     <h5 class="mb-0">Documents</h5>
                 </div>
                 <div class="card-body">
-                    {% if documents %}
                     <div class="table-responsive">
                         <table class="table table-hover">
                             <thead>
@@ -89,6 +88,62 @@
                                 </tr>
                             </thead>
                             <tbody>
+                                <!-- Vehicle Documents -->
+                                <tr>
+                                    <td>Address Proof</td>
+                                    <td>{{ application.vehicle.created_at|date:"d M Y" }}</td>
+                                    <td>
+                                        <span class="badge bg-{{ application.vehicle.address_proof|yesno:'success,secondary' }}">
+                                            {{ application.vehicle.address_proof|yesno:'Uploaded,Not Uploaded' }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        {% if application.vehicle.address_proof %}
+                                        <a href="{{ application.vehicle.address_proof.url }}" class="btn btn-sm btn-outline-primary" target="_blank">
+                                            <i class="fas fa-eye"></i> View
+                                        </a>
+                                        {% else %}
+                                        <span class="text-muted">Not Available</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Invoice Copy</td>
+                                    <td>{{ application.vehicle.created_at|date:"d M Y" }}</td>
+                                    <td>
+                                        <span class="badge bg-{{ application.vehicle.invoice_copy|yesno:'success,secondary' }}">
+                                            {{ application.vehicle.invoice_copy|yesno:'Uploaded,Not Uploaded' }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        {% if application.vehicle.invoice_copy %}
+                                        <a href="{{ application.vehicle.invoice_copy.url }}" class="btn btn-sm btn-outline-primary" target="_blank">
+                                            <i class="fas fa-eye"></i> View
+                                        </a>
+                                        {% else %}
+                                        <span class="text-muted">Not Available</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Vehicle Photograph</td>
+                                    <td>{{ application.vehicle.created_at|date:"d M Y" }}</td>
+                                    <td>
+                                        <span class="badge bg-{{ application.vehicle.vehicle_photograph|yesno:'success,secondary' }}">
+                                            {{ application.vehicle.vehicle_photograph|yesno:'Uploaded,Not Uploaded' }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        {% if application.vehicle.vehicle_photograph %}
+                                        <a href="{{ application.vehicle.vehicle_photograph.url }}" class="btn btn-sm btn-outline-primary" target="_blank">
+                                            <i class="fas fa-eye"></i> View
+                                        </a>
+                                        {% else %}
+                                        <span class="text-muted">Not Available</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                <!-- Additional Documents -->
                                 {% for document in documents %}
                                 <tr>
                                     <td>{{ document.get_document_type_display }}</td>
@@ -108,8 +163,8 @@
                             </tbody>
                         </table>
                     </div>
-                    {% else %}
-                    <p class="text-muted">No documents uploaded.</p>
+                    {% if not documents and not application.vehicle.address_proof and not application.vehicle.invoice_copy and not application.vehicle.vehicle_photograph %}
+                    <p class="text-muted">No documents uploaded yet.</p>
                     {% endif %}
                 </div>
             </div>
@@ -123,7 +178,7 @@
                         {% csrf_token %}
                         
                         <div class="mb-3">
-                            <label for="{{ form.status.id_for_label }}" class="form-label">Status</label>
+                            <label for="{{ form.status.id_for_label }}" class="form-label">Decision</label>
                             {{ form.status }}
                             {% if form.status.errors %}
                             <div class="invalid-feedback d-block">
@@ -151,27 +206,6 @@
                     </form>
                 </div>
             </div>
-
-            <h3>Address Proof</h3>
-            {% if vehicle.address_proof %}
-                <a href="{{ vehicle.address_proof.url }}" target="_blank">View Address Proof</a>
-            {% else %}
-                <p>No address proof uploaded.</p>
-            {% endif %}
-
-            <h3>Invoice Copy</h3>
-            {% if vehicle.invoice_copy %}
-                <a href="{{ vehicle.invoice_copy.url }}" target="_blank">View Invoice Copy</a>
-            {% else %}
-                <p>No invoice copy uploaded.</p>
-            {% endif %}
-
-            <h3>Vehicle Photograph</h3>
-            {% if vehicle.vehicle_photograph %}
-                <img src="{{ vehicle.vehicle_photograph.url }}" alt="Vehicle Photograph" style="max-width: 300px;">
-            {% else %}
-                <p>No vehicle photograph uploaded.</p>
-            {% endif %}
         </div>
     </div>
 </div>

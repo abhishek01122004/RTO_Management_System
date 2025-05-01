@@ -1,0 +1,147 @@
+{% extends 'base.html' %}
+
+{% block title %}License Management Service - RTO Management System{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row mb-4">
+        <div class="col">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">License Management Service</li>
+                </ol>
+            </nav>
+            <h1 class="display-4">License Management Service</h1>
+            <p class="lead">Comprehensive driver's license management and services</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card shadow mb-4">
+                <div class="card-body">
+                    <h2 class="card-title">Services Offered</h2>
+                    <ul class="list-group list-group-flush mb-4">
+                        <li class="list-group-item">
+                            <i class="bi bi-check-circle-fill text-success me-2"></i>
+                            New License Application
+                        </li>
+                        <li class="list-group-item">
+                            <i class="bi bi-check-circle-fill text-success me-2"></i>
+                            License Renewal
+                        </li>
+                        <li class="list-group-item">
+                            <i class="bi bi-check-circle-fill text-success me-2"></i>
+                            Duplicate License Request
+                        </li>
+                        <li class="list-group-item">
+                            <i class="bi bi-check-circle-fill text-success me-2"></i>
+                            License Status Tracking
+                        </li>
+                        <li class="list-group-item">
+                            <i class="bi bi-check-circle-fill text-success me-2"></i>
+                            License Class Upgradation
+                        </li>
+                    </ul>
+
+                    <h3 class="card-title">Required Documents</h3>
+                    <ul class="list-group list-group-flush mb-4">
+                        <li class="list-group-item">
+                            <i class="bi bi-file-text me-2 text-primary"></i>
+                            Age Proof
+                        </li>
+                        <li class="list-group-item">
+                            <i class="bi bi-file-text me-2 text-primary"></i>
+                            Address Proof
+                        </li>
+                        <li class="list-group-item">
+                            <i class="bi bi-file-text me-2 text-primary"></i>
+                            Medical Certificate
+                        </li>
+                        <li class="list-group-item">
+                            <i class="bi bi-file-text me-2 text-primary"></i>
+                            Passport Size Photographs
+                        </li>
+                        <li class="list-group-item">
+                            <i class="bi bi-file-text me-2 text-primary"></i>
+                            Training Certificate (if applicable)
+                        </li>
+                    </ul>
+
+                    <h3 class="card-title">Application Process</h3>
+                    <div class="timeline">
+                        <div class="timeline-item">
+                            <div class="timeline-marker"></div>
+                            <div class="timeline-content">
+                                <h4>1. Application Submission</h4>
+                                <p>Submit application with required documents</p>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-marker"></div>
+                            <div class="timeline-content">
+                                <h4>2. Document Verification</h4>
+                                <p>Verification of submitted documents</p>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-marker"></div>
+                            <div class="timeline-content">
+                                <h4>3. Learning License Test</h4>
+                                <p>Written test for learning license</p>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-marker"></div>
+                            <div class="timeline-content">
+                                <h4>4. Driving Test</h4>
+                                <p>Practical driving test</p>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-marker"></div>
+                            <div class="timeline-content">
+                                <h4>5. License Issuance</h4>
+                                <p>Receive permanent driving license</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-3">
+                        <a href="{% url 'license:apply_for_license' %}" class="btn btn-primary">
+                            <i class="bi bi-file-earmark-plus"></i> Apply for License
+                        </a>
+                        <a href="{% url 'license:my_licenses' %}" class="btn btn-outline-primary">
+                            <i class="bi bi-card-text"></i> View My Licenses
+                        </a>
+                        <a href="{% url 'license:my_license_applications' %}" class="btn btn-outline-primary">
+                            <i class="bi bi-arrow-repeat"></i> Track Applications
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Need Help?</h5>
+                </div>
+                <div class="card-body">
+                    <p>For any queries regarding license services, please contact:</p>
+                    <p class="mb-2"><i class="bi bi-telephone"></i> Helpline: 1800-XXX-XXXX</p>
+                    <p class="mb-0"><i class="bi bi-envelope"></i> Email: license@rto.gov.in</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 
