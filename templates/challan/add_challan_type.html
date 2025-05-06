@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Add Challan Type{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-card {
+        max-width: 600px;
+        margin: 0 auto;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row mb-4">
+        <div class="col">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'challan:challan_types' %}">Challan Types</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Add New Type</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+    
+    <div class="card shadow form-card">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0">Add New Challan Type</h4>
+        </div>
+        <div class="card-body">
+            <form method="post" class="mt-4">
+                {% csrf_token %}
+                
+                <div class="mb-3">
+                    <label for="name" class="form-label">Challan Type Name</label>
+                    <input type="text" class="form-control" id="name" name="name" required>
+                    <div class="form-text">Enter a descriptive name for this challan type (e.g., "Speeding", "No Parking")</div>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="description" class="form-label">Description</label>
+                    <textarea class="form-control" id="description" name="description" rows="3" required></textarea>
+                    <div class="form-text">Provide a detailed description of this challan type</div>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="default_penalty" class="form-label">Default Penalty Amount (₹)</label>
+                    <input type="number" class="form-control" id="default_penalty" name="default_penalty" min="0" step="0.01" required>
+                    <div class="form-text">Enter the default penalty amount for this type of violation</div>
+                </div>
+                
+                <div class="mb-3 form-check">
+                    <input type="checkbox" class="form-check-input" id="is_active" name="is_active" checked>
+                    <label class="form-check-label" for="is_active">Active</label>
+                    <div class="form-text">Uncheck to disable this challan type</div>
+                </div>
+                
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="bi bi-plus-circle me-2"></i>Add Challan Type
+                    </button>
+                    <a href="{% url 'challan:challan_types' %}" class="btn btn-outline-secondary">
+                        Cancel and Go Back
+                    </a>
+                </div>
+            </form>
+        </div>
+        <div class="card-footer">
+            <small class="text-muted">New challan types will be available for use immediately after creation.</small>
+        </div>
+    </div>
+</div>
+{% endblock %} 

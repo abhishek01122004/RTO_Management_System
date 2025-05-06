@@ -3,7 +3,10 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.utils import timezone
 from license.models import LicenseApplication
 from vehicle.models import RegistrationApplication
+from challan.models import Challan
 from django.contrib.auth.models import User
+from django.http import JsonResponse, Http404
+from django.core.exceptions import PermissionDenied
 
 
 @login_required
@@ -77,14 +80,50 @@ def admin_dashboard(request):
 @login_required
 def check_application_status(request, application_type, application_number):
     """View to check status of an application"""
-    # This is a placeholder function, you'll implement actual functionality later
-    context = {
-        'application_type': application_type,
-        'application_number': application_number,
-        'status': 'Placeholder status',
-    }
+    try:
+        if application_type == 'license':
+            application = LicenseApplication.objects.get(application_number=application_number)
+        elif application_type == 'vehicle':
+            application = RegistrationApplication.objects.get(application_number=application_number)
+        elif application_type == 'challan':
+            application = Challan.objects.get(challan_number=application_number)
+        else:
+            raise Http404("Invalid application type")
+        
+        # Check if user has permission to view this application
+        if request.user.user_type == 'CITIZEN':
+            if application_type == 'license' and application.applicant != request.user:
+                raise PermissionDenied
+            elif application_type == 'vehicle' and application.applicant != request.user:
+                raise PermissionDenied
+            elif application_type == 'challan' and application.violator != request.user:
+                raise PermissionDenied
+        
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({
+                'application_type': application_type,
+                'application_number': application_number,
+                'status': application.status,
+                'last_updated': application.updated_at.strftime("%Y-%m-%d %H:%M:%S")
+            })
+        
+        context = {
+            'application_type': application_type,
+            'application_number': application_number,
+            'status': application.status,
+            'last_updated': application.updated_at
+        }
+        
+        return render(request, 'dashboard/check_status.html', context)
     
-    return render(request, 'dashboard/check_status.html', context)
+    except (LicenseApplication.DoesNotExist, RegistrationApplication.DoesNotExist, Challan.DoesNotExist):
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'error': 'Application not found'}, status=404)
+        raise Http404("Application not found")
+    except PermissionDenied:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'error': 'You do not have permission to view this application'}, status=403)
+        raise PermissionDenied
 
 
 @login_required

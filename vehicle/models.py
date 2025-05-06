@@ -84,14 +84,18 @@ class RegistrationApplication(models.Model):
         ('REJECTED', 'Rejected'),
     ]
     
+    applicant = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='registration_applications')
+    vehicle = models.ForeignKey(Vehicle, on_delete=models.CASCADE, related_name='registration_applications')
     application_number = models.CharField(max_length=20, unique=True)
-    vehicle = models.ForeignKey(Vehicle, on_delete=models.CASCADE)
-    applicant = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    temporary_number = models.CharField(max_length=20, unique=True, null=True, blank=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='DRAFT')
     submitted_at = models.DateTimeField(null=True, blank=True)
-    reviewed_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='reviewed_applications')
     reviewed_at = models.DateTimeField(null=True, blank=True)
+    reviewed_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='reviewed_applications')
     review_notes = models.TextField(blank=True)
+    payment_status = models.BooleanField(default=False)
+    payment_date = models.DateTimeField(null=True, blank=True)
+    payment_transaction_id = models.CharField(max_length=100, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     

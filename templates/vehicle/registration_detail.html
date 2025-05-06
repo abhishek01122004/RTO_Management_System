@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+
+{% block title %}Vehicle Registration Details{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Vehicle Registration Details</h5>
+                </div>
+                <div class="card-body">
+                    <!-- Registration Information -->
+                    <div class="mb-4">
+                        <h6 class="border-bottom pb-2">Registration Information</h6>
+                        <table class="table">
+                            <tr>
+                                <th>Temporary Number</th>
+                                <td>{{ registration.temporary_number }}</td>
+                            </tr>
+                            <tr>
+                                <th>Application Date</th>
+                                <td>{{ registration.created_at|date:"d M Y" }}</td>
+                            </tr>
+                            <tr>
+                                <th>Status</th>
+                                <td>
+                                    {% if registration.status == 'DRAFT' %}
+                                        <span class="badge bg-secondary">Draft</span>
+                                    {% elif registration.status == 'SUBMITTED' %}
+                                        <span class="badge bg-warning">Submitted</span>
+                                    {% elif registration.status == 'UNDER_REVIEW' %}
+                                        <span class="badge bg-info">Under Review</span>
+                                    {% elif registration.status == 'APPROVED' %}
+                                        <span class="badge bg-success">Approved</span>
+                                    {% elif registration.status == 'REJECTED' %}
+                                        <span class="badge bg-danger">Rejected</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Payment Status</th>
+                                <td>
+                                    {% if registration.payment_status %}
+                                        <span class="badge bg-success">Paid</span>
+                                        {% if registration.payment_date %}
+                                            <small class="text-muted ms-2">on {{ registration.payment_date|date:"d M Y" }}</small>
+                                        {% endif %}
+                                    {% else %}
+                                        <span class="badge bg-danger">Unpaid</span>
+                                        <a href="{% url 'vehicle:vehicle_registration_payment' reg_number=registration.temporary_number %}" class="btn btn-sm btn-outline-success ms-2">
+                                            <i class="fas fa-credit-card me-1"></i> Pay Now
+                                        </a>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    <!-- Vehicle Information -->
+                    <div class="mb-4">
+                        <h6 class="border-bottom pb-2">Vehicle Information</h6>
+                        <table class="table">
+                            <tr>
+                                <th>Make & Model</th>
+                                <td>{{ registration.vehicle.make.name }} {{ registration.vehicle.model.name }}</td>
+                            </tr>
+                            <tr>
+                                <th>Category</th>
+                                <td>{{ registration.vehicle.get_category_display }}</td>
+                            </tr>
+                            <tr>
+                                <th>Registration Fee</th>
+                                <td>₹ 2500</td>
+                            </tr>
+                            <tr>
+                                <th>Engine Number</th>
+                                <td>{{ registration.vehicle.engine_number }}</td>
+                            </tr>
+                            <tr>
+                                <th>Chassis Number</th>
+                                <td>{{ registration.vehicle.chassis_number }}</td>
+                            </tr>
+                            <tr>
+                                <th>Manufacturing Year</th>
+                                <td>{{ registration.vehicle.manufacturing_year }}</td>
+                            </tr>
+                            <tr>
+                                <th>Color</th>
+                                <td>{{ registration.vehicle.color }}</td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    <!-- Documents -->
+                    <div class="mb-4">
+                        <h6 class="border-bottom pb-2">Documents</h6>
+                        <div class="row">
+                            {% if registration.vehicle.invoice_copy %}
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Invoice Copy</label>
+                                    <a href="{{ registration.vehicle.invoice_copy.url }}" class="btn btn-outline-primary btn-sm" target="_blank">
+                                        <i class="fas fa-file-pdf me-1"></i> View
+                                    </a>
+                                </div>
+                            {% endif %}
+                            {% if registration.vehicle.vehicle_photograph %}
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Vehicle Photograph</label>
+                                    <a href="{{ registration.vehicle.vehicle_photograph.url }}" class="btn btn-outline-primary btn-sm" target="_blank">
+                                        <i class="fas fa-image me-1"></i> View
+                                    </a>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'vehicle:my_vehicles' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-1"></i> Back to List
+                        </a>
+                        {% if not registration.payment_status %}
+                            <a href="{% url 'vehicle:vehicle_registration_payment' reg_number=registration.temporary_number %}" class="btn btn-success">
+                                <i class="fas fa-credit-card me-1"></i> Make Payment
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

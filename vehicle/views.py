@@ -14,6 +14,9 @@ import string
 from django.http import JsonResponse
 from django.views.decorators.http import require_GET
 from django.db import models
+from django.conf import settings
+import razorpay
+from notifications.utils import send_notification, send_email
 
 def generate_application_number():
     prefix = 'REG'
@@ -74,11 +77,12 @@ def register_vehicle(request):
                     applicant=request.user,
                     vehicle=vehicle,
                     application_number=generate_application_number(),
+                    temporary_number=f"TEMP{timezone.now().strftime('%Y%m%d')}{random.randint(1000, 9999)}",
                     status='DRAFT'
                 )
                 
                 messages.success(request, 'Vehicle registration application created successfully.')
-                return redirect('vehicle:vehicle_application_detail', application_id=application.id)
+                return redirect('vehicle:vehicle_registration_detail', reg_number=application.temporary_number)
     else:
         form = VehicleForm()
         
@@ -293,7 +297,7 @@ def review_registration_applications(request):
     return render(request, 'vehicle/review_applications.html', context)
 
 @login_required
-@user_passes_test(lambda u: u.is_staff)
+@user_passes_test(lambda u: u.is_staff or u.user_type == 'OFFICER')
 def vehicle_statistics(request):
     """View for displaying vehicle-related statistics"""
     # Get total number of vehicles
@@ -349,4 +353,149 @@ def vehicle_models(request):
     context = {
         'models': models,
     }
-    return render(request, 'vehicle/vehicle_models.html', context) 
+    return render(request, 'vehicle/vehicle_models.html', context)
+
+@login_required
+def vehicle_registration_payment(request, reg_number):
+    """View for making vehicle registration payment"""
+    registration = get_object_or_404(RegistrationApplication, temporary_number=reg_number)
+    
+    if registration.payment_status:
+        messages.warning(request, "Payment has already been made for this registration.")
+        return redirect('vehicle:vehicle_registration_detail', reg_number=reg_number)
+    
+    # Set fixed amount
+    amount = 2500
+    
+    # Handle POST for development mode direct payment
+    if request.method == 'POST' and not settings.RAZORPAY_KEY_ID:
+        # Update registration payment status
+        registration.payment_status = True
+        registration.payment_date = timezone.now()
+        registration.payment_transaction_id = f"mock_payment_{timezone.now().strftime('%Y%m%d%H%M%S')}"
+        registration.save()
+        
+        # Send notification
+        try:
+            send_notification(
+                user=registration.applicant,
+                title="Vehicle Registration Payment Successful",
+                message=f"Payment for vehicle registration {registration.temporary_number} has been received.",
+                notification_type="PAYMENT"
+            )
+            
+            send_email(
+                to_email=registration.applicant.email,
+                subject="Vehicle Registration Payment Successful",
+                message=f"Your payment for vehicle registration {registration.temporary_number} has been received. "
+                        f"Your application will now be reviewed by an RTO officer."
+            )
+        except Exception as e:
+            # Continue even if notification fails
+            print(f"Notification error: {str(e)}")
+        
+        messages.success(request, "Development mode: Payment completed successfully.")
+        return redirect('vehicle:vehicle_registration_detail', reg_number=reg_number)
+    
+    # Initialize Razorpay client
+    client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID or 'rzp_test_mock', settings.RAZORPAY_KEY_SECRET or 'mock_secret'))
+    
+    # Create order
+    order_data = {
+        'amount': int(amount * 100),  # Convert to paise
+        'currency': 'INR',
+        'receipt': f'VR_{registration.temporary_number}',
+        'notes': {
+            'registration_number': registration.temporary_number
+        }
+    }
+    
+    # Check if in development mode without Razorpay keys
+    dev_mode = not settings.RAZORPAY_KEY_ID
+    
+    try:
+        # Create Razorpay order if keys are available
+        if not dev_mode:
+            order = client.order.create(data=order_data)
+            order_id = order['id']
+        else:
+            # Mock order ID for development
+            order_id = f"dev_order_{timezone.now().strftime('%Y%m%d%H%M%S')}"
+        
+        context = {
+            'registration': registration,
+            'amount': amount,
+            'order_id': order_id,
+            'key_id': settings.RAZORPAY_KEY_ID,
+            'user_name': f"{request.user.first_name} {request.user.last_name}",
+            'user_email': request.user.email,
+            'user_phone': request.user.phone_number,
+            'dev_mode': dev_mode
+        }
+        
+        return render(request, 'vehicle/payment.html', context)
+    except Exception as e:
+        messages.error(request, f"Payment initialization failed: {str(e)}")
+        return redirect('vehicle:vehicle_registration_detail', reg_number=reg_number)
+
+@login_required
+def vehicle_registration_payment_success(request, reg_number):
+    """View for handling successful vehicle registration payment"""
+    registration = get_object_or_404(RegistrationApplication, temporary_number=reg_number)
+    
+    if request.method == 'POST':
+        payment_id = request.POST.get('razorpay_payment_id', '')
+        order_id = request.POST.get('razorpay_order_id', '')
+        signature = request.POST.get('razorpay_signature', '')
+        
+        # Verify signature
+        client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
+        
+        try:
+            client.utility.verify_payment_signature({
+                'razorpay_payment_id': payment_id,
+                'razorpay_order_id': order_id,
+                'razorpay_signature': signature
+            })
+            
+            # Update registration payment status
+            registration.payment_status = True
+            registration.payment_date = timezone.now()
+            registration.payment_transaction_id = payment_id
+            registration.save()
+            
+            # Send notification
+            send_notification(
+                user=registration.applicant,
+                title="Vehicle Registration Payment Successful",
+                message=f"Payment for vehicle registration {registration.temporary_number} has been received.",
+                notification_type="PAYMENT"
+            )
+            
+            send_email(
+                to_email=registration.applicant.email,
+                subject="Vehicle Registration Payment Successful",
+                message=f"Your payment for vehicle registration {registration.temporary_number} has been received. "
+                        f"Your application will now be reviewed by an RTO officer."
+            )
+            
+            messages.success(request, "Payment successful! Your application will be reviewed by an RTO officer.")
+            return redirect('vehicle:vehicle_registration_detail', reg_number=reg_number)
+            
+        except Exception as e:
+            messages.error(request, f"Payment verification failed: {str(e)}")
+            return redirect('vehicle:vehicle_registration_payment', reg_number=reg_number)
+    
+    return redirect('vehicle:vehicle_registration_detail', reg_number=reg_number)
+
+@login_required
+def vehicle_registration_detail(request, reg_number):
+    """View for displaying vehicle registration details"""
+    registration = get_object_or_404(RegistrationApplication, temporary_number=reg_number)
+    
+    if not (registration.applicant == request.user or is_officer(request.user) or is_admin(request.user)):
+        raise PermissionDenied
+    
+    return render(request, 'vehicle/registration_detail.html', {
+        'registration': registration
+    }) 

@@ -9,8 +9,8 @@
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb">
                     <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
-                    <li class="breadcrumb-item"><a href="{% url 'manage_challans' %}">Manage Challans</a></li>
-                    <li class="breadcrumb-item"><a href="{% url 'view_challan' challan_number=challan.challan_number %}">Challan #{{ challan.challan_number }}</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'challan:manage_challans' %}">Manage Challans</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'challan:view_challan' challan_number=challan.challan_number %}">Challan #{{ challan.challan_number }}</a></li>
                     <li class="breadcrumb-item active" aria-current="page">Update Challan</li>
                 </ol>
             </nav>
@@ -148,7 +148,7 @@
                         
                         <div class="d-flex gap-2">
                             <button type="submit" class="btn btn-primary">Update Challan</button>
-                            <a href="{% url 'view_challan' challan_number=challan.challan_number %}" class="btn btn-outline-secondary">Cancel</a>
+                            <a href="{% url 'challan:view_challan' challan_number=challan.challan_number %}" class="btn btn-outline-secondary">Cancel</a>
                         </div>
                     </form>
                 </div>

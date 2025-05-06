@@ -509,7 +509,7 @@ def update_challan(request, challan_number):
                     )
             
             messages.success(request, f"Challan #{challan.challan_number} updated successfully.")
-            return redirect('manage_challans')
+            return redirect('challan:manage_challans')
     else:
         form = ChallanUpdateForm(instance=challan)
     
@@ -532,7 +532,7 @@ def record_offline_payment(request, challan_number):
     # Check if challan is already paid
     if challan.payment_status:
         messages.info(request, "This challan has already been paid.")
-        return redirect('view_challan', challan_number=challan_number)
+        return redirect('challan:view_challan', challan_number=challan_number)
     
     if request.method == 'POST':
         form = ChallanPaymentForm(request.POST)
@@ -567,7 +567,7 @@ def record_offline_payment(request, challan_number):
                 )
             
             messages.success(request, f"Payment for challan #{challan.challan_number} recorded successfully.")
-            return redirect('view_challan', challan_number=challan_number)
+            return redirect('challan:view_challan', challan_number=challan_number)
     else:
         form = ChallanPaymentForm(initial={'amount': challan.total_amount})
     
@@ -629,15 +629,15 @@ def edit_traffic_rule(request, rule_id):
 
 
 @login_required
-@user_passes_test(lambda u: u.user_type == 'ADMIN')
+@user_passes_test(lambda u: u.user_type == 'ADMIN' or u.is_staff)
 def challan_types(request):
     """View to manage challan types"""
-    types = ChallanType.objects.all().order_by('name')
-    return render(request, 'challan/challan_types.html', {'types': types})
+    challan_types = ChallanType.objects.all().order_by('name')
+    return render(request, 'challan/challan_types.html', {'challan_types': challan_types})
 
 
 @login_required
-@user_passes_test(lambda u: u.user_type == 'ADMIN')
+@user_passes_test(lambda u: u.user_type == 'ADMIN' or u.is_staff)
 def add_challan_type(request):
     """View to add a new challan type"""
     if request.method == 'POST':
@@ -653,8 +653,8 @@ def add_challan_type(request):
             is_active=is_active
         )
         
-        messages.success(request, "Challan type added successfully.")
-        return redirect('challan_types')
+        messages.success(request, 'Challan type added successfully.')
+        return redirect('challan:challan_types')
     
     return render(request, 'challan/add_challan_type.html')
 

@@ -114,14 +114,14 @@
                                         </td>
                                         <td>
                                             <div class="btn-group btn-group-sm">
-                                                <a href="{% url 'view_challan' challan_number=challan.challan_number %}" class="btn btn-outline-primary">
+                                                <a href="{% url 'challan:view_challan' challan_number=challan.challan_number %}" class="btn btn-outline-primary">
                                                     <i class="bi bi-eye"></i>
                                                 </a>
-                                                <a href="{% url 'update_challan' challan_number=challan.challan_number %}" class="btn btn-outline-secondary">
+                                                <a href="{% url 'challan:update_challan' challan_number=challan.challan_number %}" class="btn btn-outline-secondary">
                                                     <i class="bi bi-pencil"></i>
                                                 </a>
                                                 {% if not challan.payment_status %}
-                                                <a href="{% url 'record_offline_payment' challan_number=challan.challan_number %}" class="btn btn-outline-success">
+                                                <a href="{% url 'challan:record_offline_payment' challan_number=challan.challan_number %}" class="btn btn-outline-success">
                                                     <i class="bi bi-cash"></i>
                                                 </a>
                                                 {% endif %}

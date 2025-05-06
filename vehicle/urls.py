@@ -9,6 +9,7 @@ urlpatterns = [
     
     # Vehicle Registration
     path('register/', views.register_vehicle, name='register_vehicle'),
+    path('registration/<str:reg_number>/', views.vehicle_registration_detail, name='vehicle_registration_detail'),
     path('application/<int:application_id>/', views.vehicle_application_detail, name='vehicle_application_detail'),
     path('application/<int:application_id>/submit/', views.submit_application, name='submit_application'),
     path('application/<int:application_id>/review/', views.review_application, name='review_application'),
@@ -29,4 +30,6 @@ urlpatterns = [
     path('classes/', views.vehicle_classes, name='vehicle_classes'),
     path('makes/', views.vehicle_makes, name='vehicle_makes'),
     path('models/', views.vehicle_models, name='vehicle_models'),
+    path('registration/<str:reg_number>/payment/', views.vehicle_registration_payment, name='vehicle_registration_payment'),
+    path('registration/<str:reg_number>/payment/success/', views.vehicle_registration_payment_success, name='vehicle_registration_payment_success'),
 ] 

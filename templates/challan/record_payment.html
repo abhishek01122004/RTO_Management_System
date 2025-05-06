@@ -1,0 +1,138 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Record Offline Payment{% endblock %}
+
+{% block extra_css %}
+<style>
+    .payment-card {
+        max-width: 600px;
+        margin: 0 auto;
+    }
+    .challan-details {
+        background-color: #f8f9fa;
+        border-radius: 5px;
+        padding: 15px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row mb-4">
+        <div class="col">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'challan:manage_challans' %}">Manage Challans</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'challan:view_challan' challan_number=challan.challan_number %}">Challan #{{ challan.challan_number }}</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Record Payment</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+    
+    <div class="card shadow payment-card">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0">Record Offline Payment</h4>
+        </div>
+        <div class="card-body">
+            <div class="challan-details mb-4">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p class="mb-1"><strong>Challan Number:</strong></p>
+                        <p>{{ challan.challan_number }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p class="mb-1"><strong>Issue Date:</strong></p>
+                        <p>{{ challan.issue_date|date:"d M Y" }}</p>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <p class="mb-1"><strong>Vehicle Number:</strong></p>
+                        <p>{{ challan.vehicle_number }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p class="mb-1"><strong>Total Amount:</strong></p>
+                        <p class="h4 text-success">₹{{ challan.total_amount }}</p>
+                    </div>
+                </div>
+                {% if challan.violator %}
+                <div class="row">
+                    <div class="col-md-6">
+                        <p class="mb-1"><strong>Violator:</strong></p>
+                        <p>{{ challan.violator.get_full_name }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p class="mb-1"><strong>Contact:</strong></p>
+                        <p>{{ challan.violator.phone_number }}</p>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+            
+            <div class="alert alert-info">
+                <h5 class="alert-heading">Payment Information</h5>
+                <p>Please record the offline payment details below. This will mark the challan as paid and update the system records.</p>
+            </div>
+            
+            <form method="post" class="mt-4">
+                {% csrf_token %}
+                
+                <div class="mb-3">
+                    <label for="{{ form.amount.id_for_label }}" class="form-label">Amount Paid</label>
+                    {{ form.amount }}
+                    {% if form.amount.errors %}
+                        <div class="invalid-feedback d-block">
+                            {{ form.amount.errors }}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <div class="mb-3">
+                    <label for="{{ form.payment_method.id_for_label }}" class="form-label">Payment Method</label>
+                    {{ form.payment_method }}
+                    {% if form.payment_method.errors %}
+                        <div class="invalid-feedback d-block">
+                            {{ form.payment_method.errors }}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <div class="mb-3">
+                    <label for="{{ form.transaction_id.id_for_label }}" class="form-label">Receipt/Transaction ID</label>
+                    {{ form.transaction_id }}
+                    {% if form.transaction_id.errors %}
+                        <div class="invalid-feedback d-block">
+                            {{ form.transaction_id.errors }}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <div class="mb-3">
+                    <label for="{{ form.remarks.id_for_label }}" class="form-label">Remarks</label>
+                    {{ form.remarks }}
+                    {% if form.remarks.errors %}
+                        <div class="invalid-feedback d-block">
+                            {{ form.remarks.errors }}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="bi bi-check-circle me-2"></i>Record Payment
+                    </button>
+                    <a href="{% url 'challan:view_challan' challan_number=challan.challan_number %}" class="btn btn-outline-secondary">
+                        Cancel and Go Back
+                    </a>
+                </div>
+            </form>
+        </div>
+        <div class="card-footer">
+            <small class="text-muted">This payment will be recorded in the system and the challan will be marked as paid.</small>
+        </div>
+    </div>
+</div>
+{% endblock %} 
