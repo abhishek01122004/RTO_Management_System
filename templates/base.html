@@ -335,102 +335,55 @@
         </div>
     </div>
 
-    <!-- Additional JS includes -->
-    {% block extra_js %}{% endblock %}
-    
+    <!-- Custom Scripts -->
     <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Initialize status tracking functionality
-        const trackingForm = document.getElementById('statusTrackingForm');
-        const resultContainer = document.getElementById('trackingResult');
-        
-        if (trackingForm) {
-            trackingForm.addEventListener('submit', function(e) {
-                e.preventDefault();
-                
-                const applicationNumber = this.querySelector('input[name="application_number"]').value;
-                const applicationType = this.querySelector('select[name="application_type"]').value;
-                
-                if (!applicationNumber || !applicationType) {
-                    showError(resultContainer, 'Please provide both application type and number.');
-                    return;
-                }
-                
-                // Show loading indicator
-                resultContainer.innerHTML = '<div class="text-center my-4"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div><p class="mt-2">Fetching status information...</p></div>';
-                
-                // Redirect to the appropriate status page based on application type
-                if (applicationType === 'license') {
-                    window.location.href = '/dashboard/status/license/';
-                } else {
-                    // Fetch application status via AJAX for other types
-                    fetch(`/dashboard/status/${applicationType}/${applicationNumber}/`, {
-                        headers: {
-                            'X-Requested-With': 'XMLHttpRequest'
-                        }
-                    })
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error('Application not found');
-                        }
-                        return response.json();
-                    })
-                    .then(data => {
-                        // Display the status information
-                        let statusHtml = `
-                            <div class="card">
-                                <div class="card-header bg-light">
-                                    <h6 class="mb-0">Status Information</h6>
-                                </div>
-                                <div class="card-body">
-                                    <table class="table table-borderless table-sm">
-                                        <tr>
-                                            <th style="width: 40%">Application Number:</th>
-                                            <td>${data.application_number}</td>
-                                        </tr>
-                                        <tr>
-                                            <th>Application Type:</th>
-                                            <td>${data.application_type}</td>
-                                        </tr>
-                                        <tr>
-                                            <th>Current Status:</th>
-                                            <td><span class="badge ${getBadgeClass(data.status)}">${data.status}</span></td>
-                                        </tr>
-                                        <tr>
-                                            <th>Last Updated:</th>
-                                            <td>${data.last_updated}</td>
-                                        </tr>
-                                    </table>
-                                    ${data.next_steps ? `<div class="alert alert-info mt-3"><strong>Next Steps:</strong> ${data.next_steps}</div>` : ''}
-                                </div>
-                            </div>`;
+        // Function to fetch notifications
+        function fetchNotifications() {
+            fetch('/notifications/api/unread/')
+                .then(response => response.json())
+                .then(data => {
+                    const notificationItems = document.querySelector('.notification-items');
+                    const notificationBadge = document.getElementById('notificationBadge');
+                    
+                    if (data.notifications.length > 0) {
+                        notificationBadge.textContent = data.notifications.length;
+                        notificationBadge.style.display = 'block';
                         
-                        resultContainer.innerHTML = statusHtml;
-                    })
-                    .catch(error => {
-                        showError(resultContainer, 'Application not found or error fetching status information.');
-                    });
-                }
-            });
+                        notificationItems.innerHTML = '';
+                        data.notifications.forEach(notification => {
+                            const notificationItem = document.createElement('a');
+                            notificationItem.className = 'dropdown-item notification-item';
+                            notificationItem.href = notification.link || '#';
+                            notificationItem.innerHTML = `
+                                <div class="d-flex align-items-center">
+                                    <div class="flex-grow-1">
+                                        <div class="notification-title">${notification.title}</div>
+                                        <div class="notification-message small text-muted">${notification.message}</div>
+                                    </div>
+                                    <div class="notification-time small text-muted ms-2">${notification.created_at}</div>
+                                </div>
+                            `;
+                            notificationItems.appendChild(notificationItem);
+                        });
+                    } else {
+                        notificationBadge.style.display = 'none';
+                        notificationItems.innerHTML = `
+                            <a class="dropdown-item notification-item text-center text-muted py-3" href="#">
+                                <i class="fas fa-bell-slash me-2"></i> No new notifications
+                            </a>
+                        `;
+                    }
+                })
+                .catch(error => console.error('Error fetching notifications:', error));
         }
-        
-        function showError(container, message) {
-            container.innerHTML = `<div class="alert alert-danger">${message}</div>`;
-        }
-        
-        function getBadgeClass(status) {
-            status = status.toLowerCase();
-            if (status.includes('approved') || status.includes('issued') || status.includes('completed') || status.includes('pass')) {
-                return 'bg-success';
-            } else if (status.includes('pending') || status.includes('scheduled')) {
-                return 'bg-warning text-dark';
-            } else if (status.includes('rejected') || status.includes('failed')) {
-                return 'bg-danger';
-            } else {
-                return 'bg-info';
-            }
-        }
-    });
+
+        // Fetch notifications when the page loads
+        document.addEventListener('DOMContentLoaded', fetchNotifications);
+
+        // Fetch notifications every 30 seconds
+        setInterval(fetchNotifications, 30000);
     </script>
+    
+    {% block extra_js %}{% endblock %}
 </body>
 </html>

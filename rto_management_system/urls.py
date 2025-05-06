@@ -14,6 +14,7 @@ urlpatterns = [
     path('license/', include('license.urls')),
     path('vehicle/', include('vehicle.urls')),
     path('challan/', include('challan.urls', namespace='challan')),
+    path('notifications/', include('notifications.urls')),
     path('dashboard/', include('dashboard.urls')),
     path('services/', include('services.urls', namespace='services')),
 ]

@@ -126,13 +126,14 @@ LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'dashboard'
 LOGOUT_REDIRECT_URL = 'home'
 
-# Email config (you can use dummy config for dev)
+# Email config
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = ''
-EMAIL_HOST_PASSWORD = ''
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', 'rtomanagementsystem01@gmail.com')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', 'tvrf ebcn rxgk zcbe')  # Set this to your App Password
+DEFAULT_FROM_EMAIL = os.environ.get('EMAIL_HOST_USER', 'rtomanagementsystem01@gmail.com')
 
 # Razorpay keys (if testing, use test keys)
 RAZORPAY_KEY_ID = os.environ.get('RAZORPAY_KEY_ID', '')

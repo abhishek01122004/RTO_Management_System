@@ -18,17 +18,38 @@
     <form method="post" class="mt-4">
         {% csrf_token %}
         <div class="mb-3">
-            <label for="result" class="form-label">Test Result</label>
-            <select class="form-select" id="result" name="result" required>
-                <option value="">Select Result</option>
-                <option value="PASS">Pass</option>
-                <option value="FAIL">Fail</option>
-            </select>
+            <label class="form-label">Test Result</label>
+            <div class="mt-2">
+                {% for radio in form.passed %}
+                <div class="form-check form-check-inline">
+                    {{ radio.tag }}
+                    <label class="form-check-label" for="{{ radio.id_for_label }}">
+                        {{ radio.choice_label }}
+                    </label>
+                </div>
+                {% endfor %}
+            </div>
+            {% if form.passed.errors %}
+            <div class="text-danger">
+                {{ form.passed.errors }}
+            </div>
+            {% endif %}
         </div>
         
         <div class="mb-3">
-            <label for="remarks" class="form-label">Remarks</label>
-            <textarea class="form-control" id="remarks" name="remarks" rows="3"></textarea>
+            <label for="{{ form.notes.id_for_label }}" class="form-label">Examiner Notes</label>
+            {{ form.notes }}
+            {% if form.notes.errors %}
+            <div class="text-danger">
+                {{ form.notes.errors }}
+            </div>
+            {% endif %}
+            <div class="form-text">Provide detailed notes about the test performance, especially important if the applicant failed</div>
+        </div>
+        
+        <div class="alert alert-warning">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            <strong>Important:</strong> This action cannot be undone. The test result will be final once submitted.
         </div>
         
         <div class="d-grid gap-2 d-md-flex justify-content-md-end">

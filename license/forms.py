@@ -102,7 +102,6 @@ class TestResultForm(forms.ModelForm):
         model = TestSchedule
         fields = ['passed', 'notes']
         widgets = {
-            'passed': forms.Select(attrs={'class': 'form-control'}, 
-                                 choices=[(True, 'Pass'), (False, 'Fail')]),
+            'passed': forms.RadioSelect(choices=[(True, 'Pass'), (False, 'Fail')]),
             'notes': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
         }
